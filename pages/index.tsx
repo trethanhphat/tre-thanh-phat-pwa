@@ -39,6 +39,7 @@ export default function Home() {
               Đặc sản vùng núi, vị ngọt đậm đà, đóng gói 350g.
             </p>
           </div>
+          <p>cập nhật lúc: 2506201641</p>
           <footer className="text-xl font-medium text-green-700 mt-2">
             {copyright}
           </footer>
