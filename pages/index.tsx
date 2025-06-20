@@ -1,7 +1,7 @@
 // pages/index.tsx
 import Head from "next/head";
 import Image from "next/image";
-import { appName, phone, email, copyright } from "@/libs/env";
+import { appName, phone, email } from "@/libs/env";
 
 export default function Home() {
   return (
@@ -39,9 +39,7 @@ export default function Home() {
               Đặc sản vùng núi, vị ngọt đậm đà, đóng gói 350g.
             </p>
           </div>
-          <footer className="text-xl font-medium text-green-700 mt-2">
-            {copyright}
-          </footer>
+          <footer className="text-xl font-medium text-green-700 mt-2"></footer>
         </section>
       </main>
     </>
