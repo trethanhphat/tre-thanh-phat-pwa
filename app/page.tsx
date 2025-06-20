@@ -8,7 +8,7 @@ export default function Home() {
     <main className="min-h-screen bg-white text-gray-800 px-4 pt-6 pb-24">
       {/* Tiêu đề */}
       <header className="text-center mb-6">
-        <h1 className="text-3xl font-bold text-green-700 leading-snug font-ttp">
+        <h1 className="page-title">
           {appName}
         </h1>
         <p className="mt-2 text-base text-gray-600">
@@ -18,13 +18,13 @@ export default function Home() {
 
       {/* Các chức năng chính */}
       <section className="space-y-4">
-        <button className="w-full py-4 text-lg bg-green-600 text-white rounded-2xl focus:outline-none">
+        <button className="btn-primary">
           📥 Nhập dữ liệu mới
         </button>
-        <button className="w-full py-4 text-lg bg-green-100 text-green-800 rounded-2xl border border-green-300">
+        <button className="btn-primary">
           📋 Xem báo cáo cây trồng
         </button>
-        <button className="w-full py-4 text-lg bg-yellow-50 text-yellow-800 rounded-2xl border border-yellow-300">
+        <button className="btn-primary">
           📷 Gửi ảnh thực địa
         </button>
       </section>
@@ -32,7 +32,7 @@ export default function Home() {
       {/* Thông tin footer */}
       <footer className="text-center text-sm text-gray-500 mt-10">
         <p>
-          Liên hệ: {phone} | {email}
+          Liên hệ: <a href="tel:"{phone}"">{phone}</a> | {email}
         </p>
         <p className="mt-1">{copyright}</p>
       </footer>
