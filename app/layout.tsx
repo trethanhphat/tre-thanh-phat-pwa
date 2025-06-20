@@ -3,10 +3,8 @@ import './globals.css';
 import "@/src/fonts/ttp-font.css";
 import Head from "next/head";
 import Image from "next/image";
-import { appName, phone, email, copyright } from "@/libs/env";
+import { appName, appDescription, phone, email, copyright } from "@/libs/env";
 
-const appName = process.env.NEXT_PUBLIC_APP_NAME;
-const appDescription = process.env.NEXT_PUBLIC_APP_DESCRIPTION;
 export const metadata = {
   title: appName,
   description: `${appName} - Website chính thức`,
