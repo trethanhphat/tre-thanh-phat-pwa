@@ -1,6 +1,7 @@
+// pages/index.tsx
 import Head from "next/head";
 import Image from "next/image";
-import { appName, phone, email } from "@/libs/env";
+import { appName, phone, email, copyright } from "@/libs/env";
 
 export default function Home() {
   return (
@@ -16,7 +17,7 @@ export default function Home() {
       </Head>
 
       <main className="min-h-screen bg-green-50 text-gray-800 p-6">
-        <h1 className="text-4xl font-bold text-green-800">Tre Thanh Phát</h1>
+        <h1 className="text-4xl font-bold text-green-800">{appName}</h1>
         <p className="mt-4 text-lg">
           Doanh nghiệp tiên phong phát triển hệ sinh thái ngành tre tại Việt
           Nam.
