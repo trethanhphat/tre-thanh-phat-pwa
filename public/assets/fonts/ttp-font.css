@@ -1,0 +1,12 @@
+@font-face {
+  font-family: "TTP";
+  src: url("/assets/fonts/SVN-Digitalis.woff2") format("woff2"),
+    url("/assets/fonts/SVN-Digitalis.woff") format("woff");
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+.font-ttp {
+  font-family: "TTP", sans-serif;
+}

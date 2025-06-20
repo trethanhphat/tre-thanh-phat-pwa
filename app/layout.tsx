@@ -1,4 +1,6 @@
 // app/layout.tsx
+import "@/assets/fonts/ttp-font.css";
+
 export default function RootLayout({ children }) {
   return (
     <html lang="vi">
