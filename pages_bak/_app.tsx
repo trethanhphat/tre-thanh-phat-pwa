@@ -53,3 +53,5 @@ export default function App({ Component, pageProps }: AppProps) {
     </>
   );
 }
+
+// Load lại khi có cập nhật
