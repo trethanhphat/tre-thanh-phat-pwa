@@ -15,7 +15,4 @@ const withPWA = require("next-pwa")({
 // ✅ Cấu hình mới: bật App Router + giữ strict mode + PWA
 module.exports = withPWA({
   reactStrictMode: true,
-  experimental: {
-    appDir: true, // 👈 Bật App Router (dùng thư mục /app)
-  },
 });
