@@ -1,7 +1,7 @@
 // pages/index.tsx
 import Head from "next/head";
 import Image from "next/image";
-import { appName, phone, email } from "@/libs/env";
+import { appName, phone, email, copyright } from "@/libs/env";
 
 export default function Home() {
   return (
