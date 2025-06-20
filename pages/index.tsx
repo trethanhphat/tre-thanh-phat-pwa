@@ -1,11 +1,12 @@
 import Head from "next/head";
 import Image from "next/image";
+import { appName, phone, email } from "@/libs/env";
 
 export default function Home() {
   return (
     <>
       <Head>
-        <title>Tre Thanh Phát</title>
+        <title>{appName}</title>
         <meta
           name="description"
           content="Giới thiệu doanh nghiệp Tre Thanh Phát - Hệ sinh thái ngành tre"
@@ -37,6 +38,7 @@ export default function Home() {
               Đặc sản vùng núi, vị ngọt đậm đà, đóng gói 350g.
             </p>
           </div>
+          <footer>{copyright}</footer>
         </section>
       </main>
     </>
