@@ -24,7 +24,7 @@ export default function App({ Component, pageProps }: AppProps) {
 */
 
 import "@/styles/globals.css";
-import { useServiceWorkerUpdate } from "@/src/hooks/useServiceWorkerUpdate";
+import { useServiceWorkerUpdate } from "@/hooks/useServiceWorkerUpdate";
 import type { AppProps } from "next/app";
 
 export default function App({ Component, pageProps }: AppProps) {
