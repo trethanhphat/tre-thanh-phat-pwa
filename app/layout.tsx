@@ -1,6 +1,6 @@
 // app/layout.tsx
 import "@/src/fonts/ttp-font.css";
-import "@/app/globals.css";
+
 
 export default function RootLayout({ children }) {
   return (
