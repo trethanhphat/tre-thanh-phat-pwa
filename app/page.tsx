@@ -32,7 +32,7 @@ export default function Home() {
       {/* Thông tin footer */}
       <footer className="text-center text-sm text-gray-500 mt-10">
         <p>
-          Liên hệ: <a href="tel:"{phone}"">{phone}</a> | {email}
+          Liên hệ: {phone} | {email}
         </p>
         <p className="mt-1">{copyright}</p>
       </footer>
