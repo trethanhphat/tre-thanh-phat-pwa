@@ -5,7 +5,7 @@ import { appName, phone, email, copyright } from "@/libs/env";
 
 export default function Home() {
   return (
-    <main className="min-h-screen bg-white text-gray-800 px-4 pt-6 pb-24">
+    <main className="min-h-screen bg-white text-gray-800 px-4 pt-6 pb-24 ttp-font">
       {/* Tiêu đề */}
       <header className="text-center mb-6">
         <h1 className="text-3xl font-bold text-green-700 leading-snug">
