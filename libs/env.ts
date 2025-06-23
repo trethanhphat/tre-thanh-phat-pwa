@@ -1,9 +1,11 @@
 // libs/env.ts
 
 export const appName = process.env.NEXT_PUBLIC_APP_NAME || "Tên app";
+export const appDescription = process.env.NEXT_PUBLIC_APP_DESCRIPTION || "Mô tả app";
 export const brandName = process.env.NEXT_PUBLIC_BRAND_NAME || "Nhãn hiệu";
 export const phone = process.env.NEXT_PUBLIC_CONTACT_PHONE || "Số điện thoại";
 export const email = process.env.NEXT_PUBLIC_CONTACT_EMAIL || "email";
+export const email = process.env.NEXT_PUBLIC_CONTACT_WEBSITE || "www.trethanhphat.vn";
 
 const currentYear = new Date().getFullYear();
 const startYear = 2021;
