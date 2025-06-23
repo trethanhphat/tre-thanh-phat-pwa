@@ -1,7 +1,15 @@
 "use client";
 
 import Image from "next/image";
-import { appName, phone, email, copyright } from "@/libs/env";
+import {
+  appName,
+  appDescription,
+  appUrl,
+  phone,
+  email,
+  website,
+  copyright,
+} from "@/libs/env";
 
 export default function Home() {
   return (
@@ -9,11 +17,9 @@ export default function Home() {
       {/* Tiêu đề */}
       <header className="text-center mb-6">
         <h1 className="text-3xl font-bold text-green-700 leading-snug ttp-font">
-          {appName}
+          <a href={`${appUrl}`}>{appName}</a>
         </h1>
-        <p className="mt-2 text-base text-gray-600">
-          Hệ sinh thái ngành tre – hỗ trợ nông dân phát triển bền vững
-        </p>
+        <p className="mt-2 text-base text-gray-600">{appDescription}</p>
         <p className="mt-4 text-lg">
           Doanh nghiệp tiên phong phát triển hệ sinh thái ngành tre tại Việt
           Nam.
