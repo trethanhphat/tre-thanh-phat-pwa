@@ -1,5 +1,5 @@
 // app/layout.tsx
-import './globals.css';
+import "./globals.css";
 import "@/src/fonts/ttp-font.css";
 import Head from "next/head";
 import Image from "next/image";
@@ -21,15 +21,8 @@ export default function RootLayout({ children }) {
         />
         <link rel="manifest" href="/manifest.json" />
         <meta name="theme-color" content="#116530" />
-    </head>
-      <body
-        style={{
-          fontFamily: "sans-serif",
-          background: "#fff",
-          color: "#000",
-          fontSize: "18px",
-        }}
-      >
+      </head>
+      <body>
         <main style={{ padding: "1rem" }}>{children}</main>
       </body>
     </html>
