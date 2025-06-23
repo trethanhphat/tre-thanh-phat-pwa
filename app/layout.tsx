@@ -1,6 +1,6 @@
 // app/layout.tsx
 import "./globals.css";
-import "@/src/fonts/ttp-font.css";
+import "@/src/fonts/font-ttp.css";
 import Head from "next/head";
 import Image from "next/image";
 import { appName, appDescription, phone, email, copyright } from "@/libs/env";
@@ -20,7 +20,8 @@ export default function RootLayout({ children }) {
           content="Giới thiệu doanh nghiệp Tre Thanh Phát - Hệ sinh thái ngành tre"
         />
         <link rel="manifest" href="/manifest.json" />
-        <meta name="theme-color" content="#116530" />
+        <link rel="icon" href="/assets/icon/icon-192.png" type="image/png" />
+        <meta name="theme-color" content="#ffffff" />
       </head>
       <body>
         <main style={{ padding: "1rem" }}>{children}</main>
