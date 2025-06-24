@@ -1,6 +1,6 @@
 // app/layout.tsx
-import "./globals.css";
-import "@/src/fonts/font-ttp.css";
+import "@/css/globals.css";
+import "@/fonts/font-ttp.css";
 import Head from "next/head";
 import Image from "next/image";
 import { appName, appDescription, phone, email, copyright } from "@/libs/env";
