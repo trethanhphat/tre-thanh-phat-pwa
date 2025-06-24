@@ -4,6 +4,7 @@ import '@/fonts/font-ttp.css';
 import Head from 'next/head';
 import Image from 'next/image';
 import { appName, appDescription, phone, email, copyright } from '@/lib/env';
+import { ServiceWorkerUpdateNotice } from '@/components/system/ServiceWorkerUpdateNotice';
 
 export const metadata = {
   title: appName,
@@ -25,6 +26,17 @@ export default function RootLayout({ children }) {
       </head>
       <body>
         <main style={{ padding: '1rem' }}>{children}</main>
+      </body>
+    </html>
+  );
+}
+
+export default function RootLayout({ children }: { children: React.ReactNode }) {
+  return (
+    <html lang="vi">
+      <body>
+        {children}
+        <ServiceWorkerUpdateNotice />
       </body>
     </html>
   );

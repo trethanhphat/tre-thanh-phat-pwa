@@ -23,9 +23,9 @@ export default function App({ Component, pageProps }: AppProps) {
 
 */
 
-import "@/styles/globals.css";
-import { useServiceWorkerUpdate } from "@/src/hooks/useServiceWorkerUpdate";
-import type { AppProps } from "next/app";
+import '@/styles/globals.css';
+import { useServiceWorkerUpdate } from '@/hooks/useServiceWorkerUpdate';
+import type { AppProps } from 'next/app';
 
 export default function App({ Component, pageProps }: AppProps) {
   const { hasUpdate, update, connectionType } = useServiceWorkerUpdate();
@@ -37,13 +37,13 @@ export default function App({ Component, pageProps }: AppProps) {
         <button
           onClick={update}
           style={{
-            position: "fixed",
+            position: 'fixed',
             bottom: 20,
             right: 20,
-            backgroundColor: "#116530",
-            color: "#fff",
-            padding: "12px 20px",
-            borderRadius: "8px",
+            backgroundColor: '#116530',
+            color: '#fff',
+            padding: '12px 20px',
+            borderRadius: '8px',
             zIndex: 9999,
           }}
         >
