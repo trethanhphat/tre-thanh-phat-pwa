@@ -1,3 +1,6 @@
+// src/components/Header.tsx
+'use client';
+
 import { useState } from 'react';
 import { FaSearch, FaBars, FaTimes } from 'react-icons/fa';
 
