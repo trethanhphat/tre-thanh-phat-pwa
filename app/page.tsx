@@ -7,17 +7,7 @@ export default function Home() {
   return (
     <main className="min-h-screen bg-white text-gray-800 px-4 pt-6 pb-24">
       {/* Tiêu đề */}
-      <header className="text-center mb-6">
-        <h1 className="text-3xl font-bold text-green-700 leading-snug font-ttp">
-          <a className="no-underline" href={`//${appUrl}`}>
-            {appName}
-          </a>
-        </h1>
-        <p className="mt-2 text-base text-gray-600">{appDescription}</p>
-        <p className="mt-4 text-lg">
-          Doanh nghiệp tiên phong phát triển hệ sinh thái ngành tre tại Việt Nam.
-        </p>
-      </header>
+      <header className="text-center mb-6"></header>
 
       {/* Các chức năng chính */}
       <section className="space-y-4">

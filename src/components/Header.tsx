@@ -1,4 +1,3 @@
-// src/components/Header.tsx
 'use client';
 
 import { useState } from 'react';
@@ -10,33 +9,39 @@ export default function Header() {
   const router = useRouter();
 
   return (
-    <header className="z-50 relative">
-      <div className="flex items-center justify-between p-4 bg-green-700 text-white">
-        <button
-          onClick={() => router.back()}
-          className="p-2 focus:outline-none"
-          aria-label="Quay lại"
-        >
+    <>
+      {/* Thanh tiêu đề cố định */}
+      <div className="fixed top-0 left-0 w-full bg-green-700 text-white z-50 flex items-center justify-between px-4 py-3 border-b border-green-800">
+        <button onClick={() => router.back()} className="p-2" aria-label="Quay lại">
           <FaArrowLeft size={20} />
         </button>
 
-        <h1 className="text-xl font-bold text-center flex-1">Tre Thanh Phát</h1>
+        {/* Tên app với font-ttp */}
+        <h1 className="text-3xl font-bold text-green-700 leading-snug font-ttp">
+          <a className="no-underline" href={`//${appUrl}`}>
+            {appName}
+          </a>
+        </h1>
+        <p className="mt-2 text-base text-gray-600">{appDescription}</p>
+        <p className="mt-4 text-lg">
+          Doanh nghiệp tiên phong phát triển hệ sinh thái ngành tre tại Việt Nam.
+        </p>
 
-        <button
-          onClick={() => setMenuOpen(!menuOpen)}
-          className="p-2 focus:outline-none"
-          aria-label="Mở menu"
-        >
-          {menuOpen ? <FaTimes size={24} /> : <FaBars size={24} />}
+        <button onClick={() => setMenuOpen(true)} className="p-2" aria-label="Mở menu">
+          <FaBars size={20} />
         </button>
       </div>
 
+      {/* Khoảng trắng dưới header */}
+      <div className="h-[56px]" />
+
+      {/* Menu toàn màn hình */}
       {menuOpen && (
-        <div className="fixed inset-0 bg-white text-black z-50 flex flex-col overflow-y-auto">
-          <div className="flex justify-between items-center p-4 border-b">
+        <div className="fixed inset-0 z-40 bg-white text-black overflow-y-auto">
+          <div className="sticky top-0 bg-white border-b flex items-center justify-between px-4 py-3 z-50">
             <h2 className="text-xl font-semibold">Menu</h2>
             <button onClick={() => setMenuOpen(false)} className="p-2" aria-label="Đóng menu">
-              <FaTimes size={24} />
+              <FaTimes size={20} />
             </button>
           </div>
 
@@ -62,6 +67,6 @@ export default function Header() {
           </nav>
         </div>
       )}
-    </header>
+    </>
   );
 }
