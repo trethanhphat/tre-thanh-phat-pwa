@@ -17,7 +17,7 @@ export default function Home() {
       {/* Tiêu đề */}
       <header className="text-center mb-6">
         <h1 className="text-3xl font-bold text-green-700 leading-snug font-ttp">
-          <a className="no-underline" href={`${appUrl}`}>
+          <a className="no-underline" href={`//${appUrl}`}>
             {appName}
           </a>
         </h1>
