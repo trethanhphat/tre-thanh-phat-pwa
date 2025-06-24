@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { FaBars, FaTimes, FaArrowLeft } from 'react-icons/fa';
+import { appName, appDescription, appUrl, phone, email, website, copyright } from '@/lib/env';
 
 export default function Header() {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -64,6 +65,8 @@ export default function Header() {
             <a href="/faq" className="hover:underline">
               Câu hỏi thường gặp
             </a>
+            <a href={`tel:${phone}`}>Gọi điện: {phone}</a>
+            <a href={`mailto:${email}`}>Gửi email tới: {email}</a>
           </nav>
         </div>
       )}
