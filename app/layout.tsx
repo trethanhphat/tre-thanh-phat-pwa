@@ -1,9 +1,9 @@
 // app/layout.tsx
-import "@/css/globals.css";
-import "@/fonts/font-ttp.css";
-import Head from "next/head";
-import Image from "next/image";
-import { appName, appDescription, phone, email, copyright } from "@/libs/env";
+import '@/css/globals.css';
+import '@/fonts/font-ttp.css';
+import Head from 'next/head';
+import Image from 'next/image';
+import { appName, appDescription, phone, email, copyright } from '@/lib/env';
 
 export const metadata = {
   title: appName,
@@ -24,7 +24,7 @@ export default function RootLayout({ children }) {
         <meta name="theme-color" content="#ffffff" />
       </head>
       <body>
-        <main style={{ padding: "1rem" }}>{children}</main>
+        <main style={{ padding: '1rem' }}>{children}</main>
       </body>
     </html>
   );

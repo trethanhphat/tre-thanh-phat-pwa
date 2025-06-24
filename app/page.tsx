@@ -1,15 +1,7 @@
-"use client";
+'use client';
 
-import Image from "next/image";
-import {
-  appName,
-  appDescription,
-  appUrl,
-  phone,
-  email,
-  website,
-  copyright,
-} from "@/libs/env";
+import Image from 'next/image';
+import { appName, appDescription, appUrl, phone, email, website, copyright } from '@/lib/env';
 
 export default function Home() {
   return (
@@ -23,8 +15,7 @@ export default function Home() {
         </h1>
         <p className="mt-2 text-base text-gray-600">{appDescription}</p>
         <p className="mt-4 text-lg">
-          Doanh nghiệp tiên phong phát triển hệ sinh thái ngành tre tại Việt
-          Nam.
+          Doanh nghiệp tiên phong phát triển hệ sinh thái ngành tre tại Việt Nam.
         </p>
       </header>
 
@@ -50,12 +41,8 @@ export default function Home() {
             height={500}
             className="rounded-xl shadow-lg"
           />
-          <h3 className="text-xl font-medium text-green-700 mt-2">
-            Măng gai Rừng Khoái
-          </h3>
-          <p className="text-sm">
-            Đặc sản vùng núi, vị ngọt đậm đà, đóng gói 350g.
-          </p>
+          <h3 className="text-xl font-medium text-green-700 mt-2">Măng gai Rừng Khoái</h3>
+          <p className="text-sm">Đặc sản vùng núi, vị ngọt đậm đà, đóng gói 350g.</p>
         </div>
       </section>
 
