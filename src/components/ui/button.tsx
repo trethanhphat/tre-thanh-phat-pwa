@@ -5,11 +5,7 @@ interface Props extends ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: "default" | "outline";
 }
 
-export function Button({
-  variant = "default",
-  className = "",
-  ...props
-}: Props) {
+export function Button({ variant = "default", className = "", ...props }: Props) {
   const base = "px-4 py-2 rounded";
   const style =
     variant === "outline"
