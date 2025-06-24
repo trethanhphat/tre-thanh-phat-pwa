@@ -26,19 +26,25 @@ export default function RootLayout({ children }) {
       </head>
       <body>
         <main style={{ padding: '1rem' }}>{children}</main>
-      </body>
-    </html>
-  );
-}
-
-export default function RootLayout({ children }: { children: React.ReactNode }) {
-  return (
-    <html lang="vi">
-      <body>
-        {children}
         <ServiceWorkerUpdateNotice />
       </body>
     </html>
   );
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 // Change to app
