@@ -1,4 +1,4 @@
-import type { Metadata, ResolvingMetadata } from "next";
+import { type Metadata, type ResolvingMetadata } from "next";
 import { notFound } from "next/navigation";
 
 interface Post {
@@ -16,22 +16,22 @@ interface Media {
 
 export async function generateMetadata(
   { params }: { params: { id: string } },
-  parent?: ResolvingMetadata
+  parent: ResolvingMetadata
 ): Promise<Metadata> {
-  try {
-    const res = await fetch(
-      `https://rungkhoai.com/wp-json/wp/v2/posts/${params.id}`,
-      { next: { revalidate: 60 } }
-    );
-    if (!res.ok) return { title: "Không tìm thấy bài viết" };
-    const post: Post = await res.json();
+  const res = await fetch(
+    `https://rungkhoai.com/wp-json/wp/v2/posts/${params.id}`
+  );
+  if (!res.ok) {
     return {
-      title: `${post.title.rendered} - Rừng Khoái`,
-      description: post.title.rendered,
+      title: "Không tìm thấy bài viết",
     };
-  } catch (err) {
-    return { title: "Không tìm thấy bài viết" };
   }
+
+  const post = await res.json();
+  return {
+    title: `${post.title.rendered} - Rừng Khoái`,
+    description: post.title.rendered,
+  };
 }
 
 export default async function PostDetailPage({
