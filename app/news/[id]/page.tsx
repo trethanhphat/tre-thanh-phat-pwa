@@ -1,9 +1,5 @@
-// ---------------------------
-// File: app/news/[id]/page.tsx
-// ---------------------------
-
+import type { Metadata, ResolvingMetadata } from "next";
 import { notFound } from "next/navigation";
-import { Metadata } from "next";
 
 interface Post {
   id: number;
@@ -18,20 +14,24 @@ interface Media {
   source_url: string;
 }
 
-export async function generateMetadata({
-  params,
-}: {
-  params: { id: string };
-}): Promise<Metadata> {
-  const res = await fetch(
-    `https://rungkhoai.com/wp-json/wp/v2/posts/${params.id}`
-  );
-  if (!res.ok) return { title: "Không tìm thấy bài viết" };
-  const post: Post = await res.json();
-  return {
-    title: post.title.rendered + " - Rừng Khoái",
-    description: post.title.rendered,
-  };
+export async function generateMetadata(
+  { params }: { params: { id: string } },
+  parent?: ResolvingMetadata
+): Promise<Metadata> {
+  try {
+    const res = await fetch(
+      `https://rungkhoai.com/wp-json/wp/v2/posts/${params.id}`,
+      { next: { revalidate: 60 } }
+    );
+    if (!res.ok) return { title: "Không tìm thấy bài viết" };
+    const post: Post = await res.json();
+    return {
+      title: `${post.title.rendered} - Rừng Khoái`,
+      description: post.title.rendered,
+    };
+  } catch (err) {
+    return { title: "Không tìm thấy bài viết" };
+  }
 }
 
 export default async function PostDetailPage({
