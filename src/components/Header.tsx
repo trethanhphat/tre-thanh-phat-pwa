@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { Menu, X } from "lucide-react";
+import { useState } from 'react';
+import { FaSearch, FaBars, FaTimes } from 'react-icons/fa';
 
 export default function Header() {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -12,7 +12,7 @@ export default function Header() {
         className="p-2 focus:outline-none"
         aria-label="Toggle menu"
       >
-        {menuOpen ? <X size={32} /> : <Menu size={32} />}
+        {menuOpen ? <FaTimes size={24} /> : <FaBars size={24} />}
       </button>
 
       {menuOpen && (
