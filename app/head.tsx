@@ -1,5 +1,5 @@
 // app/head.tsx
-import { appName, appDescription, phone, email, copyright } from "@/libs/env";
+import { appName, appDescription, phone, email, copyright } from '@/lib/env';
 export default function Head() {
   return (
     <>
