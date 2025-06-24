@@ -21,6 +21,9 @@ export default function Header() {
       {menuOpen && (
         <div className="absolute top-16 left-0 w-full bg-white text-black shadow-md z-50">
           <nav className="flex flex-col space-y-4 p-4 text-lg">
+            <a href="/" className="hover:underline">
+              Trang đầu
+            </a>
             <a href="/about" className="hover:underline">
               Giới thiệu
             </a>
