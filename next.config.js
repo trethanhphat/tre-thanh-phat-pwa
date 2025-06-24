@@ -15,7 +15,7 @@ const withPWA = require("next-pwa")({
 const nextConfig = {
   // your other config here
   experimental: {
-    appDir: true,
+    // appDir: true,
   },
 };
 
