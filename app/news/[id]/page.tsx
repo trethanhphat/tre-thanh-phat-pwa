@@ -14,14 +14,11 @@ interface Media {
   source_url: string;
 }
 
-// Sử dụng kiểu riêng biệt để tránh lỗi khi Next.js build
-type PageProps = {
-  params: {
-    id: string;
-  };
-};
-
-export default async function PostDetailPage({ params }: PageProps) {
+export default async function PostDetailPage({
+  params,
+}: {
+  params: { id: string };
+}) {
   const res = await fetch(
     `https://rungkhoai.com/wp‑json/wp/v2/posts/${params.id}`
   );
