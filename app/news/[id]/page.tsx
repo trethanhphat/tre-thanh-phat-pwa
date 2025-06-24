@@ -1,4 +1,5 @@
-import { type Metadata, type ResolvingMetadata } from "next";
+// File: app/news/[id]/page.tsx
+
 import { notFound } from "next/navigation";
 
 interface Post {
@@ -9,38 +10,20 @@ interface Post {
   featured_media: number;
   categories: number[];
 }
-
 interface Media {
   source_url: string;
 }
 
-export async function generateMetadata(
-  { params }: { params: { id: string } },
-  parent: ResolvingMetadata
-): Promise<Metadata> {
-  const res = await fetch(
-    `https://rungkhoai.com/wp-json/wp/v2/posts/${params.id}`
-  );
-  if (!res.ok) {
-    return {
-      title: "Không tìm thấy bài viết",
-    };
-  }
-
-  const post = await res.json();
-  return {
-    title: `${post.title.rendered} - Rừng Khoái`,
-    description: post.title.rendered,
+// Sử dụng kiểu riêng biệt để tránh lỗi khi Next.js build
+type PageProps = {
+  params: {
+    id: string;
   };
-}
+};
 
-export default async function PostDetailPage({
-  params,
-}: {
-  params: { id: string };
-}) {
+export default async function PostDetailPage({ params }: PageProps) {
   const res = await fetch(
-    `https://rungkhoai.com/wp-json/wp/v2/posts/${params.id}`
+    `https://rungkhoai.com/wp‑json/wp/v2/posts/${params.id}`
   );
   if (!res.ok) return notFound();
   const post: Post = await res.json();
@@ -48,7 +31,7 @@ export default async function PostDetailPage({
   let image = "";
   if (post.featured_media) {
     const mediaRes = await fetch(
-      `https://rungkhoai.com/wp-json/wp/v2/media/${post.featured_media}`
+      `https://rungkhoai.com/wp‑json/wp/v2/media/${post.featured_media}`
     );
     if (mediaRes.ok) {
       const media: Media = await mediaRes.json();
