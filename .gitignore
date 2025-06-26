@@ -1,3 +1,7 @@
+# Important: Secret key
+.env.local
+
+
 # Ignore build folders
 .next
 node_modules
@@ -6,3 +10,5 @@ dist
 # Optional: macOS/Windows files
 .DS_Store
 Thumbs.db
+
+
