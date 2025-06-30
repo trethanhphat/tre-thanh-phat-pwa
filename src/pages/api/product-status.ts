@@ -23,8 +23,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   try {
     const response = await axios.get(`${API_PRODUCTS_URL}/${id}`, {
       auth: {
-        username: CONSUMER_KEY,
-        password: CONSUMER_SECRET,
+        username: CONSUMER_KEY as string,
+        password: CONSUMER_SECRET as string,
       },
     });
 
