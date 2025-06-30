@@ -27,7 +27,7 @@ export const maxImageQueue = Number(process.env.NEXT_PUBLIC_MAX_IMAGE_QUEUE || '
 
 // API load News
 
-export const apiNewsUrl =
+export const NEXT_PUBLIC_API_NEWS_URL =
   process.env.NEXT_PUBLIC_API_NEWS_URL || 'https://rungkhoai.com/wp-json/wc/v2';
 
 // API load Products từ rungkhoai.com
