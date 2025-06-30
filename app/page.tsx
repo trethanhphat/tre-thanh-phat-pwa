@@ -55,32 +55,3 @@ export default function Home() {
     </main>
   );
 }
-
-export function App({ Component, pageProps }: AppProps) {
-  const { hasUpdate, update, connectionType } = useServiceWorkerUpdate();
-
-  return (
-    <>
-      <Component {...pageProps} />
-      {hasUpdate && (
-        <button
-          onClick={update}
-          style={{
-            position: 'fixed',
-            bottom: 20,
-            right: 20,
-            backgroundColor: '#116530',
-            color: '#fff',
-            padding: '12px 20px',
-            borderRadius: '8px',
-            zIndex: 9999,
-          }}
-        >
-          🔄 Có bản cập nhật mới – Nhấn để làm mới
-        </button>
-      )}
-    </>
-  );
-}
-
-// Load lại khi có cập nhật

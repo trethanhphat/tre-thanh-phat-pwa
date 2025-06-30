@@ -1,13 +1,13 @@
 import '@/css/globals.css';
 import '@/fonts/font-ttp.css';
-import { appName } from '@/lib/env';
-import { ServiceWorkerUpdateNotice } from '@/components/system/ServiceWorkerUpdateNotice';
+import { appName, appDescription } from '@/lib/env';
+import UpdateNotifier from '@/components/UpdateNotifier'; // Check Update
 import Header from '@/components/Header';
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
   title: appName,
-  description: `${appName} - Website chính thức`,
+  description: `${appDescription}`,
   themeColor: '#ffffff',
   icons: {
     icon: '/assets/icon/icon-192.png',
@@ -21,7 +21,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body>
         <Header /> {/* 🟢 Thêm dòng này */}
         <main style={{ padding: '1rem' }}>{children}</main>
-        <ServiceWorkerUpdateNotice />
+        <UpdateNotifier />
       </body>
     </html>
   );
