@@ -2,8 +2,12 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import useSWR from 'swr';
 import { fetchProducts } from '@/lib/api/products';
 import type { Product } from '@/types/product';
+import ProductCard from '@/components/ProductCard';
+
+const fetcher = (url: string) => fetch(url).then(res => res.json());
 
 export default function ProductsPage() {
   const [products, setProducts] = useState<Product[]>([]);
@@ -24,15 +28,7 @@ export default function ProductsPage() {
       ) : (
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           {products.map(product => (
-            <div key={product.id} className="border rounded-lg p-2 shadow">
-              <img
-                src={product.images?.[0]?.src}
-                alt={product.name}
-                className="w-full h-40 object-cover rounded"
-              />
-              <h2 className="mt-2 text-lg font-semibold">{product.name}</h2>
-              <p className="text-green-700 font-medium">{product.price}₫</p>
-            </div>
+            <ProductCard key={product.id} product={product} />
           ))}
         </div>
       )}
