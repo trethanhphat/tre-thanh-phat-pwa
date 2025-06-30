@@ -31,7 +31,7 @@ export const apiNewsUrl =
   process.env.NEXT_PUBLIC_API_NEWS_URL || 'https://rungkhoai.com/wp-json/wc/v2';
 
 // API load Products từ rungkhoai.com
-export const apiRungkhoaiUrl =
+export const NEXT_PUBLIC_API_PRODUCTS_URL =
   process.env.NEXT_PUBLIC_API_PRODUCTS_URL || 'https://rungkhoai.com/wp-json/wc/v3/products';
 export const NEXT_PUBLIC_API_PRODUCTS_CONSUMER_KEY =
   process.env.NEXT_PUBLIC_API_PRODUCTS_CONSUMER_KEY!;
