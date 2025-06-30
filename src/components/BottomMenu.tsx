@@ -7,7 +7,7 @@ import { useRouter } from 'next/navigation';
 import { appName, appDescription, phone, email } from '@/lib/env';
 
 const buttonStyle = {
-  textAlign: 'center' as const,
+  textAlign: 'left' as const,
   background: 'var(--menu-bg)',
   flexDirection: 'column' as const,
 };
@@ -27,17 +27,8 @@ export default function BottomMenu() {
       {/* Menu nổi dưới cùng */}
       <nav
         style={{
-          position: 'fixed',
-          bottom: 0,
-          left: 0,
-          right: 0,
           height: `${menuHeight}px`,
-          display: 'flex',
-          justifyContent: 'space-around',
-          alignItems: 'center',
           background: 'var(--menu-bg)',
-          borderTop: '1px solid #ccc',
-          zIndex: 1000,
         }}
       >
         <button onClick={() => setMenuOpen(true)} style={buttonStyle}>
