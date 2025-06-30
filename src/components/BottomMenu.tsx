@@ -20,7 +20,6 @@ const buttonStyle = {
 export default function BottomMenu() {
   const [isMenuOpen, setMenuOpen] = useState(false);
   const router = useRouter();
-
   const menuHeight = 80; // Chiều cao menu px (dùng padding-bottom tương ứng)
 
   return (
@@ -66,16 +65,39 @@ export default function BottomMenu() {
             bottom: 0,
             background: '#f8f8f8',
             zIndex: 2000,
-            padding: '1.5rem',
-            overflowY: 'auto',
+            display: 'flex',
+            flexDirection: 'column',
           }}
         >
-          <h1 className="font-ttp" style={{ fontSize: '1.8rem', marginBottom: '0.5rem' }}>
-            {appName}
-          </h1>
-          <p style={{ marginBottom: '1.5rem' }}>{appDescription}</p>
+          {/* Header cố định */}
+          <div
+            style={{
+              padding: '1.5rem',
+              background: '#fff',
+              borderBottom: '1px solid #ccc',
+              position: 'sticky',
+              top: 0,
+              zIndex: 1,
+            }}
+          >
+            <h1 className="font-ttp" style={{ fontSize: '1.8rem', marginBottom: '0.5rem' }}>
+              {appName}
+            </h1>
+            <p style={{ marginBottom: '0' }}>{appDescription}</p>
+          </div>
 
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+          {/* Nội dung menu cuộn được */}
+          <div
+            style={{
+              flex: 1,
+              overflowY: 'auto',
+              padding: '1.5rem',
+              paddingBottom: '100px',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '1rem',
+            }}
+          >
             {[
               { href: '/', label: '🏠 Trang chủ' },
               { href: '/about', label: 'ℹ️ Giới thiệu' },
@@ -100,8 +122,21 @@ export default function BottomMenu() {
               <button style={buttonStyle}>📧 Gửi email: {email}</button>
             </a>
           </div>
-          <div style={{ paddingBottom: `${menuHeight}px` }}>
-            <button onClick={() => setMenuOpen(false)} style={buttonStyle}>
+
+          {/* Nút đóng cố định dưới cùng */}
+          <div
+            style={{
+              position: 'sticky',
+              bottom: 0,
+              background: '#f8f8f8',
+              padding: '1rem',
+              borderTop: '1px solid #ccc',
+            }}
+          >
+            <button
+              onClick={() => setMenuOpen(false)}
+              style={{ ...buttonStyle, background: '#eee' }}
+            >
               ❌ Đóng Menu
             </button>
           </div>
