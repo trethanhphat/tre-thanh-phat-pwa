@@ -54,9 +54,9 @@ export default function BottomMenu() {
         >
           <button
             onClick={() => setMenuOpen(false)}
-            style={{ position: 'absolute', top: 16, right: 16 }}
+            style={{ position: 'absolute', bottom: 16, left: 16 }}
           >
-            ❌ Đóng
+            ❌ Đóng Menu
           </button>
 
           <h1 style={{ fontSize: '1.8rem', marginBottom: '0.5rem' }}>🌱 Ứng dụng Rừng Khoái</h1>
@@ -67,6 +67,7 @@ export default function BottomMenu() {
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
             <Link href="/">🏠 Trang chủ</Link>
+            <Link href="/news">📰 Tin tức</Link>
             <Link href="/products">🛒 Sản phẩm</Link>
             <Link href="/report">📊 Báo cáo</Link>
             <Link href="/survey">📝 Khảo sát</Link>
