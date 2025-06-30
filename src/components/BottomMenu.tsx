@@ -153,6 +153,7 @@ export default function BottomMenu() {
                 📧 Gửi email: {email}
               </button>
             </a>
+            <p>Doanh nghiệp tiên phong phát triển hệ sinh thái ngành tre tại Việt Nam.</p>
           </div>
 
           {/* Nút đóng cố định dưới cùng */}
