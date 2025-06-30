@@ -3,8 +3,8 @@
 export const appName = process.env.NEXT_PUBLIC_APP_NAME || 'Tên app';
 export const appDescription = process.env.NEXT_PUBLIC_APP_DESCRIPTION || 'Mô tả app';
 export const brandName = process.env.NEXT_PUBLIC_BRAND_NAME || 'Thương hiệu';
-export const phone = process.env.NEXT_PUBLIC_CONTACT_PHONE || 'Số điện thoại';
-export const email = process.env.NEXT_PUBLIC_CONTACT_EMAIL || 'Email';
+export const phone = process.env.NEXT_PUBLIC_CONTACT_PHONE || '+84999999999';
+export const email = process.env.NEXT_PUBLIC_CONTACT_EMAIL || 'email@email.com';
 export const website = process.env.NEXT_PUBLIC_CONTACT_WEBSITE || 'www.trethanhphat.vn';
 export const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'app.trethanhphat.vn';
 
@@ -27,14 +27,19 @@ export const maxImageQueue = Number(process.env.NEXT_PUBLIC_MAX_IMAGE_QUEUE || '
 
 // API load News
 
-export const apiNewsUrl = process.env.NEXT_PUBLIC_API_NEWS_URL || '';
+export const apiNewsUrl =
+  process.env.NEXT_PUBLIC_API_NEWS_URL || 'https://rungkhoai.com/wp-json/wc/v2';
 
 // API load Products từ rungkhoai.com
 export const apiRungkhoaiUrl =
-  process.env.NEXT_PUBLIC_API_RUNGKHOAI_URL || 'https://rungkhoai.com/wp-json/wc/v3/products';
-export const RUNGKHOAI_CONSUMER_KEY = process.env.RUNGKHOAI_CONSUMER_KEY!;
-export const RUNGKHOAI_CONSUMER_SECRET = process.env.RUNGKHOAI_CONSUMER_SECRET!;
+  process.env.NEXT_PUBLIC_API_PRODUCTS_URL || 'https://rungkhoai.com/wp-json/wc/v3/products';
+export const NEXT_PUBLIC_API_PRODUCTS_CONSUMER_KEY =
+  process.env.NEXT_PUBLIC_API_PRODUCTS_CONSUMER_KEY!;
+export const NEXT_PUBLIC_API_PRODUCTS_CONSUMER_SECRET =
+  process.env.NEXT_PUBLIC_API_PRODUCTS_CONSUMER_SECRET!;
 
-if (!RUNGKHOAI_CONSUMER_KEY || !RUNGKHOAI_CONSUMER_SECRET) {
-  throw new Error('Thiếu RUNGKHOAI_CONSUMER_KEY hoặc RUNGKHOAI_CONSUMER_SECRET trong .env.local');
+if (!NEXT_PUBLIC_API_PRODUCTS_CONSUMER_KEY || !NEXT_PUBLIC_API_PRODUCTS_CONSUMER_SECRET) {
+  throw new Error(
+    'Thiếu NEXT_PUBLIC_API_PRODUCTS_CONSUMER_KEY hoặc NEXT_PUBLIC_API_PRODUCTS_CONSUMER_SECRET trong .env.local'
+  );
 }
