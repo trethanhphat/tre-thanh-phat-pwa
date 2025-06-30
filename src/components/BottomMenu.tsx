@@ -53,13 +53,23 @@ export default function BottomMenu() {
           <span>🌱</span>
           <span>Mở menu</span>
         </button>
-        <Link href="/account">
-          <button style={buttonStyle}>
-            <span>👤</span>
-            <span>Tài khoản</span>
-          </button>
-        </Link>
-        <button onClick={() => router.back()} style={buttonStyle}>
+        <button
+          onClick={() => {
+            setMenuOpen(false);
+            router.push('/account');
+          }}
+          style={buttonStyle}
+        >
+          <span>👤</span>
+          <span>Tài khoản</span>
+        </button>
+        <button
+          onClick={() => {
+            setMenuOpen(false);
+            router.back();
+          }}
+          style={buttonStyle}
+        >
           <span>⬅️</span>
           <span>Quay lại</span>
         </button>
