@@ -10,17 +10,23 @@ const buttonStyle = {
   width: '100%',
   padding: '1rem',
   fontSize: '1.2rem',
-  textAlign: 'left' as const,
+  textAlign: 'center' as const,
   background: '#fff',
-  border: '1px solid #ccc',
-  borderRadius: '12px',
+  border: 'none',
   cursor: 'pointer',
+  display: 'flex',
+  flexDirection: 'column' as const,
+  alignItems: 'center',
+  justifyContent: 'center',
+  gap: '0.25rem',
 };
 
 export default function BottomMenu() {
   const [isMenuOpen, setMenuOpen] = useState(false);
   const router = useRouter();
   const menuHeight = 80; // Chiều cao menu px (dùng padding-bottom tương ứng)
+
+  const handleLinkClick = () => setMenuOpen(false);
 
   return (
     <>
@@ -44,13 +50,18 @@ export default function BottomMenu() {
         }}
       >
         <button onClick={() => setMenuOpen(true)} style={buttonStyle}>
-          🌱 Mở menu
+          <span>🌱</span>
+          <span>Mở menu</span>
         </button>
-        <Link href="/account" style={buttonStyle}>
-          👤 Tài khoản
+        <Link href="/account">
+          <button style={buttonStyle}>
+            <span>👤</span>
+            <span>Tài khoản</span>
+          </button>
         </Link>
         <button onClick={() => router.back()} style={buttonStyle}>
-          ⬅️ Quay lại
+          <span>⬅️</span>
+          <span>Quay lại</span>
         </button>
       </nav>
 
@@ -111,15 +122,21 @@ export default function BottomMenu() {
               { href: '/faq', label: '📖 Chính sách' },
             ].map(({ href, label }) => (
               <Link key={href} href={href} passHref>
-                <button style={buttonStyle}>{label}</button>
+                <button style={buttonStyle} onClick={handleLinkClick}>
+                  {label}
+                </button>
               </Link>
             ))}
 
             <a href={`tel:${phone}`}>
-              <button style={buttonStyle}>📞 Gọi điện: {phone}</button>
+              <button style={buttonStyle} onClick={handleLinkClick}>
+                📞 Gọi điện: {phone}
+              </button>
             </a>
             <a href={`mailto:${email}`}>
-              <button style={buttonStyle}>📧 Gửi email: {email}</button>
+              <button style={buttonStyle} onClick={handleLinkClick}>
+                📧 Gửi email: {email}
+              </button>
             </a>
           </div>
 
