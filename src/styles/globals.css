@@ -25,8 +25,8 @@
 }
 
 :root {
-  --menu-bg: #ffffff;
-  --menu-panel-bg: #054219;
+  --menu-bg: #054219;
+  --menu-panel-bg: #a8a8a8;
   --text-color: #fffff;
 }
 
@@ -39,6 +39,8 @@
 }
 */
 button {
+  color: var(--text-color);
+  background-color: var(--menu-bg);
   width: 100%;
   padding: 1rem;
   font-size: 1.2rem;
@@ -48,6 +50,5 @@ button {
   align-content: left;
   justify-content: flex-start;
   gap: 0.25rem;
-  color: inherit;
-  textdecoration: none;
+  text-decoration: none;
 }
