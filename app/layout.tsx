@@ -1,6 +1,6 @@
 // app/layout.tsx
 
-import '@/css/globals.css';
+import '@/styles/globals.css';
 import '@/fonts/font-ttp.css';
 import { appName, appDescription } from '@/lib/env';
 import UpdateNotifier from '@/components/UpdateNotifier'; // Check Update
