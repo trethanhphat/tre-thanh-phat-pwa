@@ -1,5 +1,8 @@
 'use client';
 
+import { useServiceWorkerUpdate } from '@/hooks/useServiceWorkerUpdate'; // Module Update
+import type { AppProps } from 'next/app'; // Module Update
+
 import Image from 'next/image';
 import { appName, appDescription, appUrl, phone, email, website, copyright } from '@/lib/env';
 
@@ -53,4 +56,31 @@ export default function Home() {
   );
 }
 
-// Để gõ trên điện thoại cho dễ nhìn
+export function App({ Component, pageProps }: AppProps) {
+  const { hasUpdate, update, connectionType } = useServiceWorkerUpdate();
+
+  return (
+    <>
+      <Component {...pageProps} />
+      {hasUpdate && (
+        <button
+          onClick={update}
+          style={{
+            position: 'fixed',
+            bottom: 20,
+            right: 20,
+            backgroundColor: '#116530',
+            color: '#fff',
+            padding: '12px 20px',
+            borderRadius: '8px',
+            zIndex: 9999,
+          }}
+        >
+          🔄 Có bản cập nhật mới – Nhấn để làm mới
+        </button>
+      )}
+    </>
+  );
+}
+
+// Load lại khi có cập nhật
