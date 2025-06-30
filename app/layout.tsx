@@ -1,3 +1,5 @@
+// app/layout.tsx
+
 import '@/css/globals.css';
 import '@/fonts/font-ttp.css';
 import { appName, appDescription } from '@/lib/env';
@@ -5,10 +7,13 @@ import UpdateNotifier from '@/components/UpdateNotifier'; // Check Update
 import Header from '@/components/Header';
 import type { Metadata } from 'next';
 
+export const viewport = {
+  themeColor: '#ffffff',
+};
+
 export const metadata: Metadata = {
   title: appName,
   description: `${appDescription}`,
-  themeColor: '#ffffff',
   icons: {
     icon: '/assets/icon/icon-192.png',
   },
