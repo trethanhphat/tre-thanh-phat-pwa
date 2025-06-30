@@ -44,9 +44,15 @@ export default function BottomMenu() {
           zIndex: 1000,
         }}
       >
-        <button onClick={() => setMenuOpen(true)}>🌱 Mở menu</button>
-        <Link href="/account">👤 Tài khoản</Link>
-        <button onClick={() => router.back()}>⬅️ Quay lại</button>
+        <button onClick={() => setMenuOpen(true)} style={buttonStyle}>
+          🌱 Mở menu
+        </button>
+        <Link href="/account" style={buttonStyle}>
+          👤 Tài khoản
+        </Link>
+        <button onClick={() => router.back()} style={buttonStyle}>
+          ⬅️ Quay lại
+        </button>
       </nav>
 
       {/* Menu toàn màn hình */}
@@ -64,22 +70,6 @@ export default function BottomMenu() {
             overflowY: 'auto',
           }}
         >
-          <button
-            onClick={() => setMenuOpen(false)}
-            style={{
-              position: 'absolute',
-              bottom: 16,
-              left: 16,
-              padding: '1rem 1.5rem',
-              fontSize: '1rem',
-              background: '#ddd',
-              borderRadius: '8px',
-              border: 'none',
-            }}
-          >
-            ❌ Đóng Menu
-          </button>
-
           <h1 className="font-ttp" style={{ fontSize: '1.8rem', marginBottom: '0.5rem' }}>
             {appName}
           </h1>
@@ -109,6 +99,11 @@ export default function BottomMenu() {
             <a href={`mailto:${email}`}>
               <button style={buttonStyle}>📧 Gửi email: {email}</button>
             </a>
+          </div>
+          <div style={{ paddingBottom: `${menuHeight}px` }}>
+            <button onClick={() => setMenuOpen(false)} style={buttonStyle}>
+              ❌ Đóng Menu
+            </button>
           </div>
         </div>
       )}
