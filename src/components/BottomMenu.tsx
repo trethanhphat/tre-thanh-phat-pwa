@@ -7,20 +7,9 @@ import { useRouter } from 'next/navigation';
 import { appName, appDescription, phone, email } from '@/lib/env';
 
 const buttonStyle = {
-  width: '100%',
-  padding: '1rem',
-  fontSize: '1.2rem',
   textAlign: 'center' as const,
   background: 'var(--menu-bg)',
-  border: 'none',
-  cursor: 'pointer',
-  display: 'flex',
   flexDirection: 'column' as const,
-  alignItems: 'center',
-  justifyContent: 'center',
-  gap: '0.25rem',
-  color: 'inherit',
-  textDecoration: 'none',
 };
 
 export default function BottomMenu() {

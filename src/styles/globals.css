@@ -26,14 +26,28 @@
 
 :root {
   --menu-bg: #ffffff;
-  --menu-panel-bg: #f8f8f8;
-  --text-color: #000000;
+  --menu-panel-bg: #054219;
+  --text-color: #fffff;
 }
 
-@media (prefers-color-scheme: dark) {
+/* @media (prefers-color-scheme: dark) {
   :root {
-    --menu-bg: #1a1a1a;
+    --menu-bg: #054219;
     --menu-panel-bg: #2a2a2a;
     --text-color: #ffffff;
   }
+}
+*/
+button {
+  width: '100%',
+  padding: '1rem',
+  fontSize: '1.2rem',
+  border: 'none',
+  cursor: 'pointer',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  gap: '0.25rem',
+  color: 'inherit',
+  textDecoration: 'none',
 }
