@@ -4,6 +4,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { appName, appDescription, appUrl, phone, email, website, copyright } from '@/lib/env';
 
 export default function BottomMenu() {
   const [isMenuOpen, setMenuOpen] = useState(false);
@@ -32,7 +33,7 @@ export default function BottomMenu() {
           zIndex: 1000,
         }}
       >
-        <button onClick={() => setMenuOpen(true)}>📖 Mở menu</button>
+        <button onClick={() => setMenuOpen(true)}>🌱 Mở menu</button>
         <Link href="/account">👤 Tài khoản</Link>
         <button onClick={() => router.back()}>⬅️ Quay lại</button>
       </nav>
@@ -59,20 +60,22 @@ export default function BottomMenu() {
             ❌ Đóng Menu
           </button>
 
-          <h1 style={{ fontSize: '1.8rem', marginBottom: '0.5rem' }}>🌱 Ứng dụng Rừng Khoái</h1>
-          <p style={{ marginBottom: '1.5rem' }}>
-            Ứng dụng theo dõi sản xuất tre, măng, lá – hỗ trợ người dân, nông trại và tổ chức cộng
-            đồng.
-          </p>
+          <h1 style={{ fontSize: '1.8rem', marginBottom: '0.5rem' }}>{appName}</h1>
+          <p style={{ marginBottom: '1.5rem' }}>{appDescription}</p>
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
             <Link href="/">🏠 Trang chủ</Link>
+            <Link href="/about">ℹ️ Giới thiệu</Link>
             <Link href="/news">📰 Tin tức</Link>
             <Link href="/products">🛒 Sản phẩm</Link>
             <Link href="/report">📊 Báo cáo</Link>
             <Link href="/survey">📝 Khảo sát</Link>
             <Link href="/photos">📷 Hình ảnh</Link>
-            <Link href="/about">ℹ️ Giới thiệu</Link>
+            <Link href="/contact">🪪 Liên hệ</Link>
+            <Link href="/faq">📖 Chính sách</Link>
+            <Link href="/faq">❓ Câu hỏi thường gặp</Link>
+            <Link href={`tel:${phone}`}>Gọi điện: {phone}</Link>
+            <Link href={`mailto:${email}`}>Gửi email tới: {email}</Link>
           </div>
         </div>
       )}

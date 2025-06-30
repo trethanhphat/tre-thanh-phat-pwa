@@ -24,37 +24,6 @@ export default function Header() {
           Doanh nghiệp tiên phong phát triển hệ sinh thái ngành tre tại Việt Nam.
         </p>
       </div>
-
-      {/* Khoảng trắng dưới header */}
-      <div className="h-[56px]" />
-
-      {/* Menu toàn màn hình */}
-      {menuOpen && (
-        <div>
-          <nav className="flex flex-col text-lg p-6 space-y-6">
-            <a href="/about" className="hover:underline">
-              Giới thiệu
-            </a>
-            <a href="/news" className="hover:underline">
-              Tin tức
-            </a>
-            <a href="/products" className="hover:underline">
-              Sản phẩm
-            </a>
-            <a href="/contact" className="hover:underline">
-              Liên hệ
-            </a>
-            <a href="/policy" className="hover:underline">
-              Chính sách
-            </a>
-            <a href="/faq" className="hover:underline">
-              Câu hỏi thường gặp
-            </a>
-            <a href={`tel:${phone}`}>Gọi điện: {phone}</a>
-            <a href={`mailto:${email}`}>Gửi email tới: {email}</a>
-          </nav>
-        </div>
-      )}
     </>
   );
 }
