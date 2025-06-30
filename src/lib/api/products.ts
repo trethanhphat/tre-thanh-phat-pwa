@@ -1,5 +1,5 @@
 // lib/api/products.ts
-
+import { RUNGKHOAI_CONSUMER_KEY, RUNGKHOAI_CONSUMER_SECRET } from '@/lib/env';
 import { Product } from '@/types/product';
 
 export async function fetchProducts(): Promise<Product[]> {
