@@ -7,7 +7,6 @@ import { useRouter } from 'next/navigation';
 import { appName, appDescription, phone, email } from '@/lib/env';
 
 const buttonStyle = {
-  textAlign: 'left' as const,
   background: 'var(--menu-bg)',
   flexDirection: 'column' as const,
 };
@@ -60,12 +59,8 @@ export default function BottomMenu() {
       {/* Menu toàn màn hình */}
       {isMenuOpen && (
         <div
+          className="menu"
           style={{
-            position: 'fixed',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
             background: 'var(--menu-panel-bg)',
             color: 'var(--text-color)',
             zIndex: 2000,
