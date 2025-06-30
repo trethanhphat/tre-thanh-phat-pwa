@@ -11,7 +11,7 @@ const buttonStyle = {
   padding: '1rem',
   fontSize: '1.2rem',
   textAlign: 'center' as const,
-  background: '#fff',
+  background: 'var(--menu-bg)',
   border: 'none',
   cursor: 'pointer',
   display: 'flex',
@@ -19,6 +19,8 @@ const buttonStyle = {
   alignItems: 'center',
   justifyContent: 'center',
   gap: '0.25rem',
+  color: 'inherit',
+  textDecoration: 'none',
 };
 
 export default function BottomMenu() {
@@ -44,7 +46,7 @@ export default function BottomMenu() {
           display: 'flex',
           justifyContent: 'space-around',
           alignItems: 'center',
-          background: '#ffffff',
+          background: 'var(--menu-bg)',
           borderTop: '1px solid #ccc',
           zIndex: 1000,
         }}
@@ -84,7 +86,8 @@ export default function BottomMenu() {
             left: 0,
             right: 0,
             bottom: 0,
-            background: '#f8f8f8',
+            background: 'var(--menu-panel-bg)',
+            color: 'var(--text-color)',
             zIndex: 2000,
             display: 'flex',
             flexDirection: 'column',
@@ -94,7 +97,7 @@ export default function BottomMenu() {
           <div
             style={{
               padding: '1.5rem',
-              background: '#fff',
+              background: 'var(--menu-bg)',
               borderBottom: '1px solid #ccc',
               position: 'sticky',
               top: 0,
@@ -131,19 +134,21 @@ export default function BottomMenu() {
               { href: '/faq', label: '❓ Câu hỏi thường gặp' },
               { href: '/faq', label: '📖 Chính sách' },
             ].map(({ href, label }) => (
-              <Link key={href} href={href} passHref>
-                <button style={buttonStyle} onClick={handleLinkClick}>
-                  {label}
-                </button>
+              <Link key={href} href={href} passHref legacyBehavior>
+                <a style={{ textDecoration: 'none' }}>
+                  <button style={buttonStyle} onClick={handleLinkClick}>
+                    {label}
+                  </button>
+                </a>
               </Link>
             ))}
 
-            <a href={`tel:${phone}`}>
+            <a href={`tel:${phone}`} style={{ textDecoration: 'none' }}>
               <button style={buttonStyle} onClick={handleLinkClick}>
                 📞 Gọi điện: {phone}
               </button>
             </a>
-            <a href={`mailto:${email}`}>
+            <a href={`mailto:${email}`} style={{ textDecoration: 'none' }}>
               <button style={buttonStyle} onClick={handleLinkClick}>
                 📧 Gửi email: {email}
               </button>
@@ -155,7 +160,7 @@ export default function BottomMenu() {
             style={{
               position: 'sticky',
               bottom: 0,
-              background: '#f8f8f8',
+              background: 'var(--menu-panel-bg)',
               padding: '1rem',
               borderTop: '1px solid #ccc',
             }}
