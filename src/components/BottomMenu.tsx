@@ -107,8 +107,8 @@ export default function BottomMenu() {
               { href: '/survey', label: '📝 Khảo sát' },
               { href: '/photos', label: '📷 Hình ảnh' },
               { href: '/contact', label: '🪪 Liên hệ' },
-              { href: '/faq', label: '❓ Câu hỏi thường gặp' },
               { href: '/policy', label: '📖 Chính sách' },
+              { href: '/faq', label: '❓ Câu hỏi thường gặp' },
             ].map(({ href, label }) => (
               <Link key={href} href={href} passHref legacyBehavior>
                 <a style={{ textDecoration: 'none' }}>
