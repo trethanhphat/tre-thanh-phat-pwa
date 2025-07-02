@@ -2,7 +2,6 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { FaBars, FaTimes, FaArrowLeft } from 'react-icons/fa';
 import { appName, appDescription, appUrl, phone, email, website, copyright } from '@/lib/env';
 
 export default function Header() {
@@ -12,10 +11,11 @@ export default function Header() {
   return (
     <>
       {/* Header cố định */}
-      <div
+      <header
         style={{
           padding: '1.5rem',
           background: 'var(--menu-bg)',
+          color: 'var(--text-color)',
           borderBottom: '1px solid #ccc',
           position: 'sticky',
           top: 0,
@@ -26,7 +26,7 @@ export default function Header() {
           {appName}
         </h1>
         <p style={{ marginBottom: '0' }}>{appDescription}</p>
-      </div>
+      </header>
     </>
   );
 }

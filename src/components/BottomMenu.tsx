@@ -73,6 +73,7 @@ export default function BottomMenu() {
             style={{
               padding: '1.5rem',
               background: 'var(--menu-bg)',
+              color: 'var(--text-color)',
               borderBottom: '1px solid #ccc',
               position: 'sticky',
               top: 0,
