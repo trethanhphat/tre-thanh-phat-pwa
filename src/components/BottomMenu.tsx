@@ -72,7 +72,6 @@ export default function BottomMenu() {
           <div
             className="header"
             style={{
-              padding: '1.5rem',
               background: 'var(--menu-bg)',
               color: 'var(--text-color)',
               borderBottom: '1px solid #ccc',
