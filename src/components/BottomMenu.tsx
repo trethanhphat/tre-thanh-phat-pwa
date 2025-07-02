@@ -142,7 +142,6 @@ export default function BottomMenu() {
               padding: '1rem',
               borderTop: '1px solid #ccc',
               height: `${menuHeight}px`,
-              background: 'var(--menu-bg)',
             }}
           >
             <button
