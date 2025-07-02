@@ -134,12 +134,15 @@ export default function BottomMenu() {
 
           {/* Nút đóng cố định dưới cùng */}
           <div
+            className="bottom"
             style={{
               position: 'sticky',
               bottom: 0,
               background: 'var(--menu-panel-bg)',
               padding: '1rem',
               borderTop: '1px solid #ccc',
+              height: `${menuHeight}px`,
+              background: 'var(--menu-bg)',
             }}
           >
             <button
