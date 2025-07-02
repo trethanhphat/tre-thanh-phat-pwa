@@ -14,7 +14,7 @@ const buttonStyle = {
 export default function BottomMenu() {
   const [isMenuOpen, setMenuOpen] = useState(false);
   const router = useRouter();
-  const menuHeight = 80; // Chiều cao menu px (dùng padding-bottom tương ứng)
+  const menuHeight = 91; // Chiều cao menu px (dùng padding-bottom tương ứng)
 
   const handleLinkClick = () => setMenuOpen(false);
 
@@ -141,7 +141,6 @@ export default function BottomMenu() {
               background: 'var(--menu-panel-bg)',
               padding: '1rem',
               borderTop: '1px solid #ccc',
-              height: `${menuHeight}px`,
             }}
           >
             <button
