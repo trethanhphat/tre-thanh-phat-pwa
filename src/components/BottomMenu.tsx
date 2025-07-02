@@ -70,6 +70,7 @@ export default function BottomMenu() {
         >
           {/* Header cố định */}
           <div
+            className="header"
             style={{
               padding: '1.5rem',
               background: 'var(--menu-bg)',

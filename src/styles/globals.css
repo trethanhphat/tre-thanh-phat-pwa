@@ -55,6 +55,12 @@ button {
   text-decoration: none;
 }
 
+header,
+div.menu div.header {
+  padding: 1.5rem;
+  padding-top: 0;
+}
+
 nav {
   position: fixed;
   bottom: 0;
