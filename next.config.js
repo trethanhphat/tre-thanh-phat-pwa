@@ -1,6 +1,6 @@
 // ✅ File: next.config.js
 
-const withPWA = require('next-pwa').default;
+const withPWA = require('next-pwa');
 const isDev = process.env.NODE_ENV === 'development';
 
 const runtimeCaching = [
@@ -32,4 +32,9 @@ module.exports = withPWA({
   register: false, // ❌ Tắt autoRegister vì dùng App Router
   sw: 'sw.js',
   runtimeCaching, // 👉 Giữ tên biến như trước
+  buildExcludes: [
+    /.*app-build-manifest\.json$/,
+    /.*dynamic-css-manifest\.json$/,
+    /.*middleware-manifest\.json$/,
+  ],
 });
