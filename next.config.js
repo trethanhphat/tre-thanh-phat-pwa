@@ -1,8 +1,6 @@
 // ✅ File: next.config.js
 
-const withPWA = require('next-pwa');
 const isDev = process.env.NODE_ENV === 'development';
-
 const runtimeCaching = [
   {
     urlPattern: /^https:\/\/app\.trethanhphat\.vn\/.*$/,
@@ -17,12 +15,7 @@ const runtimeCaching = [
   },
 ];
 
-/** @type {import('next').NextConfig} */
-const nextConfig = withPWA({
-  reactStrictMode: true,
-  experimental: {
-    serverActions: true,
-  },
+const withPWA = require('next-pwa')({
   dest: 'public',
   disable: isDev,
   register: false,
@@ -35,4 +28,12 @@ const nextConfig = withPWA({
   ],
 });
 
-module.exports = nextConfig;
+/** @type {import('next').NextConfig} */
+const nextConfig = {
+  reactStrictMode: true,
+  experimental: {
+    serverActions: true,
+  },
+};
+
+module.exports = withPWA(nextConfig);
