@@ -18,22 +18,21 @@ const runtimeCaching = [
 ];
 
 /** @type {import('next').NextConfig} */
-const nextConfig = {
+const nextConfig = withPWA({
   reactStrictMode: true,
   experimental: {
     serverActions: true,
   },
-};
-
-module.exports = withPWA(nextConfig, {
   dest: 'public',
   disable: isDev,
-  register: false, // ❌ Tắt autoRegister vì dùng App Router
+  register: false,
   sw: 'sw.js',
-  runtimeCaching, // 👉 Giữ tên biến như trước
+  runtimeCaching,
   buildExcludes: [
     /.*app-build-manifest\.json$/,
     /.*dynamic-css-manifest\.json$/,
     /.*middleware-manifest\.json$/,
   ],
 });
+
+module.exports = nextConfig;
