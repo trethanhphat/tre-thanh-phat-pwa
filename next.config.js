@@ -25,8 +25,7 @@ const nextConfig = {
   },
 };
 
-module.exports = withPWA({
-  ...nextConfig,
+module.exports = withPWA(nextConfig, {
   dest: 'public',
   disable: isDev,
   register: false, // ❌ Tắt autoRegister vì dùng App Router
