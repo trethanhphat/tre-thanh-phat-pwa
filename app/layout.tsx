@@ -1,5 +1,4 @@
-// app/layout.tsx
-'use client';
+// ✅ File: app/layout.tsx
 
 import '@/styles/globals.css';
 import '@/fonts/font-ttp.css';
@@ -8,7 +7,7 @@ import UpdateNotifier from '@/components/UpdateNotifier';
 import BottomMenu from '@/components/BottomMenu';
 import Header from '@/components/Header';
 import type { Metadata } from 'next';
-import { useEffect } from 'react';
+import ServiceWorkerCheck from '@/components/ServiceWorkerCheck';
 
 export const viewport = {
   themeColor: '#ffffff',
@@ -24,25 +23,14 @@ export const metadata: Metadata = {
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
-  useEffect(() => {
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.ready
-        .then(reg => {
-          console.log('[PWA] ✅ Service Worker is active:', reg.active?.scriptURL);
-        })
-        .catch(err => {
-          console.error('[PWA] ❌ Service Worker not ready:', err);
-        });
-    } else {
-      console.warn('[PWA] ⚠️ Service Worker not supported in this browser.');
-    }
-  }, []);
-
   return (
     <html lang="vi">
       <body>
         <Header />
-        <main style={{ padding: '1rem' }}>{children}</main>
+        <main style={{ padding: '1rem' }}>
+          {children}
+          <ServiceWorkerCheck /> {/* ✅ Theo dõi Service Worker */}
+        </main>
         <BottomMenu />
         <UpdateNotifier />
       </body>
