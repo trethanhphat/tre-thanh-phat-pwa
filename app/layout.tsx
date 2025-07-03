@@ -8,6 +8,7 @@ import BottomMenu from '@/components/BottomMenu';
 import Header from '@/components/Header';
 import type { Metadata } from 'next';
 import ServiceWorkerCheck from '@/components/ServiceWorkerCheck';
+import ServiceWorkerRegister from '@/components/ServiceWorkerRegister';
 
 export const viewport = {
   themeColor: '#ffffff',
@@ -29,6 +30,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <Header />
         <main style={{ padding: '1rem' }}>
           {children}
+          <ServiceWorkerRegister /> {/* ✅ Đăng ký Service Worker */}
           <ServiceWorkerCheck /> {/* ✅ Theo dõi Service Worker */}
         </main>
         <BottomMenu />
