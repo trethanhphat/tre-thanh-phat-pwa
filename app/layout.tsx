@@ -28,13 +28,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="vi">
       <body>
         <Header />
-        <main style={{ padding: '1rem' }}>
-          {children}
-          <ServiceWorkerRegister /> {/* ✅ Đăng ký Service Worker */}
-          <ServiceWorkerCheck /> {/* ✅ Theo dõi Service Worker */}
-        </main>
+        <main style={{ padding: '1rem' }}>{children}</main>
         <BottomMenu />
         <UpdateNotifier />
+        <ServiceWorkerRegister /> {/* ✅ Đăng ký Service Worker */}
+        <ServiceWorkerCheck /> {/* ✅ Theo dõi Service Worker */}
       </body>
     </html>
   );
