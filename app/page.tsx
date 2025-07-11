@@ -13,22 +13,6 @@ export default function Home() {
       <header className="text-center mb-6"></header>
       {/* Các chức năng chính */}
       <section className="space-y-4">
-        <section className="space-y-4">
-          <div className="p-4">
-            <h1 className="text-2xl font-bold mb-4">
-              Báo cáo phát triển vùng trồng Tre Thanh Phát
-            </h1>
-            <div className="aspect-w-16 aspect-h-9">
-              <iframe
-                src="https://lookerstudio.google.com/embed/reporting/470c0a0d-60ed-4191-bacb-46f02752fd88/page/kz9JF?s=kRSik9CXYew"
-                width="100%"
-                height="100%"
-                frameBorder="0"
-                allowFullScreen
-              ></iframe>
-            </div>
-          </div>
-        </section>
         <button className="btn-primary w-full py-4 text-lg bg-green-600 text-white rounded-2xl focus:outline-none">
           📥 Nhập dữ liệu mới
         </button>
