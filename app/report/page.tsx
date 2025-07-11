@@ -18,7 +18,7 @@ export default function Home() {
           <h1 className="text-2xl font-bold mb-4">Báo cáo phát triển vùng trồng Tre Thanh Phát</h1>
           <div className="aspect-w-16 aspect-h-9">
             <iframe
-              src="https://lookerstudio.google.com/s/kRSik9CXYew"
+              src="https://lookerstudio.google.com/reporting/470c0a0d-60ed-4191-bacb-46f02752fd88/page/kz9JF?s=kRSik9CXYew"
               width="100%"
               height="100%"
               frameBorder="0"

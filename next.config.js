@@ -1,6 +1,7 @@
 // ✅ File: next.config.js
 
 const isDev = process.env.NODE_ENV === 'development';
+
 const runtimeCaching = [
   {
     urlPattern: /^https:\/\/app\.trethanhphat\.vn\/.*$/,
@@ -33,6 +34,21 @@ const nextConfig = {
   reactStrictMode: true,
   experimental: {
     serverActions: true,
+  },
+
+  // ✅ Thêm Content-Security-Policy để cho phép nhúng từ Looker Studio
+  async headers() {
+    return [
+      {
+        source: '/:path*',
+        headers: [
+          {
+            key: 'Content-Security-Policy',
+            value: "frame-src 'self' https://lookerstudio.google.com;",
+          },
+        ],
+      },
+    ];
   },
 };
 
