@@ -20,7 +20,7 @@ export default function Home() {
             </h1>
             <div className="aspect-w-16 aspect-h-9">
               <iframe
-                src="https://lookerstudio.google.com/reporting/470c0a0d-60ed-4191-bacb-46f02752fd88/page/kz9JF?s=kRSik9CXYew"
+                src="https://lookerstudio.google.com/embed/reporting/470c0a0d-60ed-4191-bacb-46f02752fd88/page/kz9JF?s=kRSik9CXYew"
                 width="100%"
                 height="100%"
                 frameBorder="0"
@@ -32,9 +32,11 @@ export default function Home() {
         <button className="btn-primary w-full py-4 text-lg bg-green-600 text-white rounded-2xl focus:outline-none">
           📥 Nhập dữ liệu mới
         </button>
-        <button className="btn-secondary w-full py-4 text-lg bg-green-100 text-green-800 rounded-2xl border border-green-300">
-          📋 Xem báo cáo cây trồng
-        </button>
+        <a href="https://lookerstudio.google.com/reporting/470c0a0d-60ed-4191-bacb-46f02752fd88/page/kz9JF?s=kRSik9CXYew">
+          <button className="btn-secondary w-full py-4 text-lg bg-green-100 text-green-800 rounded-2xl border border-green-300">
+            📋 Xem báo cáo cây trồng
+          </button>
+        </a>
         <button className="btn-primary w-full py-4 text-lg bg-yellow-50 text-yellow-800 rounded-2xl border border-yellow-300">
           📷 Gửi ảnh thực địa
         </button>
