@@ -14,15 +14,18 @@ export default function Home() {
 
       {/* Các chức năng chính */}
       <section className="space-y-4">
-        <button className="btn-primary w-full py-4 text-lg bg-green-600 text-white rounded-2xl focus:outline-none">
-          📥 Nhập dữ liệu mới
-        </button>
-        <button className="btn-secondary w-full py-4 text-lg bg-green-100 text-green-800 rounded-2xl border border-green-300">
-          📋 Xem báo cáo cây trồng
-        </button>
-        <button className="btn-primary w-full py-4 text-lg bg-yellow-50 text-yellow-800 rounded-2xl border border-yellow-300">
-          📷 Gửi ảnh thực địa
-        </button>
+        <div className="p-4">
+          <h1 className="text-2xl font-bold mb-4">Báo cáo phát triển vùng trồng Tre Thanh Phát</h1>
+          <div className="aspect-w-16 aspect-h-9">
+            <iframe
+              src="https://lookerstudio.google.com/s/kRSik9CXYew"
+              width="100%"
+              height="100%"
+              frameBorder="0"
+              allowFullScreen
+            ></iframe>
+          </div>
+        </div>
       </section>
 
       {/* Thông tin footer */}
