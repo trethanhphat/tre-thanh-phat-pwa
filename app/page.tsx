@@ -32,7 +32,10 @@ export default function Home() {
         <button className="btn-primary w-full py-4 text-lg bg-green-600 text-white rounded-2xl focus:outline-none">
           📥 Nhập dữ liệu mới
         </button>
-        <a href="https://lookerstudio.google.com/reporting/470c0a0d-60ed-4191-bacb-46f02752fd88/page/kz9JF?s=kRSik9CXYew">
+        <a
+          class="inline-block px-4 py-2 bg-green-600 text-white rounded-xl no-underline mr-4"
+          href="https://lookerstudio.google.com/reporting/470c0a0d-60ed-4191-bacb-46f02752fd88/page/kz9JF?s=kRSik9CXYew"
+        >
           <button className="btn-secondary w-full py-4 text-lg bg-green-100 text-green-800 rounded-2xl border border-green-300">
             📋 Xem báo cáo cây trồng
           </button>
