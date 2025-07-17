@@ -30,8 +30,8 @@
   --color-border: #ccc;
   --color-surface: #fff; /* dùng cho thẻ, card */
 }
-
-@media (prefers-color-scheme: dark) {
+/
+@media (/*prefers-color-scheme: dark*/) {
   :root {
     --color-primary: #8bd8b0; /* Nhẹ hơn, tăng tương phản trên nền tối */
     --color-accent: #ffc591; /* Màu phụ sáng hơn */
