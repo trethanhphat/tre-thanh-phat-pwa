@@ -7,7 +7,8 @@ import { useRouter } from 'next/navigation';
 import { appName, appDescription, phone, email } from '@/lib/env';
 
 const buttonStyle = {
-  background: 'var(--menu-bg)',
+  background: 'var(--color-primary)',
+  color: 'var(--color-surface)'
   flexDirection: 'column' as const,
 };
 
@@ -27,7 +28,6 @@ export default function BottomMenu() {
       <nav
         style={{
           height: `${menuHeight}px`,
-          background: 'var(--menu-bg)',
         }}
       >
         <button onClick={() => setMenuOpen(true)} style={buttonStyle}>
@@ -61,8 +61,6 @@ export default function BottomMenu() {
         <div
           className="menu"
           style={{
-            background: 'var(--menu-panel-bg)',
-            color: 'var(--text-color)',
             zIndex: 2000,
             display: 'flex',
             flexDirection: 'column',
@@ -138,7 +136,6 @@ export default function BottomMenu() {
             style={{
               position: 'sticky',
               bottom: 0,
-              background: 'var(--menu-panel-bg)',
               padding: '1rem',
               borderTop: '1px solid #ccc',
             }}

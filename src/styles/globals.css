@@ -68,6 +68,10 @@ div.menu div.header {
   text-align: center;
 }
 
+div.menu {
+  background-color: var(--color-primary);
+}
+
 header.header-wrapper {
   background: var(--menu-bg);
   color: var(--text-color);
