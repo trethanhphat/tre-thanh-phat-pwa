@@ -13,7 +13,7 @@ export default function UpdateNotifier() {
       style={{
         position: 'fixed',
         bottom: 20,
-        right: 20,
+        right: 0,
         backgroundColor: '#116530',
         color: '#fff',
         padding: '12px 20px',

@@ -22,7 +22,7 @@ export default function Header() {
     <>
       {/* Header cố định */}
       <header className={`header-wrapper ${shrink ? 'shrink' : ''}`}>
-        <h1 className="font-ttp app-title">{appName}</h1>
+        <a href={appUrl}></a><h1 className="font-ttp app-title">{appName}</h1></a>
         {!shrink && <p className="app-description">{appDescription}</p>}
       </header>
     </>

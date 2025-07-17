@@ -38,7 +38,6 @@ export default function Home() {
           Email: <a href={`mailto:${email}`}>{email}</a>
         </p>
         <p className="mt-1">{copyright}</p>
-        <p>Cập nhật lúc: 2506230816</p>
       </footer>
       {/* Navigation dưới nếu cần thêm sau */}
     </main>
