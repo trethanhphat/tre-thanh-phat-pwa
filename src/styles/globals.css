@@ -21,9 +21,26 @@
 }
 
 :root {
-  --menu-bg: #ffffff;
-  --menu-panel-bg: #a8a8a8;
-  --text-color: #054219;
+  --color-primary: #3f7d58; /* Màu chủ đạo: xanh rêu */
+  --color-accent: #ef9651; /* Màu phụ trợ: cam nhạt */
+  --color-alert: #ec5228; /* Màu nhấn mạnh/cảnh báo */
+  --color-background: #efefef; /* Màu nền */
+  --color-text: #1e1e1e;
+  --color-muted: #888;
+  --color-border: #ccc;
+  --color-surface: #fff; /* dùng cho thẻ, card */
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-primary: #8bd8b0; /* Nhẹ hơn, tăng tương phản trên nền tối */
+    --color-accent: #ffc591; /* Màu phụ sáng hơn */
+    --color-alert: #ff7f5e; /* Cam sáng nổi bật */
+    --color-background: #121212; /* Nền rất tối */
+    --color-surface: #1e1e1e; /* Card hoặc hộp nội dung */
+    --color-text: #f5f5f5; /* Chữ trắng/xám rất sáng */
+    --color-muted: #aaaaaa; /* Chữ phụ nhạt hơn */
+  }
 }
 
 body {
@@ -31,8 +48,8 @@ body {
 }
 
 button {
-  color: #000000;
-  background-color: #a8a8a8;
+  color: var(--color-surface);
+  background-color: var(--color-primary);
   width: 100%;
   padding: 1rem;
   font-size: 1.2rem;
@@ -52,8 +69,8 @@ div.menu div.header {
 }
 
 header.header-wrapper {
-  background-color: #054219;
-  color: #ffffff;
+  background: var(--menu-bg);
+  color: var(--text-color);
 }
 nav {
   position: fixed;
@@ -90,8 +107,6 @@ div.menu a {
 
 /* Thêm mới cho header co lại */
 .header-wrapper {
-  background: var(--menu-bg);
-  color: var(--text-color);
   border-bottom: 1px solid #ccc;
   position: sticky;
   top: 0;
