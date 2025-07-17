@@ -72,6 +72,10 @@ header.header-wrapper {
   background: var(--menu-bg);
   color: var(--text-color);
 }
+
+header a {
+  text-decoration: none;
+}
 nav {
   position: fixed;
   bottom: 0;
