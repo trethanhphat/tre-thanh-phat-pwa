@@ -70,9 +70,9 @@ export default function BottomMenu() {
           <div
             className="header"
             style={{
-              background: 'var(--menu-bg)',
-              color: 'var(--text-color)',
-              borderBottom: '1px solid #ccc',
+              background: 'var(--color-primary)',
+              color: 'var(--color-surface)',
+              borderBottom: '1px solid var(--color-alert)',
               position: 'sticky',
               top: 0,
               zIndex: 1,
@@ -134,10 +134,12 @@ export default function BottomMenu() {
           <div
             className="bottom"
             style={{
+              background: 'var(--color-primary)',
+              color: 'var(--color-surface)',
               position: 'sticky',
               bottom: 0,
               padding: '1rem',
-              borderTop: '1px solid #ccc',
+              borderTop: '1px solid var(--color-alert)',
             }}
           >
             <button

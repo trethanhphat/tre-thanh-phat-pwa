@@ -73,8 +73,8 @@ div.menu {
 }
 
 header.header-wrapper {
-  background: var(--menu-bg);
-  color: var(--text-color);
+  background: var(--color-primary);
+  color: var(--color-surface);
 }
 
 header a {
