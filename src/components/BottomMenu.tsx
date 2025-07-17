@@ -8,7 +8,7 @@ import { appName, appDescription, phone, email } from '@/lib/env';
 
 const buttonStyle = {
   background: 'var(--color-primary)',
-  color: 'var(--color-surface)'
+  color: 'var(--color-surface)',
   flexDirection: 'column' as const,
 };
 
