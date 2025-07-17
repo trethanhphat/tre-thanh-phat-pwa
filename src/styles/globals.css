@@ -51,6 +51,10 @@ div.menu div.header {
   text-align: center;
 }
 
+header.header-wrapper {
+  background-color: #054219;
+  color: #ffffff;
+}
 nav {
   position: fixed;
   bottom: 0;
