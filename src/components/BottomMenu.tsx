@@ -72,7 +72,7 @@ export default function BottomMenu() {
             className="header"
             style={{
               background: 'var(--color-primary)',
-              color: 'var(--color-surface)',
+              color: 'var(--color-header)',
               borderBottom: '1px solid var(--color-alert)',
               position: 'sticky',
               top: 0,
