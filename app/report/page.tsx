@@ -10,16 +10,16 @@ export default function Home() {
   return (
     <main className="min-h-screen bg-white text-gray-800 px-4 pt-6 pb-24">
       {/* Tiêu đề */}
-      <header className="text-center mb-6"></header>
+      <h1 className="text-2xl font-bold mb-4">Danh sách Báo cáo phát triển Tre Thanh Phát</h1>
 
       {/* Các chức năng chính */}
       <section className="space-y-4">
         <div className="p-4">
-          <h1 className="text-2xl font-bold mb-4">Báo cáo phát triển vùng trồng Tre Thanh Phát</h1>
+          <h2 className="text-2xl font-bold mb-4">Báo cáo Tổng hợp</h2>
           <div className="aspect-w-16 aspect-h-9">
             <a
-              className="inline-block px-4 py-2 bg-green-600 text-white rounded-xl no-underline mr-4"
-              href="https://lookerstudio.google.com/reporting/470c0a0d-60ed-4191-bacb-46f02752fd88/page/kz9JF?s=kRSik9CXYew"
+              className="button"
+              href="https://lookerstudio.google.com/reporting/de31c339-19fa-4080-8def-8d124c043394/page/hDqRF"
             >
               <button className="btn-secondary w-full py-4 text-lg bg-green-100 text-green-800 rounded-2xl border border-green-300">
                 📋 Xem báo cáo cây trồng
@@ -29,6 +29,37 @@ export default function Home() {
         </div>
       </section>
 
+      <section className="space-y-4">
+        <div className="p-4">
+          <h2 className="text-2xl font-bold mb-4">Báo cáo Số cây trồng các tháng</h2>
+          <div className="aspect-w-16 aspect-h-9">
+            <a
+              className="button"
+              href="https://lookerstudio.google.com/reporting/de31c339-19fa-4080-8def-8d124c043394/page/hDqRF"
+            >
+              <button className="btn-secondary w-full py-4 text-lg bg-green-100 text-green-800 rounded-2xl border border-green-300">
+                📋 Xem báo cáo cây trồng
+              </button>
+            </a>
+          </div>
+        </div>
+      </section>
+
+      <section className="space-y-4">
+        <div className="p-4">
+          <h2 className="text-2xl font-bold mb-4">Báo cáo theo vùng</h2>
+          <div className="aspect-w-16 aspect-h-9">
+            <a
+              className="button"
+              href="https://lookerstudio.google.com/reporting/470c0a0d-60ed-4191-bacb-46f02752fd88/page/kz9JF?s=kRSik9CXYew"
+            >
+              <button className="btn-secondary w-full py-4 text-lg bg-green-100 text-green-800 rounded-2xl border border-green-300">
+                📋 Xem báo cáo cây trồng
+              </button>
+            </a>
+          </div>
+        </div>
+      </section>
       {/* Thông tin footer */}
       <footer className="text-center text-sm text-gray-500 mt-10">
         <p>
