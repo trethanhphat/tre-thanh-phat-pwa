@@ -7,6 +7,7 @@
   --font-primary: Arial, sans-serif;
   /* Light Mode */
   --color-primary: #054219;
+  --color-header: #e2ffe2;
   --color-accent: #ef9651;
   --color-alert: #ec5228;
   --color-background: #efefef;
@@ -19,6 +20,7 @@
 @media (prefers-color-scheme: dark) {
   :root {
     --color-primary: #054219;
+    --color-header: #e2ffe2;
     --color-accent: #89f7a7;
     --color-alert: #ff7f5e;
     --color-background: #0d1b12;
@@ -36,8 +38,8 @@ html {
 
 body {
   font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
-  background-color: #fff;
-  color: #111;
+  background-color: var(--color-background);
+  color: var(--color-text);
   margin: 8px;
   padding: 0;
   line-height: 1.6;
@@ -185,7 +187,7 @@ div.menu div.header {
 
 header a,
 div.menu div.header a {
-  color: #e2ffe2;
+  color: var(--color-header);
 }
 div.menu {
   background-color: var(--color-primary);
@@ -193,7 +195,7 @@ div.menu {
 
 header.header-wrapper {
   background: var(--color-primary);
-  color: #e2ffe2;
+  color: var(--color-header);
 }
 
 header a {
