@@ -1,0 +1,44 @@
+// ✅ File: src/components/Home.module.scss
+
+.buttonPrimary {
+  width: 100%;
+  padding: 1rem;
+  font-size: 1.125rem;
+  background-color: #3f7d58;
+  color: white;
+  border-radius: 1rem;
+  border: none;
+  cursor: pointer;
+  &:focus {
+    outline: none;
+  }
+}
+
+.buttonSecondary {
+  width: 100%;
+  padding: 1rem;
+  font-size: 1.125rem;
+  background-color: #d1fae5;
+  color: #065f46;
+  border-radius: 1rem;
+  border: 1px solid #6ee7b7;
+  cursor: pointer;
+}
+
+.buttonWarning {
+  width: 100%;
+  padding: 1rem;
+  font-size: 1.125rem;
+  background-color: #fef3c7;
+  color: #92400e;
+  border-radius: 1rem;
+  border: 1px solid #fcd34d;
+  cursor: pointer;
+}
+
+.footer {
+  text-align: center;
+  font-size: 0.875rem;
+  color: #6b7280;
+  margin-top: 2.5rem;
+} // gray-500
