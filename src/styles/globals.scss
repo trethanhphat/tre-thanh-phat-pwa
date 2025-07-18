@@ -240,6 +240,10 @@ nav {
   margin: 8px;
 }
 
+nav button,
+.menu button {
+  width: 100%;
+}
 nav button span {
   text-align: center;
 }
