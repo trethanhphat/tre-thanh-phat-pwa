@@ -4,6 +4,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import ManualSyncButton from './ManualSyncButton';
 import { appName, appDescription, appUrl, phone, email } from '@/lib/env';
 
 const buttonStyle = {
@@ -123,6 +124,7 @@ export default function BottomMenu() {
                 📧 Gửi email: {email}
               </button>
             </a>
+            <ManualSyncButton />
             <p>Doanh nghiệp tiên phong phát triển hệ sinh thái ngành tre tại Việt Nam.</p>
           </div>
 
