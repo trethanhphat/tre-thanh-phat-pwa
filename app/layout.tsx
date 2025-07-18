@@ -1,7 +1,6 @@
 // ✅ File: app/layout.tsx
 
-import '@/styles/globals.css';
-import '@/fonts/font-ttp.css';
+import '@/styles/globals.scss';
 import { appName, appDescription } from '@/lib/env';
 import UpdateNotifier from '@/components/UpdateNotifier';
 import BottomMenu from '@/components/BottomMenu';
