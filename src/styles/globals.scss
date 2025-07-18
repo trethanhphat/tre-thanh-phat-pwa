@@ -246,6 +246,10 @@ nav button,
 .menu button {
   width: 100%;
 }
+
+nav button {
+  border-radius: 0;
+}
 nav button span {
   text-align: center;
 }
