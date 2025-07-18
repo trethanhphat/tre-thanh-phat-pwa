@@ -1,3 +1,5 @@
+// File: /src/components/UpdateNotifier.tsx
+
 'use client';
 
 import { useServiceWorkerUpdate } from '@/hooks/useServiceWorkerUpdate';
