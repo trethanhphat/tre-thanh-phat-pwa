@@ -70,6 +70,10 @@ div.menu div.header {
   text-align: center;
 }
 
+header a,
+div.menu div.header a {
+  color: var(--color-background);
+}
 div.menu {
   background-color: var(--color-primary);
 }

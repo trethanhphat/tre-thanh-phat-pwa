@@ -3,7 +3,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { appName, appDescription, appUrl, phone, email, website, copyright } from '@/lib/env';
+import { appName, appDescription, appUrl } from '@/lib/env';
 
 export default function Header() {
   const [menuOpen, setMenuOpen] = useState(false);

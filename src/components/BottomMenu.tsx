@@ -4,7 +4,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { appName, appDescription, phone, email } from '@/lib/env';
+import { appName, appDescription, appUrl, phone, email } from '@/lib/env';
 
 const buttonStyle = {
   background: 'var(--color-primary)',
@@ -78,9 +78,9 @@ export default function BottomMenu() {
               zIndex: 1,
             }}
           >
-            <h1 className="font-ttp" style={{ fontSize: '1.8rem', marginBottom: '0.5rem' }}>
-              {appName}
-            </h1>
+            <a href={`//${appUrl}`}>
+              <h1 className="font-ttp app-title">{appName}</h1>
+            </a>
             <p style={{ marginBottom: '0' }}>{appDescription}</p>
           </div>
 
