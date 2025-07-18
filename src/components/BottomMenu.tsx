@@ -9,7 +9,7 @@ import { appName, appDescription, appUrl, phone, email } from '@/lib/env';
 
 const buttonStyle = {
   background: 'var(--color-primary)',
-  color: 'var(--color-surface)',
+  color: #e2ffe2,
   flexDirection: 'column' as const,
 };
 
@@ -133,7 +133,7 @@ export default function BottomMenu() {
             className="bottom"
             style={{
               background: 'var(--color-primary)',
-              color: 'var(--color-surface)',
+              color: #e2ffe2,
               position: 'sticky',
               bottom: 0,
               padding: '1rem',
