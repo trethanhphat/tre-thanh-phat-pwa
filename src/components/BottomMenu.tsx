@@ -142,10 +142,7 @@ export default function BottomMenu() {
               borderTop: '1px solid var(--color-alert)',
             }}
           >
-            <button
-              onClick={() => setMenuOpen(false)}
-              style={{ ...buttonStyle, background: '#eee' }}
-            >
+            <button onClick={() => setMenuOpen(false)} style={{ ...buttonStyle }}>
               ❌ Đóng Menu
             </button>
           </div>
