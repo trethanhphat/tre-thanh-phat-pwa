@@ -108,12 +108,8 @@ export default function BottomMenu() {
               { href: '/policy', label: '📖 Chính sách' },
               { href: '/faq', label: '❓ Câu hỏi thường gặp' },
             ].map(({ href, label }) => (
-              <Link key={href} href={href} passHref legacyBehavior>
-                <a style={{ textDecoration: 'none' }}>
-                  <button style={buttonStyle} onClick={handleLinkClick}>
-                    {label}
-                  </button>
-                </a>
+              <Link href={href} style={{ textDecoration: 'none' }} onClick={handleLinkClick}>
+                <button style={buttonStyle}>{label}</button>
               </Link>
             ))}
 

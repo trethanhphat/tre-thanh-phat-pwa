@@ -1,8 +1,12 @@
+// File: /tsconfig.json
+
 {
   "compilerOptions": {
     "baseUrl": ".",
     "paths": {
-      "@/*": ["src/*"]
+      "@/*": ["src/*"],
+      "@fonts/*": ["src/fonts/*"],
+      "@styles/*": ["src/styles/*"]
     },
     "target": "ES2017",
     "lib": ["dom", "dom.iterable", "esnext"],
@@ -20,6 +24,6 @@
     "jsx": "preserve",
     "typeRoots": ["./node_modules/@types", "./types"]
   },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx"],
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts", "**/*.scss"],
   "exclude": ["node_modules"]
 }
