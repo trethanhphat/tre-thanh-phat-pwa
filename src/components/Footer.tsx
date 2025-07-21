@@ -7,7 +7,7 @@ import { appName, appDescription, appUrl, phone, email, website, copyright } fro
 export default (
   <>
     {/* Footer cố định */}
-    <footer className={styles.footer}>
+    <footer className="footer">
       <a href={`//${appUrl}`}>
         <h3 className="font-ttp app-title">{appName}</h3>
       </a>
