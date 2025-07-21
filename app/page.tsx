@@ -8,6 +8,8 @@ import { appName, appDescription, appUrl, phone, email, copyright } from '@/lib/
 export default function Home() {
   return (
     <main className="main">
+      <h1></h1>
+      <div></div>
       <section className="space-y-4">
         <div>
           <p>
@@ -58,16 +60,6 @@ export default function Home() {
           </p>
         </div>
       </section>
-
-      <footer className={styles.footer}>
-        <p>
-          Điện thoại: <a href={`tel:${phone}`}>{phone}</a>
-        </p>
-        <p>
-          Email: <a href={`mailto:${email}`}>{email}</a>
-        </p>
-        <p className="mt-1">{copyright}</p>
-      </footer>
     </main>
   );
 }
