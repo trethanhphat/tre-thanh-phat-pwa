@@ -5,6 +5,7 @@ import { appName, appDescription } from '@/lib/env';
 import UpdateNotifier from '@/components/UpdateNotifier';
 import BottomMenu from '@/components/BottomMenu';
 import Header from '@/components/Header';
+import Footer from '@/components/Footer';
 import type { Metadata } from 'next';
 import ServiceWorkerCheck from '@/components/ServiceWorkerCheck';
 import ServiceWorkerRegister from '@/components/ServiceWorkerRegister';
@@ -28,6 +29,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body>
         <Header />
         <main style={{ padding: '1rem' }}>{children}</main>
+        <Footer />
         <BottomMenu />
         <UpdateNotifier />
         <ServiceWorkerRegister /> {/* ✅ Đăng ký Service Worker */}
