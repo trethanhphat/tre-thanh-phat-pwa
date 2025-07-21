@@ -1,12 +1,10 @@
+// ✅ File: src/components/Footer.tsx
 'use client';
 
-import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import { appName, appDescription, appUrl, phone, email, website, copyright } from '@/lib/env';
+import { appName, appUrl, phone, email, copyright } from '@/lib/env';
 
-export default (
-  <>
-    {/* Footer cố định */}
+export default function Footer() {
+  return (
     <footer className="footer">
       <a href={`//${appUrl}`}>
         <h3 className="font-ttp app-title">{appName}</h3>
@@ -19,5 +17,5 @@ export default (
       </p>
       <p className="mt-1">{copyright}</p>
     </footer>
-  </>
-);
+  );
+}
