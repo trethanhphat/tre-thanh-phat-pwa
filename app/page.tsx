@@ -29,14 +29,14 @@ export default function Home() {
             sagittis magna. Sed consequat, leo eget bibendum sodales, augue velit cursus nunc,
           </p>
         </div>
-        <button className={styles.buttonPrimary}>📥 Nhập dữ liệu mới</button>
+        <a className={styles.buttonPrimary}>📥 Nhập dữ liệu mới</a>
         <a
           className="button"
           href="https://lookerstudio.google.com/reporting/470c0a0d-60ed-4191-bacb-46f02752fd88/page/kz9JF?s=kRSik9CXYew"
         >
           📋 Xem báo cáo cây trồng
         </a>
-        <button className={styles.buttonWarning}>📷 Gửi ảnh thực địa</button>
+        <a className={styles.buttonWarning}>📷 Gửi ảnh thực địa</a>
         <div>
           <p>
             Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Aenean commodo ligula eget
