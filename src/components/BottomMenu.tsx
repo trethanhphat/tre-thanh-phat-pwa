@@ -8,8 +8,6 @@ import ManualSyncButton from './ManualSyncButton';
 import { appName, appUrl, phone, email } from '@/lib/env';
 
 const buttonStyle = {
-  background: 'var(--color-primary)',
-  color: 'var(--color-header)',
   flexDirection: 'column' as const,
 };
 
