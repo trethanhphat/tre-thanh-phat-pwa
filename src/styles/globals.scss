@@ -274,7 +274,8 @@ nav {
   z-index: 1000;
   border-top: 1px solid var(--color-border);
   margin: 8px;
-  background-color: var(--color-background);
+  background-color: var(--color-primary);
+  color: var(--color-secondary);
 }
 
 nav button,
