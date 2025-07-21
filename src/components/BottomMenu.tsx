@@ -5,7 +5,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import ManualSyncButton from './ManualSyncButton';
-import { appName, appDescription, appUrl, phone, email } from '@/lib/env';
+import { appName, appUrl, phone, email } from '@/lib/env';
 
 const buttonStyle = {
   background: 'var(--color-primary)',
@@ -16,7 +16,7 @@ const buttonStyle = {
 export default function BottomMenu() {
   const [isMenuOpen, setMenuOpen] = useState(false);
   const router = useRouter();
-  const menuHeight = 91; // Chiều cao menu px (dùng padding-bottom tương ứng)
+  const menuHeight = 80; // Chiều cao menu px (dùng padding-bottom tương ứng)
 
   const handleLinkClick = () => setMenuOpen(false);
 
@@ -82,7 +82,6 @@ export default function BottomMenu() {
             <a href={`//${appUrl}`}>
               <h1 className="font-ttp app-title">{appName}</h1>
             </a>
-            <p style={{ marginBottom: '0' }}>{appDescription}</p>
           </div>
 
           {/* Nội dung menu cuộn được */}
