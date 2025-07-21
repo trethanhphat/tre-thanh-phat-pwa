@@ -7,7 +7,7 @@
   --font-primary: Arial, sans-serif;
   /* Light Mode */
   --color-primary: #054219;
-  --color-header: #e2ffe2;
+  --color-secondary: #e2ffe2;
   --color-accent: #ef9651;
   --color-alert: #ec5228;
   --color-background: #efefef;
@@ -20,7 +20,7 @@
 @media (prefers-color-scheme: dark) {
   :root {
     --color-primary: #054219;
-    --color-header: #e2ffe2;
+    --color-secondary: #e2ffe2;
     --color-accent: #89f7a7;
     --color-alert: #ff7f5e;
     --color-background: #0d1b12;
@@ -118,7 +118,7 @@ button {
 }
 
 .button {
-  color: var(--color-surface);
+  color: var(--color-secondary);
   background-color: var(--color-primary);
   padding: 1rem;
   margin: 1rem;
@@ -198,7 +198,7 @@ div.menu div.header {
 
 header a,
 div.menu div.header a {
-  color: var(--color-header);
+  color: var(--color-secondary);
   text-decoration: none;
 }
 
@@ -210,8 +210,8 @@ header p {
 
 .header-wrapper {
   background: var(--color-primary);
-  color: var(--color-header);
-  border-bottom: 1px solid #ccc;
+  color: var(--color-secondary);
+  border-bottom: 1px solid var(--color-border);
   position: sticky;
   top: 0;
   z-index: 1;
@@ -246,8 +246,9 @@ nav {
   align-items: center;
   border: none;
   z-index: 1000;
-  border-top: 1px solid #ccc;
+  border-top: 1px solid var(--color-border);
   margin: 8px;
+  background-color: var(--color-background);
 }
 
 nav button,
