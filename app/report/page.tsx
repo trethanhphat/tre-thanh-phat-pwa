@@ -21,9 +21,7 @@ export default function Home() {
               className="button"
               href="https://lookerstudio.google.com/reporting/56850af2-7c18-4c89-b6e3-7290d72f9c89/page/QnqRF"
             >
-              <button className="btn-secondary w-full py-4 text-lg bg-green-100 text-green-800 rounded-2xl border border-green-300">
-                📋 Xem báo cáo
-              </button>
+              📋 Xem báo cáo
             </a>
           </div>
         </div>
@@ -36,9 +34,7 @@ export default function Home() {
               className="button"
               href="https://lookerstudio.google.com/reporting/de31c339-19fa-4080-8def-8d124c043394/page/hDqRF"
             >
-              <button className="btn-secondary w-full py-4 text-lg bg-green-100 text-green-800 rounded-2xl border border-green-300">
-                📋 Xem báo cáo
-              </button>
+              📋 Xem báo cáo
             </a>
           </div>
         </div>
@@ -52,9 +48,7 @@ export default function Home() {
               className="button"
               href="https://lookerstudio.google.com/reporting/470c0a0d-60ed-4191-bacb-46f02752fd88/page/kz9JF?s=kRSik9CXYew"
             >
-              <button className="btn-secondary w-full py-4 text-lg bg-green-100 text-green-800 rounded-2xl border border-green-300">
-                📋 Xem báo cáo
-              </button>
+              📋 Xem báo cáo
             </a>
           </div>
         </div>
