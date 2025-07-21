@@ -129,12 +129,9 @@ export default function BottomMenu() {
           <div
             className="bottom"
             style={{
-              background: 'var(--color-primary)',
-              color: 'var(--color-header)',
               position: 'sticky',
               bottom: 0,
-              padding: '1rem',
-              borderTop: '1px solid var(--color-alert)',
+              borderTop: '1px solid var(--color-border)',
             }}
           >
             <button onClick={() => setMenuOpen(false)} style={{ ...buttonStyle }}>
