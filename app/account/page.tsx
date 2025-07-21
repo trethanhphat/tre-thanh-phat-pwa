@@ -24,20 +24,6 @@ export default function Home() {
           📷 Gửi ảnh thực địa
         </a>
       </section>
-
-      {/* Thông tin footer */}
-      <footer className="text-center text-sm text-gray-500 mt-10">
-        <p>
-          Điện thoại: <a href={`tel:${phone}`}>{phone}</a>
-        </p>
-        <p>
-          Email: <a href={`mailto:${email}`}>{email}</a>
-        </p>
-        <p className="mt-1">{copyright}</p>
-        <p>Cập nhật lúc: 2506230816</p>
-      </footer>
-
-      {/* Navigation dưới nếu cần thêm sau */}
     </main>
   );
 }

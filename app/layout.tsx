@@ -34,6 +34,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <UpdateNotifier />
         <ServiceWorkerRegister /> {/* ✅ Đăng ký Service Worker */}
         <ServiceWorkerCheck /> {/* ✅ Theo dõi Service Worker */}
+        {/* Navigation dưới nếu cần thêm sau */}
       </body>
     </html>
   );

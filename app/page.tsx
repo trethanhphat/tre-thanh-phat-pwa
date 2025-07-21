@@ -8,8 +8,22 @@ import { appName, appDescription, appUrl, phone, email, copyright } from '@/lib/
 export default function Home() {
   return (
     <main className="main">
-      <h1></h1>
-      <div></div>
+      <div>
+        <h1>{appName}</h1>
+        <p>{appDescription}</p>
+      </div>
+      {/* Các chức năng chính */}
+      <section className="space-y-4">
+        <a className="button" href="/survey">
+          📥 Nhập dữ liệu mới
+        </a>
+        <a className="button" href="/report">
+          📋 Xem báo cáo cây trồng
+        </a>
+        <a className="button" href="/photos/upload">
+          📷 Gửi ảnh thực địa
+        </a>
+      </section>
       <section className="space-y-4">
         <div>
           <p>
