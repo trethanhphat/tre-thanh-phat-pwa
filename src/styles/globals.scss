@@ -191,39 +191,35 @@ div.menu div.header {
 header a,
 div.menu div.header a {
   color: var(--color-header);
-}
-div.menu {
-  background-color: var(--color-primary);
-}
-
-header.header-wrapper {
-  background: var(--color-primary);
-  color: var(--color-header);
-}
-
-header a {
   text-decoration: none;
 }
 
+header p {
+  text-align: center;
+}
+
 /* Thêm mới cho header co lại */
+
 .header-wrapper {
+  background: var(--color-primary);
+  color: var(--color-header);
   border-bottom: 1px solid #ccc;
   position: sticky;
   top: 0;
   z-index: 1;
   padding: 1rem 1.5rem;
   text-align: center;
-  transition: all 0.3s ease;
+  transition: all 0.5s ease;
 }
 
 .header-wrapper.shrink {
-  padding: 0.5rem 1.5rem;
+  padding: 0.25rem 1.5rem;
 }
 
 .app-title {
   font-size: 1.8rem;
-  margin-bottom: 0.5rem;
-  transition: font-size 0.3s ease;
+  margin-bottom: 0.25rem;
+  transition: font-size 0.5s ease;
 }
 
 .header-wrapper.shrink .app-title {
@@ -231,6 +227,7 @@ header a {
   margin-bottom: 0;
 }
 
+/* CSS của Menu */
 nav {
   position: fixed;
   bottom: 0;
@@ -258,6 +255,7 @@ nav button span {
 }
 
 div.menu {
+  background-color: var(--color-primary);
   position: fixed;
   top: 0;
   left: 0;
