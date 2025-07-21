@@ -118,6 +118,9 @@ input {
   line-height: 1.6;
 }
 
+p {
+  text-align: justify;
+}
 button,
 .button {
   color: var(--color-surface);
