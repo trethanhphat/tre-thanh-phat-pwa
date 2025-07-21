@@ -96,12 +96,12 @@ export default function BottomMenu() {
           >
             {[
               { href: '/', label: '🏠 Trang chủ' },
-              { href: '/about', label: 'ℹ️ Giới thiệu' },
+              { href: '//trethanhphat.vn/', label: 'ℹ️ Giới thiệu' },
               { href: '/news', label: '📰 Tin tức' },
-              { href: '/products', label: '🛒 Sản phẩm' },
+              { href: '//rungkhoai.com', label: '🛒 Sản phẩm' },
               { href: '/report', label: '📊 Báo cáo' },
               { href: '/survey', label: '📝 Khảo sát' },
-              { href: '/photos', label: '📷 Hình ảnh' },
+              { href: 'https://photos.app.goo.gl/wkDfQRz7YwiV8cCd6', label: '📷 Hình ảnh' },
               { href: '/contact', label: '🪪 Liên hệ' },
               { href: '/policy', label: '📖 Chính sách' },
               { href: '/faq', label: '❓ Câu hỏi thường gặp' },
