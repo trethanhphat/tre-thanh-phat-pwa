@@ -24,34 +24,30 @@ export default function BottomMenu() {
       <div style={{ paddingBottom: `${menuHeight}px` }}></div>
 
       {/* Menu nổi dưới cùng */}
-      <nav
-        style={{
-          height: `${menuHeight}px`,
-        }}
-      >
-        <button onClick={() => setMenuOpen(true)} style={buttonStyle}>
-          <span>🌱</span>
-          <span>Mở menu</span>
+      <nav style={{ height: `${menuHeight}px` }} className="nav-bar">
+        <button onClick={() => setMenuOpen(true)} className="nav-btn">
+          <span className="nav-icon">🌱</span>
+          <span className="nav-label">Mở menu</span>
         </button>
         <button
           onClick={() => {
             setMenuOpen(false);
             router.push('/account');
           }}
-          style={buttonStyle}
+          className="nav-btn"
         >
-          <span>👤</span>
-          <span>Tài khoản</span>
+          <span className="nav-icon">👤</span>
+          <span className="nav-label">Tài khoản</span>
         </button>
         <button
           onClick={() => {
             setMenuOpen(false);
             router.back();
           }}
-          style={buttonStyle}
+          className="nav-btn"
         >
-          <span>⬅️</span>
-          <span>Quay lại</span>
+          <span className="nav-icon">⬅️</span>
+          <span className="nav-label">Quay lại</span>
         </button>
       </nav>
 
