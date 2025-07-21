@@ -20,8 +20,8 @@ export default function Home() {
         <a href="/report" className="button">
           📋 Xem báo cáo cây trồng
         </a>
-        <a className="button" href="/photos/upload">
-          📷 Gửi ảnh thực địa
+        <a className="button" href="https://photos.app.goo.gl/wkDfQRz7YwiV8cCd6">
+          📷 Xem ảnh lá tre
         </a>
       </section>
     </main>
