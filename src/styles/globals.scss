@@ -241,6 +241,8 @@ header p {
 }
 
 .nav-btn {
+  background-color: var(--color-primary);
+  color: var(--color-secondary);
   display: flex;
   flex-direction: column;
   align-items: center;

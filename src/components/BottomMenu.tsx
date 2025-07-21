@@ -26,7 +26,16 @@ export default function BottomMenu() {
       {/* Menu nổi dưới cùng */}
       <nav style={{ height: `${menuHeight}px` }} className="nav-bar">
         <button onClick={() => setMenuOpen(true)} className="nav-btn">
-          <span className="nav-icon">🌱</span>
+          <span className="nav-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+              <path
+                d="M3 6h18M3 12h18M3 18h18"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+              />
+            </svg>
+          </span>
           <span className="nav-label">Mở menu</span>
         </button>
         <button
@@ -36,7 +45,12 @@ export default function BottomMenu() {
           }}
           className="nav-btn"
         >
-          <span className="nav-icon">👤</span>
+          <span className="nav-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+              <circle cx="12" cy="8" r="4" stroke="currentColor" strokeWidth="2" />
+              <path d="M4 20c0-4 4-6 8-6s8 2 8 6" stroke="currentColor" strokeWidth="2" />
+            </svg>
+          </span>
           <span className="nav-label">Tài khoản</span>
         </button>
         <button
@@ -46,7 +60,17 @@ export default function BottomMenu() {
           }}
           className="nav-btn"
         >
-          <span className="nav-icon">⬅️</span>
+          <span className="nav-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+              <path
+                d="M15 6l-6 6 6 6"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+          </span>
           <span className="nav-label">Quay lại</span>
         </button>
       </nav>
