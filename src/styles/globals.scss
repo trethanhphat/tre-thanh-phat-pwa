@@ -59,6 +59,12 @@ p {
   text-align: justify;
 }
 
+span.font-ttp {
+  font-family: var(--font-ttp);
+  font-size: 1.125em;
+  color: var(--color-secondary);
+  background-color: var(--color-primary);
+}
 // Tiêu đề từ h1 đến h6
 h1 {
   font-size: 1.8rem;
