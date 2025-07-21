@@ -14,15 +14,15 @@ export default function Home() {
 
       {/* Các chức năng chính */}
       <section className="space-y-4">
-        <button className="btn-primary w-full py-4 text-lg bg-green-600 text-white rounded-2xl focus:outline-none">
+        <a href="/survey" className="button">
           📥 Nhập dữ liệu mới
-        </button>
-        <button className="btn-secondary w-full py-4 text-lg bg-green-100 text-green-800 rounded-2xl border border-green-300">
+        </a>
+        <a href="/report" className="button">
           📋 Xem báo cáo cây trồng
-        </button>
-        <button className="btn-primary w-full py-4 text-lg bg-yellow-50 text-yellow-800 rounded-2xl border border-yellow-300">
+        </a>
+        <a className="button" href="/photos/upload">
           📷 Gửi ảnh thực địa
-        </button>
+        </a>
       </section>
 
       {/* Thông tin footer */}
