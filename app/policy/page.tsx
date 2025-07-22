@@ -91,9 +91,9 @@ export default function Home() {
       </ul>{' '}
       <hr /> <h3>6. Thông tin chủ sở hữu</h3> <p>Ứng dụng được phát triển và vận hành bởi:</p>
       <ul>
-        <li>Công ty Cổ phần Tre Thanh Phát</li>
-        <li>Mã số thuế: (cập nhật sau)</li>
-        <li>Địa chỉ: (cập nhật sau)</li>
+        <li>Công ty Cổ phần Tre Thanh Phát</li> {/* UPDATE: */}
+        <li>Mã số thuế: (cập nhật sau)</li> {/* UPDATE: */}
+        <li>Địa chỉ: (cập nhật sau)</li> {/* UPDATE: */}
         <li>Điện thoại: {phone}</li>
         <li>Email: {email}</li>
       </ul>
