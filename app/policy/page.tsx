@@ -35,10 +35,10 @@ export default function Home() {
           <b>Bên thứ ba:</b> Chúng tôi không chia sẻ thông tin với bên thứ ba nếu không có sự đồng
           ý.
         </li>
-      </ul>{' '}
+      </ul>
       <hr />
       <h3>2. Chính sách sử dụng</h3> Khi sử dụng ứng dụng của TTP Corp, bạn đồng ý tuân theo các
-      điều khoản sau:{' '}
+      điều khoản sau:
       <ul>
         <li>Không sử dụng ứng dụng cho mục đích trái pháp luật.</li>
         <li>Không phá hoại, gây ảnh hưởng đến hệ thống, làm gián đoạn dịch vụ.</li>
@@ -47,37 +47,36 @@ export default function Home() {
         cần thông báo trước.
       </ul>
       <hr />
-      <h3>3. Chính sách bảo vệ dữ liệu cá nhân</h3>{' '}
+      <h3>3. Chính sách bảo vệ dữ liệu cá nhân</h3>
       <p>Chúng tôi tuân thủ Nghị định 13/2023/NĐ-CP về bảo vệ dữ liệu cá nhân: </p>
       <ul>
         <li>
           <b>Loại dữ liệu cá nhân:</b> Bao gồm thông tin cơ bản (họ tên, email, số điện thoại) và dữ
           liệu hành vi (lịch sử sử dụng, vị trí...).
-        </li>{' '}
-        * ** * **
+        </li>
         <li>
           <b>Mục đích xử lý:</b>
           Chỉ sử dụng để cung cấp dịch vụ tốt hơn.
-        </li>{' '}
-        *{' '}
+        </li>
         <li>
-          **<b>Bảo vệ dữ liệu:</b>** Áp dụng mã hoá, phân quyền truy cập, xác thực 2 lớp (nếu có).
-        </li>{' '}
-        * **Khiếu nại:** Người dùng có quyền yêu cầu dừng xử lý hoặc xoá dữ liệu. ---{' '}
+          <b>Bảo vệ dữ liệu:</b> Áp dụng mã hoá, phân quyền truy cập, xác thực 2 lớp (nếu có).
+        </li>
+        <li>Khiếu nại: Người dùng có quyền yêu cầu dừng xử lý hoặc xoá dữ liệu.</li>
       </ul>
-      <h3>4. Chính sách cookie và bộ nhớ cục bộ</h3>{' '}
+      <hr />
+      <h3>4. Chính sách cookie và bộ nhớ cục bộ</h3>
       <p>
         Ứng dụng có thể lưu thông tin tạm thời qua bộ nhớ cục bộ (localStorage, IndexedDB) nhằm:
-      </p>{' '}
+      </p>
       <ul>
         <li>* Ghi nhớ trạng thái đăng nhập. </li>
         <li>* Tăng tốc truy cập và sử dụng khi offline.</li>
-      </ul>{' '}
+      </ul>
       <p>
-        Chúng tôi không sử dụng cookie để theo dõi quảng cáo hay bán dữ liệu cho bên thứ ba. ---{' '}
+        Chúng tôi không sử dụng cookie để theo dõi quảng cáo hay bán dữ liệu cho bên thứ ba. ---
       </p>
-      <h3>5. Chính sách hoạt động ngoại tuyến và đồng bộ</h3>{' '}
-      <p>Ứng dụng PWA của chúng tôi hỗ trợ hoạt động không cần kết nối mạng:</p>{' '}
+      <h3>5. Chính sách hoạt động ngoại tuyến và đồng bộ</h3>
+      <p>Ứng dụng PWA của chúng tôi hỗ trợ hoạt động không cần kết nối mạng:</p>
       <ul>
         <li>
           <b>Chế độ ngoại tuyến:</b> Người dùng có thể xem dữ liệu gần nhất đã lưu, ghi nhật ký
@@ -88,7 +87,7 @@ export default function Home() {
           nếu có dữ liệu chưa đồng bộ, ứng dụng sẽ thông báo rõ ràng.
         </li>
         Cảnh báo: Nếu có dữ liệu chưa đồng bộ, ứng dụng sẽ thông báo rõ ràng.
-      </ul>{' '}
+      </ul>
       <hr /> <h3>6. Thông tin chủ sở hữu</h3> <p>Ứng dụng được phát triển và vận hành bởi:</p>
       <ul>
         <li>Công ty Cổ phần Tre Thanh Phát</li> {/* UPDATE: */}
