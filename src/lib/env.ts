@@ -1,16 +1,16 @@
 // libs/env.ts
 
-export const appName = process.env.NEXT_PUBLIC_APP_NAME || 'Tên app';
-export const appDescription = process.env.NEXT_PUBLIC_APP_DESCRIPTION || 'Mô tả app';
-export const brandName = process.env.NEXT_PUBLIC_BRAND_NAME || 'Thương hiệu';
-export const phone = process.env.NEXT_PUBLIC_CONTACT_PHONE || '+84999999999';
-export const email = process.env.NEXT_PUBLIC_CONTACT_EMAIL || 'email@email.com';
+export const appName = process.env.NEXT_PUBLIC_APP_NAME || '(APP NAME)';
+export const appDescription = process.env.NEXT_PUBLIC_APP_DESCRIPTION || '(APP DESCRIPTION)';
+export const brandName = process.env.NEXT_PUBLIC_BRAND_NAME || '(BRAND NAME)';
+export const phone = process.env.NEXT_PUBLIC_CONTACT_PHONE || '(CONTACT PHONE)';
+export const email = process.env.NEXT_PUBLIC_CONTACT_EMAIL || '(CONTACT EMAIL)';
 export const website = process.env.NEXT_PUBLIC_CONTACT_WEBSITE || 'www.trethanhphat.vn';
 export const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'app.trethanhphat.vn';
 
 const currentYear = new Date().getFullYear();
-const startYear = 2021;
-const brandOwner = process.env.NEXT_PUBLIC_BRAND_OWNER || 'Tre Thanh Phát Corp';
+const startYear = 2024;
+const brandOwner = process.env.NEXT_PUBLIC_BRAND_OWNER || 'Thanh Phát Bamboo Corp';
 
 export const copyright = `© ${
   startYear === currentYear ? currentYear : `${startYear}–${currentYear}`
