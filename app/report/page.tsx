@@ -11,10 +11,7 @@ export default function Home() {
     <main className="min-h-screen bg-white text-gray-800 px-4 pt-6 pb-24">
       {/* Tiêu đề */}
       <h1 className="text-2xl font-bold mb-4">
-        Danh sách Báo cáo phát triển{' '}
-        <span className="font-ttp" style="color: var(--color-primary)">
-          Tre Thanh Phát
-        </span>
+        Danh sách Báo cáo phát triển <span className="font-ttp">Tre Thanh Phát</span>
       </h1>
 
       {/* Các chức năng chính */}
