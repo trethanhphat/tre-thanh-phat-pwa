@@ -6,6 +6,8 @@ export function middleware(request: NextRequest) {
   const t = url.searchParams.get('t');
   const b = url.searchParams.get('b');
 
+  console.log('Middleware is running:', { pathname: url.pathname, t, b });
+
   if (t) {
     url.pathname = `/tree/${t}`;
     url.searchParams.delete('t');
