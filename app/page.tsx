@@ -2,18 +2,19 @@
 
 'use client';
 
-import { useEffect } from 'react';
+import { Suspense, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import styles from '@/components/Home.module.scss';
 import { appName, appDescription, appUrl, phone, email, copyright } from '@/lib/env';
 
-export default function Home() {
+function RedirectHandler() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
   useEffect(() => {
     const t = searchParams?.get('t');
     const b = searchParams?.get('b');
+
     if (t) {
       router.replace(`/tree/${t}`);
     } else if (b) {
@@ -21,6 +22,10 @@ export default function Home() {
     }
   }, [searchParams, router]);
 
+  return null;
+}
+
+export default function Home() {
   return (
     <main className="main">
       <div>
