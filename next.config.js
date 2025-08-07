@@ -22,11 +22,7 @@ const withPWA = require('next-pwa')({
   register: false,
   sw: 'sw.js',
   runtimeCaching,
-  buildExcludes: [
-    /.*app-build-manifest\.json$/,
-    /.*dynamic-css-manifest\.json$/,
-    /.*middleware-manifest\.json$/,
-  ],
+  buildExcludes: [/.*app-build-manifest\.json$/, /.*dynamic-css-manifest\.json$/],
 });
 
 /** @type {import('next').NextConfig} */
