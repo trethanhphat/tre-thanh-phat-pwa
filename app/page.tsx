@@ -12,8 +12,8 @@ export default function Home() {
   const searchParams = useSearchParams();
 
   useEffect(() => {
-    const t = searchParams.get('t');
-    const b = searchParams.get('b');
+    const t = searchParams?.get('t');
+    const b = searchParams?.get('b');
     if (t) {
       router.replace(`/tree/${t}`);
     } else if (b) {
