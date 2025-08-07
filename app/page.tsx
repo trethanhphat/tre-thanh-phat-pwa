@@ -2,10 +2,25 @@
 
 'use client';
 
+import { useEffect } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import styles from '@/components/Home.module.scss';
 import { appName, appDescription, appUrl, phone, email, copyright } from '@/lib/env';
 
 export default function Home() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+
+  useEffect(() => {
+    const t = searchParams.get('t');
+    const b = searchParams.get('b');
+    if (t) {
+      router.replace(`/tree/${t}`);
+    } else if (b) {
+      router.replace(`/batch/${b}`);
+    }
+  }, [searchParams, router]);
+
   return (
     <main className="main">
       <div>
