@@ -11,17 +11,6 @@ function RedirectHandler() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  useEffect(() => {
-    const t = searchParams?.get('t');
-    const b = searchParams?.get('b');
-
-    if (t) {
-      router.replace(`/tree/${t}`);
-    } else if (b) {
-      router.replace(`/batch/${b}`);
-    }
-  }, [searchParams, router]);
-
   return null;
 }
 
