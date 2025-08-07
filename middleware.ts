@@ -20,3 +20,7 @@ export function middleware(request: NextRequest) {
 
   return NextResponse.next();
 }
+
+export const config = {
+  matcher: ['/', '/:path*'], // áp dụng middleware cho trang gốc "/" và mọi đường dẫn khác
+};
