@@ -2,9 +2,9 @@
 import { NextResponse } from 'next/server';
 import axios from 'axios';
 
-const API_PRODUCTS_URL = 'https://rungkhoai.com/wp-json/wc/v3/products';
-const CONSUMER_KEY = process.env.NEXT_PUBLIC_API_PRODUCTS_CONSUMER_KEY;
-const CONSUMER_SECRET = process.env.NEXT_PUBLIC_API_PRODUCTS_CONSUMER_SECRET;
+const API_PRODUCTS_URL = process.env.NEXT_PUBLIC_API_PRODUCTS_URL as string;
+const CONSUMER_KEY = process.env.NEXT_PUBLIC_API_PRODUCTS_CONSUMER_KEY as string;
+const CONSUMER_SECRET = process.env.NEXT_PUBLIC_API_PRODUCTS_CONSUMER_SECRET as string;
 
 if (!CONSUMER_KEY || !CONSUMER_SECRET) {
   throw new Error('Thiếu API key WooCommerce');
