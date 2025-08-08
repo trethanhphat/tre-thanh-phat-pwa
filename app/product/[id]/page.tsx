@@ -6,6 +6,9 @@ import { useParams } from 'next/navigation';
 
 interface ProductData {
   id: number;
+  name: string; // ➕ Tên sản phẩm
+  image: string; // ➕ URL ảnh sản phẩm
+  description: string; // ➕ Mô tả sản phẩm
   price: string;
   stock_quantity: number | null;
   stock_status: string;
@@ -13,7 +16,7 @@ interface ProductData {
 
 export default function ProductDetailPage() {
   const params = useParams();
-  const id = params?.id as string; // Ép kiểu để TS chấp nhận
+  const id = params?.id as string;
 
   const [product, setProduct] = useState<ProductData | null>(null);
   const [loading, setLoading] = useState(true);
@@ -42,11 +45,29 @@ export default function ProductDetailPage() {
   if (!product) return <p className="p-4">Không tìm thấy sản phẩm</p>;
 
   return (
-    <div className="p-4">
-      <h1 className="text-2xl font-bold mb-2">Sản phẩm #{product.id}</h1>
-      <p>💰 Giá: {product.price}₫</p>
-      <p>📦 Số lượng tồn: {product.stock_quantity ?? 'Không xác định'}</p>
-      <p>🔖 Trạng thái: {product.stock_status === 'instock' ? 'Còn hàng' : 'Hết hàng'}</p>
+    <div className="p-4 max-w-xl mx-auto">
+      <h1 className="text-2xl font-bold mb-2">{product.name}</h1>
+
+      {product.image && (
+        <img
+          src={product.image}
+          alt={product.name}
+          className="w-full max-h-96 object-cover rounded-lg mb-4 border"
+        />
+      )}
+
+      <p className="text-gray-700 mb-4">{product.description}</p>
+
+      <p>
+        💰 <strong>Giá:</strong> {product.price}₫
+      </p>
+      <p>
+        📦 <strong>Số lượng tồn:</strong> {product.stock_quantity ?? 'Không xác định'}
+      </p>
+      <p>
+        🔖 <strong>Trạng thái:</strong>{' '}
+        {product.stock_status === 'instock' ? 'Còn hàng' : 'Hết hàng'}
+      </p>
     </div>
   );
 }
