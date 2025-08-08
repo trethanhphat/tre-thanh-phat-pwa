@@ -1,4 +1,4 @@
-// File: app/api/products-list/route.ts
+// ✅ File: app/api/products-list/route.ts
 import { NextResponse } from 'next/server';
 import axios from 'axios';
 
@@ -7,22 +7,14 @@ const CONSUMER_KEY = process.env.NEXT_PUBLIC_API_PRODUCTS_CONSUMER_KEY;
 const CONSUMER_SECRET = process.env.NEXT_PUBLIC_API_PRODUCTS_CONSUMER_SECRET;
 
 if (!CONSUMER_KEY || !CONSUMER_SECRET) {
-  throw new Error(
-    'Thiếu NEXT_PUBLIC_API_PRODUCTS_CONSUMER_KEY hoặc NEXT_PUBLIC_API_PRODUCTS_CONSUMER_SECRET trong .env.local'
-  );
+  throw new Error('Thiếu API key WooCommerce');
 }
 
 export async function GET() {
   try {
     const response = await axios.get(API_PRODUCTS_URL, {
-      auth: {
-        username: CONSUMER_KEY as string,
-        password: CONSUMER_SECRET as string,
-      },
-      params: {
-        per_page: 100, // lấy tối đa 100 sản phẩm một lần
-        page: 1,
-      },
+      auth: { username: CONSUMER_KEY, password: CONSUMER_SECRET },
+      params: { per_page: 100, page: 1 },
     });
 
     const products = response.data.map((p: any) => ({
@@ -31,11 +23,12 @@ export async function GET() {
       price: p.price,
       stock_quantity: p.stock_quantity,
       stock_status: p.stock_status,
+      image_url: p.images?.[0]?.src || null,
     }));
 
     return NextResponse.json({ products });
   } catch (error: any) {
-    console.error('Lỗi lấy danh sách sản phẩm:', error?.response?.data || error.message);
-    return NextResponse.json({ error: 'Không thể lấy danh sách sản phẩm' }, { status: 500 });
+    console.error('Lỗi lấy sản phẩm:', error?.response?.data || error.message);
+    return NextResponse.json({ error: 'Không thể lấy sản phẩm' }, { status: 500 });
   }
 }

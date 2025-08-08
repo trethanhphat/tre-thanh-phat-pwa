@@ -3,96 +3,113 @@
 
 import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
-import he from 'he'; // giải mã HTML entities
+import { openDB } from 'idb';
 
-interface ProductData {
-  id: number;
-  name: string;
-  price: string;
-  stock_quantity: number | null;
-  stock_status: string;
-  image: string;
-  description: string;
+const DB_NAME = 'TPBC_DB';
+const STORE_PRODUCTS = 'products';
+const STORE_IMAGES = 'images';
+
+// Khởi tạo DB
+async function initDB() {
+  return openDB(DB_NAME, 1, {
+    upgrade(db) {
+      if (!db.objectStoreNames.contains(STORE_PRODUCTS)) {
+        db.createObjectStore(STORE_PRODUCTS, { keyPath: 'id' });
+      }
+      if (!db.objectStoreNames.contains(STORE_IMAGES)) {
+        db.createObjectStore(STORE_IMAGES, { keyPath: 'url' });
+      }
+    },
+  });
+}
+
+// Lưu ảnh nếu chưa có
+async function saveImageIfNotExists(url: string) {
+  if (!url) return;
+  const db = await initDB();
+  const existing = await db.get(STORE_IMAGES, url);
+  if (existing) return;
+
+  try {
+    const res = await fetch(url);
+    const blob = await res.blob();
+    await db.put(STORE_IMAGES, { url, blob });
+  } catch (err) {
+    console.error('Lỗi tải ảnh:', err);
+  }
+}
+
+// Lấy ảnh offline nếu có
+async function getImageURL(url: string) {
+  if (!url) return '';
+  const db = await initDB();
+  const record = await db.get(STORE_IMAGES, url);
+  if (record?.blob) {
+    return URL.createObjectURL(record.blob);
+  }
+  return url; // fallback online
 }
 
 export default function ProductDetailPage() {
-  const params = useParams();
-  const id = params?.id as string;
-
-  const [product, setProduct] = useState<ProductData | null>(null);
+  const { id } = useParams();
+  const [product, setProduct] = useState<any>(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  const CACHE_KEY = `product_${id}`;
-  const CACHE_TIME = 1000 * 60 * 5; // 5 phút
 
   useEffect(() => {
     if (!id) return;
 
-    async function fetchProduct() {
-      setLoading(true);
-
-      // 1️⃣ Kiểm tra cache
-      const cached = localStorage.getItem(CACHE_KEY);
-      if (cached) {
-        const { data, timestamp } = JSON.parse(cached);
-        if (Date.now() - timestamp < CACHE_TIME) {
-          setProduct(data);
-          setLoading(false);
-          return;
-        }
-      }
-
-      // 2️⃣ Gọi API
+    const fetchProduct = async () => {
       try {
+        // 1️⃣ Lấy từ API
         const res = await fetch(`/api/product?id=${id}`);
-        if (!res.ok) throw new Error('Không thể tải sản phẩm');
+        if (!res.ok) throw new Error('Không thể tải sản phẩm từ API');
         const data = await res.json();
 
-        // Lưu cache offline
-        localStorage.setItem(
-          CACHE_KEY,
-          JSON.stringify({
-            data,
-            timestamp: Date.now(),
-          })
-        );
+        // 2️⃣ Lưu DB offline
+        const db = await initDB();
+        await db.put(STORE_PRODUCTS, data);
+
+        // 3️⃣ Cache ảnh chung
+        if (data.image_url) {
+          await saveImageIfNotExists(data.image_url);
+          data.image_url = await getImageURL(data.image_url);
+        }
 
         setProduct(data);
-      } catch (err: any) {
-        setError(err.message);
+      } catch (err) {
+        console.warn('⚠️ Không có mạng, tải sản phẩm từ offline DB');
+        const db = await initDB();
+        const offlineData = await db.get(STORE_PRODUCTS, Number(id));
+        if (offlineData) {
+          offlineData.image_url = await getImageURL(offlineData.image_url);
+          setProduct(offlineData);
+        }
       } finally {
         setLoading(false);
       }
-    }
+    };
 
     fetchProduct();
   }, [id]);
 
-  if (loading) return <p className="p-4">Đang tải...</p>;
-  if (error) return <p className="p-4 text-red-500">Lỗi: {error}</p>;
-  if (!product) return <p className="p-4">Không tìm thấy sản phẩm</p>;
+  if (loading) return <p>Đang tải sản phẩm...</p>;
+  if (!product) return <p>Không tìm thấy sản phẩm.</p>;
 
   return (
-    <div className="p-4">
-      <h1 className="text-2xl font-bold mb-2">{product.name}</h1>
-
-      {product.image && (
+    <div style={{ padding: '20px' }}>
+      <h1>{product.name}</h1>
+      {product.image_url && (
         <img
-          src={product.image}
+          src={product.image_url}
           alt={product.name}
-          className="mb-4 rounded shadow max-w-full h-auto"
+          style={{ maxWidth: '300px', borderRadius: '8px' }}
         />
       )}
-
       <p>💰 Giá: {product.price}₫</p>
-      <p>📦 Số lượng tồn: {product.stock_quantity ?? 'Không xác định'}</p>
-      <p>🔖 Trạng thái: {product.stock_status === 'instock' ? 'Còn hàng' : 'Hết hàng'}</p>
-
-      <div className="mt-4 prose max-w-none">
-        <h2 className="text-xl font-semibold mb-2">Mô tả sản phẩm</h2>
-        <div dangerouslySetInnerHTML={{ __html: he.decode(product.description) }} />
-      </div>
+      <p>
+        📦 Tồn kho: {product.stock_quantity} ({product.stock_status})
+      </p>
+      <div dangerouslySetInnerHTML={{ __html: product.description }} />
     </div>
   );
 }
