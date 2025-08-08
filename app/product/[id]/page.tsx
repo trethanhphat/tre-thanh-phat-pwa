@@ -3,6 +3,7 @@
 
 import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
+import he from 'he'; // giải mã HTML entities
 
 interface ProductData {
   id: number;
@@ -22,22 +23,50 @@ export default function ProductDetailPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  const CACHE_KEY = `product_${id}`;
+  const CACHE_TIME = 1000 * 60 * 5; // 5 phút
+
   useEffect(() => {
     if (!id) return;
 
-    fetch(`/api/product?id=${id}`)
-      .then(res => {
+    async function fetchProduct() {
+      setLoading(true);
+
+      // 1️⃣ Kiểm tra cache
+      const cached = localStorage.getItem(CACHE_KEY);
+      if (cached) {
+        const { data, timestamp } = JSON.parse(cached);
+        if (Date.now() - timestamp < CACHE_TIME) {
+          setProduct(data);
+          setLoading(false);
+          return;
+        }
+      }
+
+      // 2️⃣ Gọi API
+      try {
+        const res = await fetch(`/api/product?id=${id}`);
         if (!res.ok) throw new Error('Không thể tải sản phẩm');
-        return res.json();
-      })
-      .then(data => {
+        const data = await res.json();
+
+        // Lưu cache offline
+        localStorage.setItem(
+          CACHE_KEY,
+          JSON.stringify({
+            data,
+            timestamp: Date.now(),
+          })
+        );
+
         setProduct(data);
-        setLoading(false);
-      })
-      .catch(err => {
+      } catch (err: any) {
         setError(err.message);
+      } finally {
         setLoading(false);
-      });
+      }
+    }
+
+    fetchProduct();
   }, [id]);
 
   if (loading) return <p className="p-4">Đang tải...</p>;
@@ -62,7 +91,7 @@ export default function ProductDetailPage() {
 
       <div className="mt-4 prose max-w-none">
         <h2 className="text-xl font-semibold mb-2">Mô tả sản phẩm</h2>
-        <div dangerouslySetInnerHTML={{ __html: product.description }} />
+        <div dangerouslySetInnerHTML={{ __html: he.decode(product.description) }} />
       </div>
     </div>
   );
