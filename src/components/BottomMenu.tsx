@@ -118,7 +118,7 @@ export default function BottomMenu() {
               { href: '/', label: '🏠 Trang chủ' },
               { href: '//trethanhphat.vn/', label: 'ℹ️ Giới thiệu' },
               { href: '//blog.trethanhphat.vn', label: '📰 Tin tức' },
-              { href: '//rungkhoai.com', label: '🛒 Sản phẩm' },
+              { href: '/products-list', label: '🛒 Sản phẩm' },
               { href: '/report', label: '📊 Báo cáo' },
               { href: '/survey', label: '📝 Khảo sát' },
               { href: '/photos', label: '📷 Hình ảnh' },
