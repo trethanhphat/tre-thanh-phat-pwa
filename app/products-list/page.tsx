@@ -11,6 +11,18 @@ export default function ProductsListPage() {
   const [offline, setOffline] = useState(false);
   const [imageCache, setImageCache] = useState<{ [id: number]: string }>({});
 
+  // Load ảnh song song, trả về object map id -> localUrl
+  const loadImages = async (list: Product[]) => {
+    const promises = list.map(async p => {
+      if (p.image_url) {
+        return [p.id, await getImageURL(p.image_url)] as const;
+      }
+      return [p.id, ''] as const;
+    });
+    const entries = await Promise.all(promises);
+    return Object.fromEntries(entries);
+  };
+
   const fetchProducts = async () => {
     try {
       setLoading(true);
@@ -22,14 +34,19 @@ export default function ProductsListPage() {
         setProducts(data.products);
         await syncProducts(data.products);
         setOffline(false);
-        loadImages(data.products);
+
+        const imgMap = await loadImages(data.products);
+        setImageCache(imgMap);
       }
     } catch (error) {
       console.warn('⚠️ Không thể tải online, dùng dữ liệu offline:', error);
       const cachedData = await loadProductsFromDB();
       if (cachedData.length > 0) {
         setProducts(cachedData);
-        loadImages(cachedData);
+
+        const imgMap = await loadImages(cachedData);
+        setImageCache(imgMap);
+
         setOffline(true);
       }
     } finally {
@@ -37,21 +54,24 @@ export default function ProductsListPage() {
     }
   };
 
-  const loadImages = async (list: Product[]) => {
-    const imgMap: { [id: number]: string } = {};
-    for (const p of list) {
-      if (p.image_url) {
-        imgMap[p.id] = await getImageURL(p.image_url);
-      }
-    }
-    setImageCache(imgMap);
-  };
-
   useEffect(() => {
     fetchProducts();
-    const handleOnline = () => fetchProducts();
+
+    const handleOnline = () => {
+      fetchProducts();
+    };
+
     window.addEventListener('online', handleOnline);
-    return () => window.removeEventListener('online', handleOnline);
+    return () => {
+      window.removeEventListener('online', handleOnline);
+
+      // Giải phóng các Object URLs để tránh rò rỉ bộ nhớ
+      Object.values(imageCache).forEach(url => {
+        if (url.startsWith('blob:')) {
+          URL.revokeObjectURL(url);
+        }
+      });
+    };
   }, []);
 
   return (
@@ -65,28 +85,46 @@ export default function ProductsListPage() {
       ) : (
         <table style={{ borderCollapse: 'collapse', width: '100%', border: '1px solid #ccc' }}>
           <thead>
-            <tr style={{ background: '#f5f5f5' }}>
-              <th style={{ border: '1px solid #ccc', padding: '8px' }}>Ảnh</th>
-              <th style={{ border: '1px solid #ccc', padding: '8px' }}>Tên sản phẩm</th>
-              <th style={{ border: '1px solid #ccc', padding: '8px' }}>Giá</th>
-              <th style={{ border: '1px solid #ccc', padding: '8px' }}>Tồn kho</th>
-              <th style={{ border: '1px solid #ccc', padding: '8px' }}>Trạng thái</th>
+            <tr style={{ background: 'var(--color-primary)' }}>
+              <th style={{ border: '1px solid var(--color-border)', padding: '8px' }}>Ảnh</th>
+              <th style={{ border: '1px solid var(--color-border)', padding: '8px' }}>
+                Tên sản phẩm
+              </th>
+              <th style={{ border: '1px solid var(--color-border)', padding: '8px' }}>Giá</th>
+              <th style={{ border: '1px solid var(--color-border)', padding: '8px' }}>Tồn kho</th>
+              <th style={{ border: '1px solid var(--color-border)', padding: '8px' }}>
+                Trạng thái
+              </th>
             </tr>
           </thead>
           <tbody>
             {products.map(p => (
               <tr key={p.id}>
-                <td style={{ border: '1px solid #ccc', padding: '8px', textAlign: 'center' }}>
-                  {imageCache[p.id] && (
+                <td
+                  style={{
+                    border: '1px solid var(--color-border)',
+                    padding: '8px',
+                    textAlign: 'center',
+                  }}
+                >
+                  {imageCache[p.id] ? (
                     <img src={imageCache[p.id]} alt={p.name} style={{ maxWidth: '60px' }} />
+                  ) : (
+                    <span>...</span>
                   )}
                 </td>
-                <td style={{ border: '1px solid #ccc', padding: '8px' }}>{p.name}</td>
-                <td style={{ border: '1px solid #ccc', padding: '8px' }}>{p.price}</td>
-                <td style={{ border: '1px solid #ccc', padding: '8px' }}>
+                <td style={{ border: '1px solid var(--color-border)', padding: '8px' }}>
+                  {p.name}
+                </td>
+                <td style={{ border: '1px solid var(--color-border)', padding: '8px' }}>
+                  {p.price}
+                </td>
+                <td style={{ border: '1px solid var(--color-border)', padding: '8px' }}>
                   {p.stock_quantity ?? '-'}
                 </td>
-                <td style={{ border: '1px solid #ccc', padding: '8px' }}>{p.stock_status}</td>
+                <td style={{ border: '1px solid var(--color-border)', padding: '8px' }}>
+                  {p.stock_status}
+                </td>
               </tr>
             ))}
           </tbody>

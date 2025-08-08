@@ -1,4 +1,4 @@
-// ✅ File: lib/db.ts
+// ✅ File: src/lib/db.ts
 import { openDB } from 'idb';
 
 export const DB_NAME = 'TPBC_DB';
