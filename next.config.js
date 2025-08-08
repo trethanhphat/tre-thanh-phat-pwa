@@ -29,7 +29,7 @@ const withPWA = require('next-pwa')({
 const nextConfig = {
   reactStrictMode: true,
   experimental: {
-    serverActions: true,
+    serverActions: {},
   },
 
   // ✅ Thêm Content-Security-Policy để cho phép nhúng từ Looker Studio
