@@ -1,5 +1,27 @@
 // src/utils/indexedDB.ts
-import { initDB, STORE_IMAGES } from '@/lib/db';
+import { initDB, STORE_PRODUCTS, STORE_IMAGES } from '@/lib/db';
+
+// Lưu sản phẩm vào IndexedDB
+export async function saveProductsToDB(products: any[]) {
+  const db = await initDB();
+  const tx = db.transaction(STORE_PRODUCTS, 'readwrite');
+  const store = tx.objectStore(STORE_PRODUCTS);
+
+  for (const product of products) {
+    // Chuẩn bị đối tượng sản phẩm rút gọn nếu cần
+    const data = {
+      id: product.id,
+      name: product.name,
+      price: product.price,
+      stock_quantity: product.stock_quantity,
+      stock_status: product.stock_status,
+      image_url: product.image || '', // hoặc product.image_url nếu khác
+      description: product.description || '',
+    };
+    await store.put(data);
+  }
+  await tx.done;
+}
 
 // Lưu ảnh dưới dạng Blob
 export async function saveImageToDB(imageUrl: string) {
@@ -29,7 +51,6 @@ export async function getImageFromDB(imageUrl: string): Promise<string | null> {
 
   const record = await store.get(imageUrl);
   if (record?.blob) {
-    // Tạo URL để src img có thể dùng
     return URL.createObjectURL(record.blob);
   }
   return null;

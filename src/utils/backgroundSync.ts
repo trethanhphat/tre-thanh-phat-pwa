@@ -1,5 +1,5 @@
-// File: utils/backgroundSync.ts
-import { saveProductsToDB, saveImageToDB } from './indexedDB';
+// File: src/utils/backgroundSync.ts
+import { saveProductsToDB, saveImageToDB } from '@/utils/indexedDB';
 import { getSyncOverMobile } from './settings';
 
 export async function backgroundSync() {
