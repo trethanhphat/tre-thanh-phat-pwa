@@ -1,3 +1,4 @@
+// File: app/product/[id]/page.tsx
 'use client';
 
 import { useEffect, useState } from 'react';
@@ -48,7 +49,7 @@ async function getImageURL(url: string): Promise<string> {
 }
 
 export default function ProductDetailPage() {
-  const { id } = useParams();
+  const { id } = useParams() as { id: string };
   const [product, setProduct] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [localImageUrl, setLocalImageUrl] = useState<string | null>(null);
