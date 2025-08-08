@@ -6,12 +6,12 @@ import { useParams } from 'next/navigation';
 
 interface ProductData {
   id: number;
-  name: string; // ➕ Tên sản phẩm
-  image: string; // ➕ URL ảnh sản phẩm
-  description: string; // ➕ Mô tả sản phẩm
+  name: string;
   price: string;
   stock_quantity: number | null;
   stock_status: string;
+  image: string;
+  description: string;
 }
 
 export default function ProductDetailPage() {
@@ -45,29 +45,25 @@ export default function ProductDetailPage() {
   if (!product) return <p className="p-4">Không tìm thấy sản phẩm</p>;
 
   return (
-    <div className="p-4 max-w-xl mx-auto">
+    <div className="p-4">
       <h1 className="text-2xl font-bold mb-2">{product.name}</h1>
 
       {product.image && (
         <img
           src={product.image}
           alt={product.name}
-          className="w-full max-h-96 object-cover rounded-lg mb-4 border"
+          className="mb-4 rounded shadow max-w-full h-auto"
         />
       )}
 
-      <p className="text-gray-700 mb-4">{product.description}</p>
+      <p>💰 Giá: {product.price}₫</p>
+      <p>📦 Số lượng tồn: {product.stock_quantity ?? 'Không xác định'}</p>
+      <p>🔖 Trạng thái: {product.stock_status === 'instock' ? 'Còn hàng' : 'Hết hàng'}</p>
 
-      <p>
-        💰 <strong>Giá:</strong> {product.price}₫
-      </p>
-      <p>
-        📦 <strong>Số lượng tồn:</strong> {product.stock_quantity ?? 'Không xác định'}
-      </p>
-      <p>
-        🔖 <strong>Trạng thái:</strong>{' '}
-        {product.stock_status === 'instock' ? 'Còn hàng' : 'Hết hàng'}
-      </p>
+      <div className="mt-4 prose max-w-none">
+        <h2 className="text-xl font-semibold mb-2">Mô tả sản phẩm</h2>
+        <div dangerouslySetInnerHTML={{ __html: product.description }} />
+      </div>
     </div>
   );
 }
