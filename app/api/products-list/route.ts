@@ -1,4 +1,4 @@
-// File: app/api/product-list/route.ts
+// File: app/api/products-list/route.ts
 import { NextResponse } from 'next/server';
 import axios from 'axios';
 
@@ -7,7 +7,9 @@ const CONSUMER_KEY = process.env.NEXT_PUBLIC_API_PRODUCTS_CONSUMER_KEY;
 const CONSUMER_SECRET = process.env.NEXT_PUBLIC_API_PRODUCTS_CONSUMER_SECRET;
 
 if (!CONSUMER_KEY || !CONSUMER_SECRET) {
-  throw new Error('Thiếu key WooCommerce trong biến môi trường');
+  throw new Error(
+    'Thiếu NEXT_PUBLIC_API_PRODUCTS_CONSUMER_KEY hoặc NEXT_PUBLIC_API_PRODUCTS_CONSUMER_SECRET trong .env.local'
+  );
 }
 
 export async function GET() {
