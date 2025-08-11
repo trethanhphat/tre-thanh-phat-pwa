@@ -26,9 +26,11 @@ export const syncInterval = Number(process.env.NEXT_PUBLIC_SYNC_RETRY_INTERVAL |
 export const maxImageQueue = Number(process.env.NEXT_PUBLIC_MAX_IMAGE_QUEUE || '20');
 
 // API load News
-
 export const NEXT_PUBLIC_API_NEWS_URL =
   process.env.NEXT_PUBLIC_API_NEWS_URL || 'https://rungkhoai.com/wp-json/wc/v2';
+
+// API load dữ liệu batch
+export const NEXT_PUBLIC_API_BATCH_URL = process.env.NEXT_PUBLIC_API_BATCH_URL || '';
 
 // API load Products từ rungkhoai.com
 export const NEXT_PUBLIC_API_PRODUCTS_URL =
