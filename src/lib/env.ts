@@ -30,7 +30,7 @@ export const NEXT_PUBLIC_API_NEWS_URL =
   process.env.NEXT_PUBLIC_API_NEWS_URL || 'https://rungkhoai.com/wp-json/wc/v2';
 
 // API load dữ liệu batch
-export const NEXT_PUBLIC_API_BATCH_URL = process.env.NEXT_PUBLIC_API_BATCH_URL || '';
+export const API_BATCH_URL = process.env.API_BATCH_URL || '';
 
 // API load Products từ rungkhoai.com
 export const NEXT_PUBLIC_API_PRODUCTS_URL =

@@ -1,9 +1,9 @@
 // ✅ File: app/api/sheet/batch/route.ts
 export async function GET(request: Request) {
   try {
-    const batchApi = process.env.NEXT_PUBLIC_API_BATCH_URL;
+    const batchApi = process.env.API_BATCH_URL;
     if (!batchApi) {
-      return new Response(JSON.stringify({ error: 'Thiếu NEXT_PUBLIC_API_BATCH_URL trong .env' }), {
+      return new Response(JSON.stringify({ error: 'Thiếu API_BATCH_URL trong .env' }), {
         status: 500,
         headers: { 'Content-Type': 'application/json' },
       });
