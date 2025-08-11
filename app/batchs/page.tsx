@@ -1,4 +1,4 @@
-// ✅ File: app/batch/page.tsx
+// ✅ File: app/batchs/page.tsx
 'use client';
 
 import Link from 'next/link';
