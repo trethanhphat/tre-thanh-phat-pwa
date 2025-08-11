@@ -67,6 +67,11 @@ export default function BatchDetailPage() {
           <p>
             <strong>Ghi chú:</strong> {batch.note || 'Không có'}
           </p>
+          <p>
+            <a className="button" href="/batchs">
+              <strong>Quay trở về danh sách lô</strong>
+            </a>
+          </p>
         </div>
       )}
 
