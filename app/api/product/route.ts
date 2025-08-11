@@ -1,6 +1,7 @@
 // ✅ File: app/api/product/route.ts
 import { NextResponse } from 'next/server';
 
+const API_PRODUCTS_URL = process.env.NEXT_PUBLIC_API_PRODUCTS_URL as string;
 const CONSUMER_KEY = process.env.NEXT_PUBLIC_API_PRODUCTS_CONSUMER_KEY!;
 const CONSUMER_SECRET = process.env.NEXT_PUBLIC_API_PRODUCTS_CONSUMER_SECRET!;
 
@@ -22,7 +23,8 @@ export async function GET(request: Request) {
   }
 
   try {
-    const res = await fetch(`https://rungkhoai.com/wp-json/wc/v3/products/${id}`, {
+    const url = `${API_PRODUCTS_URL}/${id}?_fields=id,name,price,stock_quantity,stock_status,images,description`;
+    const res = await fetch(url, {
       headers: {
         Authorization: `Basic ${Buffer.from(`${CONSUMER_KEY}:${CONSUMER_SECRET}`).toString(
           'base64'
