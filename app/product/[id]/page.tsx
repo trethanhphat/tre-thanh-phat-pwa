@@ -76,6 +76,11 @@ export default function ProductDetailPage() {
   return (
     <div style={{ padding: 20 }}>
       <h1>{product.name}</h1>
+      <p>
+        <a className="button" href="/products">
+          <strong>Quay trở về danh sách sản phẩm</strong>
+        </a>
+      </p>
       {(localImageUrl || product.image_url) && (
         <img
           src={localImageUrl || product.image_url}

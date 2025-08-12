@@ -43,6 +43,11 @@ export default function BatchDetailPage() {
   return (
     <main className="p-4">
       <h1 className="text-2xl font-bold text-blue-700 mb-4">📦 Lô/Batch: {id}</h1>
+      <p>
+        <a className="button" href="/batchs">
+          <strong>Quay trở về danh sách lô</strong>
+        </a>
+      </p>
 
       {loading && <p>⏳ Đang tải dữ liệu...</p>}
       {error && <p className="text-red-600">❌ {error}</p>}
@@ -66,11 +71,6 @@ export default function BatchDetailPage() {
           </p>
           <p>
             <strong>Ghi chú:</strong> {batch.note || 'Không có'}
-          </p>
-          <p>
-            <a className="button" href="/batchs">
-              <strong>Quay trở về danh sách lô</strong>
-            </a>
           </p>
         </div>
       )}
