@@ -9,6 +9,7 @@ import type { Metadata } from 'next';
 import ServiceWorkerCheck from '@/components/ServiceWorkerCheck';
 import ServiceWorkerRegister from '@/components/ServiceWorkerRegister';
 import BackgroundSync from '@/components/BackgroundSync'; // import client component
+import ResponsiveTableLabels from '@/components/ResponsiveTableLabels';
 
 export const viewport = {
   themeColor: '#ffffff',
