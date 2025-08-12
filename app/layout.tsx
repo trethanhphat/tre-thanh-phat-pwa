@@ -35,6 +35,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <ServiceWorkerRegister /> {/* ✅ Đăng ký Service Worker */}
         <ServiceWorkerCheck /> {/* ✅ Theo dõi Service Worker */}
         <BackgroundSync /> {/* client component chạy useEffect */}
+        <ResponsiveTableLabels /> {/* ✅ Tự động thêm data-label cho bảng */}
       </body>
     </html>
   );
