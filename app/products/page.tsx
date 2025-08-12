@@ -1,4 +1,4 @@
-// ✅ File: app/products-list/page.tsx
+// ✅ File: app/products/page.tsx
 'use client';
 
 import { useEffect, useState } from 'react';
@@ -12,7 +12,7 @@ export default function ProductsListPage() {
   const [offline, setOffline] = useState(false);
   const [imageCache, setImageCache] = useState<{ [id: number]: string }>({});
 
-  // Load ảnh song song, trả về object map id -> localUrl
+  // Load ảnh song song
   const loadImages = async (list: Product[]) => {
     const promises = list.map(async p => {
       if (p.image_url) {
@@ -24,53 +24,57 @@ export default function ProductsListPage() {
     return Object.fromEntries(entries);
   };
 
-  const fetchProducts = async () => {
+  // Load offline trước
+  const loadOfflineFirst = async () => {
+    const cachedData = await loadProductsFromDB();
+    if (cachedData.length > 0) {
+      setProducts(cachedData);
+      const imgMap = await loadImages(cachedData);
+      setImageCache(imgMap);
+      setOffline(true);
+    }
+    setLoading(false);
+  };
+
+  // Fetch online và chỉ update nếu dữ liệu thay đổi
+  const fetchOnlineAndUpdate = async () => {
     try {
-      setLoading(true);
       const res = await fetch('/api/products-list');
       if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
 
       const data = await res.json();
       if (data?.products) {
-        setProducts(data.products);
         await syncProducts(data.products);
-        setOffline(false);
 
-        const imgMap = await loadImages(data.products);
-        setImageCache(imgMap);
+        const isDifferent =
+          products.length !== data.products.length ||
+          JSON.stringify(products) !== JSON.stringify(data.products);
+
+        if (isDifferent) {
+          setProducts(data.products);
+          const imgMap = await loadImages(data.products);
+          setImageCache(imgMap);
+          setOffline(false);
+        }
       }
     } catch (error) {
-      console.warn('⚠️ Không thể tải online, dùng dữ liệu offline:', error);
-      const cachedData = await loadProductsFromDB();
-      if (cachedData.length > 0) {
-        setProducts(cachedData);
-
-        const imgMap = await loadImages(cachedData);
-        setImageCache(imgMap);
-
-        setOffline(true);
-      }
-    } finally {
-      setLoading(false);
+      console.warn('⚠️ Không thể tải online:', error);
     }
   };
 
   useEffect(() => {
-    fetchProducts();
+    loadOfflineFirst(); // hiển thị offline ngay
+    fetchOnlineAndUpdate(); // chạy fetch nền
 
     const handleOnline = () => {
-      fetchProducts();
+      fetchOnlineAndUpdate();
     };
 
     window.addEventListener('online', handleOnline);
     return () => {
       window.removeEventListener('online', handleOnline);
-
-      // Giải phóng các Object URLs để tránh rò rỉ bộ nhớ
       Object.values(imageCache).forEach(url => {
-        if (url.startsWith('blob:')) {
-          URL.revokeObjectURL(url);
-        }
+        if (url.startsWith('blob:')) URL.revokeObjectURL(url);
       });
     };
   }, []);
