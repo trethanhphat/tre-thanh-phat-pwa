@@ -75,12 +75,13 @@ export default function ProductDetailPage() {
 
   return (
     <div style={{ padding: 20 }}>
-      <h1>{product.name}</h1>
       <p>
         <a className="button" href="/products">
           <strong>Quay trở về danh sách sản phẩm</strong>
         </a>
       </p>
+      <h1>{product.name}</h1>
+
       {(localImageUrl || product.image_url) && (
         <img
           src={localImageUrl || product.image_url}
@@ -93,6 +94,11 @@ export default function ProductDetailPage() {
         📦 Tồn kho: {product.stock_quantity} ({product.stock_status})
       </p>
       <div dangerouslySetInnerHTML={{ __html: product.description || '' }} />
+      <p>
+        <a className="button" href="/products">
+          <strong>Quay trở về danh sách sản phẩm</strong>
+        </a>
+      </p>
     </div>
   );
 }
