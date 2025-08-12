@@ -73,7 +73,7 @@ export default function BatchListPage() {
               className="border p-2"
               style={{ border: '1px solid var(--color-border)', padding: '8px' }}
             >
-              Diện tích
+              Diện tích (ha)
             </th>
             <th
               className="border p-2"
@@ -93,6 +93,7 @@ export default function BatchListPage() {
                   padding: '8px',
                   textAlign: 'center',
                 }}
+                data-label="Mã lô"
               >
                 <Link href={`/batch/${batch.batch_id}`}>{batch.batch_id}</Link>
               </td>
@@ -103,6 +104,7 @@ export default function BatchListPage() {
                   padding: '8px',
                   textAlign: 'center',
                 }}
+                data-label="Khu vực"
               >
                 {batch.region_id}
               </td>
@@ -123,6 +125,7 @@ export default function BatchListPage() {
                   padding: '8px',
                   textAlign: 'center',
                 }}
+                data-label="Ngày trồng"
               >
                 {batch.quantity}
               </td>
@@ -133,6 +136,7 @@ export default function BatchListPage() {
                   padding: '8px',
                   textAlign: 'center',
                 }}
+                data-label="Diện tích (ha)"
               >
                 {batch.area || '—'}
               </td>
@@ -143,6 +147,7 @@ export default function BatchListPage() {
                   padding: '8px',
                   textAlign: 'center',
                 }}
+                data-label="Ghi chú"
               >
                 {batch.note || '—'}
               </td>

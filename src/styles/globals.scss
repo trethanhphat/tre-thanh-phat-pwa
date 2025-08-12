@@ -335,3 +335,61 @@ img.max-w-full {
 img.h-auto {
   height: auto;
 }
+/* Bảng mặc định */
+table {
+  border-collapse: collapse;
+  width: 100%;
+  border: 1px solid #ccc;
+}
+
+th,
+td {
+  border: 1px solid var(--color-border);
+  padding: 8px;
+}
+
+/* Mobile: hiển thị dạng card */
+@media (max-width: 768px) {
+  table,
+  thead,
+  tbody,
+  th,
+  td,
+  tr {
+    display: block;
+    width: 100%;
+  }
+
+  thead {
+    display: none;
+  }
+
+  tr {
+    margin-bottom: 1rem;
+    border: 1px solid var(--color-border);
+    border-radius: 6px;
+    padding: 8px;
+    background: var(--color-surface);
+  }
+
+  td {
+    border: none;
+    padding: 6px 8px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  td::before {
+    content: attr(data-label);
+    font-weight: bold;
+    flex: 1;
+    margin-right: 10px;
+    color: var(--color-primary);
+  }
+
+  td img {
+    max-width: 80px;
+    height: auto;
+  }
+}

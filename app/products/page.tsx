@@ -87,7 +87,9 @@ export default function ProductsListPage() {
         <table style={{ borderCollapse: 'collapse', width: '100%', border: '1px solid #ccc' }}>
           <thead>
             <tr style={{ background: 'var(--color-primary)' }}>
-              <th style={{ border: '1px solid var(--color-border)', padding: '8px' }}>Ảnh</th>
+              <th style={{ border: '1px solid var(--color-border)', padding: '8px' }}>
+                Ảnh sản phẩm
+              </th>
               <th style={{ border: '1px solid var(--color-border)', padding: '8px' }}>
                 Tên sản phẩm
               </th>
@@ -107,6 +109,7 @@ export default function ProductsListPage() {
                     padding: '8px',
                     textAlign: 'center',
                   }}
+                  data-label="Ảnh sản phẩm"
                 >
                   {imageCache[p.id] ? (
                     <Link href={`/product/${p.id}`}>
@@ -116,7 +119,10 @@ export default function ProductsListPage() {
                     <span>...</span>
                   )}
                 </td>
-                <td style={{ border: '1px solid var(--color-border)', padding: '8px' }}>
+                <td
+                  style={{ border: '1px solid var(--color-border)', padding: '8px' }}
+                  data-label="Tên sản phẩm"
+                >
                   <Link
                     href={`/product/${p.id}`}
                     style={{ color: 'var(--color-link)', textDecoration: 'underline' }}
@@ -124,13 +130,22 @@ export default function ProductsListPage() {
                     {p.name}
                   </Link>
                 </td>
-                <td style={{ border: '1px solid var(--color-border)', padding: '8px' }}>
+                <td
+                  style={{ border: '1px solid var(--color-border)', padding: '8px' }}
+                  data-label="Giá sản phẩm"
+                >
                   {p.price}
                 </td>
-                <td style={{ border: '1px solid var(--color-border)', padding: '8px' }}>
+                <td
+                  style={{ border: '1px solid var(--color-border)', padding: '8px' }}
+                  data-label="Tồn kho"
+                >
                   {p.stock_quantity ?? '-'}
                 </td>
-                <td style={{ border: '1px solid var(--color-border)', padding: '8px' }}>
+                <td
+                  style={{ border: '1px solid var(--color-border)', padding: '8px' }}
+                  data-label="Trạng thái"
+                >
                   {p.stock_status}
                 </td>
               </tr>
