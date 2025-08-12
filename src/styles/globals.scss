@@ -357,7 +357,6 @@ td {
   td,
   tr {
     display: block;
-    width: 100%;
   }
 
   thead {
@@ -383,7 +382,6 @@ td {
   td::before {
     content: attr(data-label);
     font-weight: bold;
-    flex: 1;
     margin-right: 10px;
     color: var(--color-primary);
   }

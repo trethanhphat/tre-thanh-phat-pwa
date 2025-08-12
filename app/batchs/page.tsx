@@ -36,7 +36,13 @@ export default function BatchListPage() {
       });
   }, []);
 
-  if (loading) return <p className="p-4">⏳ Đang tải dữ liệu...</p>;
+  if (loading)
+    return (
+      <div>
+        <h1 className="text-2xl font-bold mb-4">📋 Danh sách lô / Batch</h1>
+        <p className="p-4">⏳ Đang tải dữ liệu...</p>
+      </div>
+    );
   if (error) return <p className="p-4 text-red-600">❌ {error}</p>;
 
   return (
@@ -115,6 +121,7 @@ export default function BatchListPage() {
                   padding: '8px',
                   textAlign: 'center',
                 }}
+                data-label="Ngày trồng"
               >
                 {batch.planting_date}
               </td>
@@ -125,7 +132,7 @@ export default function BatchListPage() {
                   padding: '8px',
                   textAlign: 'center',
                 }}
-                data-label="Ngày trồng"
+                data-label="Số lượng"
               >
                 {batch.quantity}
               </td>
