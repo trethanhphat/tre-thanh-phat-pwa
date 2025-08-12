@@ -116,15 +116,16 @@ export default function BottomMenu() {
           >
             {[
               { href: '/', label: '🏠 Trang chủ' },
-              { href: '//trethanhphat.vn/', label: 'ℹ️ Giới thiệu' },
-              { href: '//blog.trethanhphat.vn', label: '📰 Tin tức' },
-              { href: '/products-list', label: '🛒 Sản phẩm' },
+              // { href: '//trethanhphat.vn/', label: 'ℹ️ Giới thiệu' },
+              // { href: '//blog.trethanhphat.vn', label: '📰 Tin tức' },
+              { href: '/batchs', label: '🎋 Đợt trồng' },
+              { href: '/products', label: '🛒 Sản phẩm' },
               { href: '/report', label: '📊 Báo cáo' },
-              { href: '/survey', label: '📝 Khảo sát' },
+              // { href: '/survey', label: '📝 Khảo sát' },
               { href: '/photos', label: '📷 Hình ảnh' },
-              { href: '/contact', label: '🪪 Liên hệ' },
+              // { href: '/contact', label: '🪪 Liên hệ' },
               { href: '/policy', label: '📖 Chính sách' },
-              { href: '/faq', label: '❓ Câu hỏi thường gặp' },
+              // { href: '/faq', label: '❓ Câu hỏi thường gặp' },
             ].map(({ href, label }) => (
               <Link href={href} style={{ textDecoration: 'none' }} onClick={handleLinkClick}>
                 <button style={buttonStyle}>{label}</button>
