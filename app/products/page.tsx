@@ -4,6 +4,7 @@
 import { useEffect, useState } from 'react';
 import { Product, loadProductsFromDB, syncProducts } from '@/lib/products';
 import { getImageURL } from '@/lib/images';
+import Link from 'next/link';
 
 export default function ProductsListPage() {
   const [products, setProducts] = useState<Product[]>([]);
