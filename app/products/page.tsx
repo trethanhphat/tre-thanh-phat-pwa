@@ -108,13 +108,20 @@ export default function ProductsListPage() {
                   }}
                 >
                   {imageCache[p.id] ? (
-                    <img src={imageCache[p.id]} alt={p.name} style={{ maxWidth: '60px' }} />
+                    <Link href={`/product/${p.id}`}>
+                      <img src={imageCache[p.id]} alt={p.name} style={{ maxWidth: '60px' }} />
+                    </Link>
                   ) : (
                     <span>...</span>
                   )}
                 </td>
                 <td style={{ border: '1px solid var(--color-border)', padding: '8px' }}>
-                  {p.name}
+                  <Link
+                    href={`/product/${p.id}`}
+                    style={{ color: 'var(--color-link)', textDecoration: 'underline' }}
+                  >
+                    {p.name}
+                  </Link>
                 </td>
                 <td style={{ border: '1px solid var(--color-border)', padding: '8px' }}>
                   {p.price}
