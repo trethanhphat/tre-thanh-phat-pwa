@@ -18,7 +18,17 @@ export default function Home() {
 
       <section className="space-y-4">
         <div className="p-4">
-          <h2 className="text-2xl font-bold mb-4">Số cây đã trồng từng tháng</h2>
+          <h2 className="text-2xl font-bold mb-4">Tăng trưởng diện tích của {appName}</h2>
+          <div className="aspect-w-16 aspect-h-9">
+            <a className="button" href="https://lookerstudio.google.com/s/pz8LKuZU1UQ">
+              📋 Xem báo cáo
+            </a>
+          </div>
+        </div>
+      </section>
+      <section className="space-y-4">
+        <div className="p-4">
+          <h2 className="text-2xl font-bold mb-4">Tăng trưởng số cây trồng của {appName}</h2>
           <div className="aspect-w-16 aspect-h-9">
             <a
               className="button"
