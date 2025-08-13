@@ -2,6 +2,7 @@
 
 'use client';
 import { useEffect, useState } from 'react';
+import TreeCodeChecker from '@/components/TreeCodeChecker';
 
 export default function SheetPage() {
   const [data, setData] = useState<string[][]>([]);
@@ -20,19 +21,22 @@ export default function SheetPage() {
   if (loading) return <p>Đang tải dữ liệu...</p>;
 
   return (
-    <div style={{ padding: 20 }}>
-      <h1>Dữ liệu từ Google Sheet</h1>
-      <table border={1} cellPadding={5} style={{ borderCollapse: 'collapse' }}>
-        <tbody>
-          {data.map((row, i) => (
-            <tr key={i}>
-              {row.map((cell, j) => (
-                <td key={j}>{cell}</td>
-              ))}
-            </tr>
-          ))}
-        </tbody>
-      </table>
+    <div>
+      <div style={{ padding: 20 }}>
+        <h1>Dữ liệu từ Google Sheet</h1>
+        <table border={1} cellPadding={5} style={{ borderCollapse: 'collapse' }}>
+          <tbody>
+            {data.map((row, i) => (
+              <tr key={i}>
+                {row.map((cell, j) => (
+                  <td key={j}>{cell}</td>
+                ))}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      <TreeCodeChecker />;
     </div>
   );
 }

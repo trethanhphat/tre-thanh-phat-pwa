@@ -11,7 +11,7 @@ export default function Home() {
   return (
     <main className="main">
       {/* Tiêu đề */}
-      <h2 className="text-center mb-6">CHÍNH SÁCH ỨNG DỤNG PWA - {appName}</h2>
+      <h2 className="text-center mb-6">Chính sách ứng dụng PWA của {appName}</h2>
       <h3>1. Chính sách quyền riêng tư</h3>
       <p>
         Ứng dụng của chúng tôi tôn trọng và cam kết bảo mật thông tin cá nhân của người dùng. Chính
