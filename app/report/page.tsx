@@ -77,13 +77,12 @@ export default function Home() {
       <section className="space-y-4">
         <div className="p-4">
           <h2 className="text-2xl font-bold mb-4">
-            Số lượng cây đã trồng của từng vùng trồng của{' '}
-            <span className="font-ttp">{appName}</span>
+            Báo cáo tổng hợp từng vùng trồng của <span className="font-ttp">{appName}</span>
           </h2>
           <div className="aspect-w-16 aspect-h-9">
             <a
               className="button"
-              href="https://lookerstudio.google.com/reporting/470c0a0d-60ed-4191-bacb-46f02752fd88/page/kz9JF?s=kRSik9CXYew"
+              href="https://lookerstudio.google.com/reporting/470c0a0d-60ed-4191-bacb-46f02752fd88"
             >
               📋 Xem báo cáo
             </a>
