@@ -1,4 +1,6 @@
-'use client';
+// File: app / settings / page.tsx;
+
+('use client');
 
 import { useState, useEffect } from 'react';
 import { setSyncOverMobile, getSyncOverMobile } from '@/utils/settings';
