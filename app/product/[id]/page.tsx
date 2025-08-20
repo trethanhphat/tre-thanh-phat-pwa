@@ -90,7 +90,7 @@ export default function ProductDetailPage() {
           style={{ maxWidth: 300, borderRadius: 8 }}
         />
       )}
-      <p>💰 Giá: {formatPrice(product.price)}₫</p>
+      <p>💰 Giá: {formatPrice(product.price)}</p>
       <p>
         📦 Tồn kho: {product.stock_quantity ?? '-'} (
         {(() => {
