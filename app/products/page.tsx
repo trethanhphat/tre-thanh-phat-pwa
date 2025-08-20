@@ -124,10 +124,10 @@ export default function ProductsListPage() {
   // sort client-side
   const sortedProducts = [...products].sort((a, b) => {
     const getVal = (p: Product) => {
+      if (sortField === 'stock_status') return (p.stock_status || '').toLowerCase();
       if (sortField === 'name') return (p.name || '').toLowerCase();
       if (sortField === 'price') return Number(p.price || '0') || 0;
       if (sortField === 'stock_quantity') return Number(p.stock_quantity ?? 0);
-      if (sortField === 'stock_status') return (p.stock_status || '').toLowerCase();
       return 0;
     };
     const va = getVal(a);
