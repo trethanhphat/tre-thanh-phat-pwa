@@ -2,7 +2,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import ProductsTable from './ProductsTable';
+import ProductsTable from '../ProductsTable';
 import { Product, loadProductsFromDB, syncProducts } from '@/lib/products';
 import { getImageURL } from '@/lib/images';
 
