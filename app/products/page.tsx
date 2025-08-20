@@ -1,145 +1,176 @@
 // ✅ File: app/products/page.tsx
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import ProductsTable from './ProductsTable';
 import { Product, loadProductsFromDB, syncProducts } from '@/lib/products';
-import Link from 'next/link';
+import { getImageURL } from '@/lib/images';
 
-// Hàm render trạng thái dạng badge
-function formatStockStatus(status?: string) {
-  switch (status) {
-    case 'instock':
-      return { text: 'Còn hàng', color: 'green' };
-    case 'outofstock':
-      return { text: 'Hết hàng', color: 'red' };
-    case 'onbackorder':
-      return { text: 'Đặt trước', color: 'orange' };
-    default:
-      return { text: 'Không rõ', color: 'gray' };
-  }
-}
-
-// Icon sort
-function renderSortIcon(key: string, sortKey: string, sortAsc: boolean) {
-  if (key !== sortKey) return '↕';
-  return sortAsc ? '▲' : '▼';
-}
+type SortField = 'name' | 'price' | 'stock_quantity';
+type SortOrder = 'asc' | 'desc';
 
 export default function ProductsListPage() {
   const [products, setProducts] = useState<Product[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [updated, setUpdated] = useState(false);
+  const [imageCache, setImageCache] = useState<Record<number, string>>({});
+  const [loading, setLoading] = useState(true); // lần đầu: DB trống -> spinner
+  const [offline, setOffline] = useState(false); // đang hiển thị offline
+  const [justUpdated, setJustUpdated] = useState(false); // banner "Đã cập nhật"
+  const [sortField, setSortField] = useState<SortField>('name');
+  const [sortOrder, setSortOrder] = useState<SortOrder>('asc');
 
-  // sort state
-  const [sortKey, setSortKey] = useState<keyof Product>('name');
-  const [sortAsc, setSortAsc] = useState(true);
-
+  // giữ tham chiếu để so sánh & biết trạng thái trước đó
+  const productsRef = useRef<Product[]>([]);
+  const offlineRef = useRef<boolean>(false);
   useEffect(() => {
-    const fetchData = async () => {
-      setLoading(true);
-      setUpdated(false);
-      try {
-        const res = await fetch('/api/products');
-        const data = await res.json();
-        const products: Product[] = Array.isArray(data) ? data : data.data || [];
+    productsRef.current = products;
+  }, [products]);
+  useEffect(() => {
+    offlineRef.current = offline;
+  }, [offline]);
 
-        if (!Array.isArray(products)) {
-          throw new Error('API không trả về mảng sản phẩm');
-        }
+  // tải ảnh song song và trả map id -> url (online hoặc blob offline)
+  const loadImages = async (list: Product[]) => {
+    const entries = await Promise.all(
+      list.map(async p => {
+        if (p.image_url) return [p.id, await getImageURL(p.image_url)] as const;
+        return [p.id, ''] as const;
+      })
+    );
+    return Object.fromEntries(entries);
+  };
 
-        await syncProducts(products);
-        const cached = await loadProductsFromDB();
-        setProducts(cached);
-        setUpdated(true);
-      } catch (err) {
-        console.error('Không thể sync sản phẩm:', err);
-      } finally {
-        setLoading(false);
-      }
-    };
+  // thay image cache và revoke blob cũ để tránh leak
+  const replaceImageCache = (next: Record<number, string>) => {
+    Object.values(imageCache).forEach(url => {
+      if (url && url.startsWith('blob:')) URL.revokeObjectURL(url);
+    });
+    setImageCache(next);
+  };
 
-    fetchData();
-  }, []);
-
-  // Hàm sort
-  const handleSort = (key: keyof Product) => {
-    if (sortKey === key) {
-      setSortAsc(!sortAsc);
+  // 1) load offline trước
+  const loadOfflineFirst = async () => {
+    const cached = await loadProductsFromDB();
+    if (cached.length > 0) {
+      setProducts(cached);
+      replaceImageCache(await loadImages(cached));
+      setOffline(true);
+      setLoading(false); // đã có offline để hiển thị
     } else {
-      setSortKey(key);
-      setSortAsc(true);
+      setLoading(true); // chưa có gì -> spinner
     }
   };
 
+  // 2) fetch online và cập nhật
+  const fetchOnlineAndUpdate = async () => {
+    try {
+      const res = await fetch('/api/products', { cache: 'no-store' });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const payload = await res.json();
+
+      // ✅ PARSE ĐÚNG: API của bạn là { products: [...] }
+      const fresh: Product[] = Array.isArray(payload)
+        ? payload
+        : payload?.products ?? payload?.data ?? [];
+
+      if (!Array.isArray(fresh)) throw new Error('API không trả về mảng sản phẩm hợp lệ');
+
+      // 🎯 Tránh xoá DB khi API tạm thời trả rỗng
+      if (fresh.length === 0) {
+        setLoading(false);
+        return;
+      }
+
+      await syncProducts(fresh);
+
+      // chỉ setState khi khác
+      const prev = productsRef.current;
+      const isDifferent =
+        prev.length !== fresh.length || JSON.stringify(prev) !== JSON.stringify(fresh);
+
+      if (isDifferent) {
+        setProducts(fresh);
+        replaceImageCache(await loadImages(fresh));
+      }
+
+      const wasOffline = offlineRef.current;
+      setOffline(false);
+      setLoading(false);
+      if (wasOffline) {
+        setJustUpdated(true);
+        setTimeout(() => setJustUpdated(false), 2500);
+      }
+    } catch (err) {
+      console.warn('⚠️ Không thể tải online:', err);
+      if (productsRef.current.length === 0) setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadOfflineFirst();
+    fetchOnlineAndUpdate();
+
+    const handleOnline = () => fetchOnlineAndUpdate();
+    window.addEventListener('online', handleOnline);
+    return () => {
+      window.removeEventListener('online', handleOnline);
+      // revoke blob khi unmount
+      Object.values(imageCache).forEach(url => {
+        if (url && url.startsWith('blob:')) URL.revokeObjectURL(url);
+      });
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // sort client-side
   const sortedProducts = [...products].sort((a, b) => {
-    const av = (a[sortKey] ?? '').toString();
-    const bv = (b[sortKey] ?? '').toString();
-    return sortAsc ? av.localeCompare(bv) : bv.localeCompare(av);
+    const getVal = (p: Product) => {
+      if (sortField === 'name') return (p.name || '').toLowerCase();
+      if (sortField === 'price') return Number(p.price || '0') || 0;
+      if (sortField === 'stock_quantity') return Number(p.stock_quantity ?? 0);
+      return 0;
+    };
+    const va = getVal(a);
+    const vb = getVal(b);
+    if (va < vb) return sortOrder === 'asc' ? -1 : 1;
+    if (va > vb) return sortOrder === 'asc' ? 1 : -1;
+    return 0;
   });
 
+  const handleSortChange = (field: SortField) => {
+    if (field === sortField) setSortOrder(o => (o === 'asc' ? 'desc' : 'asc'));
+    else {
+      setSortField(field);
+      setSortOrder('asc');
+    }
+  };
+
   return (
-    <div>
-      <h1>Sản phẩm</h1>
+    <div style={{ padding: '1rem' }}>
+      <h1>Danh sách sản phẩm</h1>
 
-      {loading && <p>Đang tải dữ liệu...</p>}
-      {updated && !loading && <p style={{ color: 'green' }}>✅ Đã cập nhật dữ liệu</p>}
+      {/* trạng thái hiển thị */}
+      {offline && (
+        <p style={{ color: 'orange', marginBottom: 8 }}>
+          ⚠️ Đang hiển thị dữ liệu offline và đang chờ cập nhật...
+        </p>
+      )}
+      {justUpdated && !offline && (
+        <p style={{ color: 'green', marginBottom: 8 }}>✅ Đã cập nhật dữ liệu mới</p>
+      )}
 
-      <div style={{ overflowX: 'auto' }}>
-        <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-          <thead>
-            <tr style={{ background: '#f5f5f5' }}>
-              <th style={{ cursor: 'pointer' }} onClick={() => handleSort('id')}>
-                ID {renderSortIcon('id', sortKey, sortAsc)}
-              </th>
-              <th>Ảnh</th>
-              <th style={{ cursor: 'pointer' }} onClick={() => handleSort('name')}>
-                Tên {renderSortIcon('name', sortKey, sortAsc)}
-              </th>
-              <th>Giá</th>
-              <th>Kho</th>
-            </tr>
-          </thead>
-          <tbody>
-            {sortedProducts.map(p => {
-              const { text, color } = formatStockStatus(p.stock_status);
-              return (
-                <tr key={p.id} style={{ borderBottom: '1px solid #ddd' }}>
-                  <td>{p.id}</td>
-                  <td>
-                    <img
-                      src={p.image_url || '/assets/icon/no-image.png'}
-                      alt={p.name}
-                      width={50}
-                      height={50}
-                      onError={e => {
-                        e.currentTarget.src = '/assets/icon/no-image.png';
-                      }}
-                    />
-                  </td>
-                  <td>
-                    <Link href={`/products/${p.id}`}>{p.name}</Link>
-                  </td>
-                  <td>{p.price || '-'}</td>
-                  <td>
-                    <span
-                      style={{
-                        display: 'inline-block',
-                        padding: '2px 6px',
-                        borderRadius: '6px',
-                        background: color + '20',
-                        color,
-                        fontSize: '0.85em',
-                      }}
-                    >
-                      {text}
-                    </span>
-                  </td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
-      </div>
+      {loading ? (
+        <p>Đang tải dữ liệu...</p>
+      ) : products.length === 0 ? (
+        <p>Không có sản phẩm</p>
+      ) : (
+        <ProductsTable
+          products={sortedProducts}
+          imageCache={imageCache}
+          sortField={sortField}
+          sortOrder={sortOrder}
+          onSortChange={handleSortChange}
+        />
+      )}
     </div>
   );
 }
