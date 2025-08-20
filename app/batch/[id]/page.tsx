@@ -80,9 +80,11 @@ export default function BatchDetailPage() {
           </p>
           <p>
             <strong>Vị trí trên bản đồ:</strong>{' '}
-            <Link href={batch.batch_location || '#'}>
-              {batch.batch_location || 'Đang cập nhật'}
-            </Link>
+            {batch.batch_location ? (
+              <Link href={batch.batch_location}>Mở bản đồ</Link>
+            ) : (
+              <span className="text-gray-500">Đang cập nhật</span>
+            )}
           </p>
           <p>
             <a className="button" href="/batchs">
