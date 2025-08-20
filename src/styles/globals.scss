@@ -58,7 +58,9 @@ input {
 p {
   text-align: justify;
 }
-
+.font-ttp {
+  color: var(--color-primary);
+}
 span.font-ttp {
   font-family: var(--font-ttp);
   font-size: 1.125em;
@@ -228,6 +230,7 @@ header p {
 }
 
 .app-title {
+  color: var(--color-secondary);
   font-size: 1.8rem;
   margin-bottom: 0.25rem;
   transition: font-size 0.5s ease;
