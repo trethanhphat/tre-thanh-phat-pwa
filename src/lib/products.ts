@@ -1,4 +1,4 @@
-// ✅ File: lib/products.ts
+// ✅ File: src/lib/products.ts
 import { initDB, STORE_PRODUCTS } from './db';
 import { saveImageIfNotExists } from './images';
 
@@ -18,11 +18,11 @@ export const loadProductsFromDB = async (): Promise<Product[]> => {
 
 export const syncProducts = async (products: Product[]) => {
   const db = await initDB();
-  const tx = db.transaction(STORE_PRODUCTS, 'readwrite');
-  const store = tx.store;
 
   // Danh sách ID mới
   const newIds = new Set(products.map(p => p.id));
+  const tx = db.transaction(STORE_PRODUCTS, 'readwrite');
+  const store = tx.store;
 
   // Xóa bản ghi cũ
   let cursor = await store.openCursor();
