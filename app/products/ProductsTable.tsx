@@ -84,31 +84,40 @@ export default function ProductsTable({
                 href={`/product/${p.id}`}
                 style={{ color: 'var(--color-link)', textDecoration: 'underline' }}
               >
+                <span onClick={() => onSortChange('name')} style={{ cursor: 'pointer' }}>
+                  {sortField === 'name' ? (sortOrder === 'asc' ? '⬆️' : '⬇️') : '↕️'}
+                </span>
                 {p.name}
               </Link>
-              <span onClick={() => onSortChange('name')} style={{ cursor: 'pointer' }}>
-                {sortField === 'name' ? (sortOrder === 'asc' ? '⬆️' : '⬇️') : '↕️'}
-              </span>
             </td>
             <td
               style={{ border: '1px solid var(--color-border)', padding: '8px' }}
               data-label="Giá"
-              onClick={() => onSortChange('price')}
+              // onClick={() => onSortChange('price')}
             >
+              <span onClick={() => onSortChange('price')} style={{ cursor: 'pointer' }}>
+                {sortField === 'price' ? (sortOrder === 'asc' ? '⬆️' : '⬇️') : '↕️'}
+              </span>
               {formatPrice(p.price)}
             </td>
             <td
               style={{ border: '1px solid var(--color-border)', padding: '8px' }}
               data-label="Tồn kho"
-              onClick={() => onSortChange('stock_quantity')}
+              //onClick={() => onSortChange('stock_quantity')}
             >
+              <span onClick={() => onSortChange('stock_quantity')} style={{ cursor: 'pointer' }}>
+                {sortField === 'stock_quantity' ? (sortOrder === 'asc' ? '⬆️' : '⬇️') : '↕️'}
+              </span>
               {p.stock_quantity ?? '-'}
             </td>
             <td
               style={{ border: '1px solid var(--color-border)', padding: '8px' }}
               data-label="Trạng thái"
-              onClick={() => onSortChange('stock_status')}
+              // onClick={() => onSortChange('stock_status')}
             >
+              <span onClick={() => onSortChange('stock_status')} style={{ cursor: 'pointer' }}>
+                {sortField === 'stock_status' ? (sortOrder === 'asc' ? '⬆️' : '⬇️') : '↕️'}
+              </span>
               {(() => {
                 const { text, color } = formatStockStatus(p.stock_status);
                 return <span style={{ color }}>{text}</span>;
