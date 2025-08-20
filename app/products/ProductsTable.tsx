@@ -8,9 +8,9 @@ import { formatPrice, formatStockStatus } from '@/utils/format';
 interface ProductsTableProps {
   products: Product[];
   imageCache: { [id: number]: string };
-  sortField: 'name' | 'price' | 'stock_quantity';
+  sortField: 'name' | 'price' | 'stock_quantity' | 'stock_status';
   sortOrder: 'asc' | 'desc';
-  onSortChange: (field: 'name' | 'price' | 'stock_quantity') => void;
+  onSortChange: (field: 'name' | 'price' | 'stock_quantity' | 'stock_status') => void;
 }
 
 export default function ProductsTable({
@@ -20,7 +20,7 @@ export default function ProductsTable({
   sortOrder,
   onSortChange,
 }: ProductsTableProps) {
-  const renderSortIcon = (field: 'name' | 'price' | 'stock_quantity') => {
+  const renderSortIcon = (field: 'name' | 'price' | 'stock_quantity' | 'stock_status') => {
     if (sortField !== field) return null;
     return sortOrder === 'asc' ? ' ↑' : ' ↓';
   };
@@ -48,7 +48,12 @@ export default function ProductsTable({
           >
             Tồn kho{renderSortIcon('stock_quantity')}
           </th>
-          <th style={{ border: '1px solid var(--color-border)', padding: '8px' }}>Trạng thái</th>
+          <th
+            style={{ border: '1px solid var(--color-border)', padding: '8px' }}
+            onClick={() => onSortChange('stock_status')}
+          >
+            Trạng thái{renderSortIcon('stock_status')}
+          </th>
         </tr>
       </thead>
       <tbody>
@@ -73,6 +78,7 @@ export default function ProductsTable({
             <td
               style={{ border: '1px solid var(--color-border)', padding: '8px' }}
               data-label="Tên sản phẩm"
+              onClick={() => onSortChange('name')}
             >
               <Link
                 href={`/product/${p.id}`}
@@ -84,18 +90,21 @@ export default function ProductsTable({
             <td
               style={{ border: '1px solid var(--color-border)', padding: '8px' }}
               data-label="Giá"
+              onClick={() => onSortChange('price')}
             >
               {formatPrice(p.price)}
             </td>
             <td
               style={{ border: '1px solid var(--color-border)', padding: '8px' }}
               data-label="Tồn kho"
+              onClick={() => onSortChange('stock_quantity')}
             >
               {p.stock_quantity ?? '-'}
             </td>
             <td
               style={{ border: '1px solid var(--color-border)', padding: '8px' }}
               data-label="Trạng thái"
+              onClick={() => onSortChange('stock_status')}
             >
               {(() => {
                 const { text, color } = formatStockStatus(p.stock_status);

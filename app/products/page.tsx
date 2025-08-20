@@ -6,7 +6,7 @@ import ProductsTable from './ProductsTable';
 import { Product, loadProductsFromDB, syncProducts } from '@/lib/products';
 import { getImageURL } from '@/lib/images';
 
-type SortField = 'name' | 'price' | 'stock_quantity';
+type SortField = 'name' | 'price' | 'stock_quantity' | 'stock_status';
 type SortOrder = 'asc' | 'desc';
 
 export default function ProductsListPage() {
@@ -127,6 +127,7 @@ export default function ProductsListPage() {
       if (sortField === 'name') return (p.name || '').toLowerCase();
       if (sortField === 'price') return Number(p.price || '0') || 0;
       if (sortField === 'stock_quantity') return Number(p.stock_quantity ?? 0);
+      if (sortField === 'stock_status') return (p.stock_status || '').toLowerCase();
       return 0;
     };
     const va = getVal(a);
