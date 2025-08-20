@@ -1,4 +1,4 @@
-// ✅ File: app/api/products-list/route.ts
+// ✅ File: app/api/products/route.ts
 import { NextResponse } from 'next/server';
 import axios from 'axios';
 

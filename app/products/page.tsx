@@ -4,6 +4,7 @@
 import { useEffect, useState } from 'react';
 import { Product, loadProductsFromDB, syncProducts } from '@/lib/products';
 import { getImageURL } from '@/lib/images';
+import { formatPrice, formatStockStatus } from '@/utils/format';
 import Link from 'next/link';
 
 export default function ProductsListPage() {
@@ -39,7 +40,7 @@ export default function ProductsListPage() {
   // Fetch online và chỉ update nếu dữ liệu thay đổi
   const fetchOnlineAndUpdate = async () => {
     try {
-      const res = await fetch('/api/products-list');
+      const res = await fetch('/api/products');
       if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
 
       const data = await res.json();
@@ -138,7 +139,7 @@ export default function ProductsListPage() {
                   style={{ border: '1px solid var(--color-border)', padding: '8px' }}
                   data-label="Giá sản phẩm"
                 >
-                  {p.price}
+                  {formatPrice(p.price)}
                 </td>
                 <td
                   style={{ border: '1px solid var(--color-border)', padding: '8px' }}
@@ -150,7 +151,10 @@ export default function ProductsListPage() {
                   style={{ border: '1px solid var(--color-border)', padding: '8px' }}
                   data-label="Trạng thái"
                 >
-                  {p.stock_status}
+                  {(() => {
+                    const { text, color } = formatStockStatus(p.stock_status);
+                    return <span style={{ color }}>{text}</span>;
+                  })()}
                 </td>
               </tr>
             ))}
