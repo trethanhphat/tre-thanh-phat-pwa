@@ -6,6 +6,7 @@ import { useParams } from 'next/navigation';
 
 import { initDB } from '@/lib/db';
 import { saveImageIfNotExists, getImageURL } from '@/lib/images';
+import { formatPrice, formatStockStatus } from '@/utils/format';
 
 export default function ProductDetailPage() {
   const { id } = useParams() as { id: string };
@@ -89,9 +90,14 @@ export default function ProductDetailPage() {
           style={{ maxWidth: 300, borderRadius: 8 }}
         />
       )}
-      <p>💰 Giá: {product.price}₫</p>
+      <p>💰 Giá: {formatPrice(product.price)}₫</p>
       <p>
-        📦 Tồn kho: {product.stock_quantity} ({product.stock_status})
+        📦 Tồn kho: {product.stock_quantity ?? '-'} (
+        {(() => {
+          const { text, color } = formatStockStatus(product.stock_status);
+          return <span style={{ color }}>{text}</span>;
+        })()}
+        )
       </p>
       <div dangerouslySetInnerHTML={{ __html: product.description || '' }} />
       <p>
