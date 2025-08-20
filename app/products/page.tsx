@@ -1,83 +1,97 @@
-// File: app/products/page.tsx
+// ✅ File: app/products/page.tsx
 'use client';
 
 import { useEffect, useState } from 'react';
 import { Product, loadProductsFromDB, syncProducts } from '@/lib/products';
 import { getImageURL } from '@/lib/images';
-import ProductsTable from './ProductsTable';
+import Link from 'next/link';
 
-type SortField = 'name' | 'price' | 'stock_quantity';
-type SortOrder = 'asc' | 'desc';
+type SortKey = 'name' | 'price' | 'stock';
 
 export default function ProductsListPage() {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [offline, setOffline] = useState(false);
-  const [imageCache, setImageCache] = useState<{ [id: number]: string }>({});
-  const [sortField, setSortField] = useState<SortField>('name');
-  const [sortOrder, setSortOrder] = useState<SortOrder>('asc');
+  const [sortKey, setSortKey] = useState<SortKey>('name');
 
-  // ... loadOfflineFirst, fetchOnlineAndUpdate, useEffect giữ nguyên
+  useEffect(() => {
+    loadOfflineFirst().then(() => syncOnline());
+  }, []);
 
-  const getSortedProducts = () => {
-    return [...products].sort((a, b) => {
-      let valA: string | number = '';
-      let valB: string | number = '';
+  async function loadOfflineFirst() {
+    const offlineProducts = await loadProductsFromDB();
+    if (offlineProducts.length > 0) {
+      setProducts(offlineProducts);
+      setOffline(true);
+    }
+    setLoading(false); // ✅ tắt loading sau khi check DB
+  }
 
-      if (sortField === 'name') {
-        valA = a.name.toLowerCase();
-        valB = b.name.toLowerCase();
-      } else if (sortField === 'price') {
-        valA = Number(a.price) || 0;
-        valB = Number(b.price) || 0;
-      } else if (sortField === 'stock_quantity') {
-        valA = a.stock_quantity ?? 0;
-        valB = b.stock_quantity ?? 0;
+  async function syncOnline() {
+    try {
+      const freshProducts = await syncProducts();
+      if (freshProducts.length > 0) {
+        setProducts(freshProducts);
+        setOffline(false);
       }
-
-      if (valA < valB) return sortOrder === 'asc' ? -1 : 1;
-      if (valA > valB) return sortOrder === 'asc' ? 1 : -1;
-      return 0;
-    });
-  };
-
-  const handleSortChange = (field: SortField) => {
-    if (field === sortField) {
-      // Click lại cùng cột → đảo chiều
-      setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
-    } else {
-      setSortField(field);
-      setSortOrder('asc');
+    } catch (err) {
+      console.error('Sync error', err);
+      setOffline(true);
+    } finally {
+      setLoading(false);
     }
-  };
+  }
 
-  const renderContent = () => {
-    if (products.length > 0) {
-      return (
-        <ProductsTable
-          products={getSortedProducts()}
-          imageCache={imageCache}
-          sortField={sortField}
-          sortOrder={sortOrder}
-          onSortChange={handleSortChange}
-        />
-      );
+  // ✅ Sắp xếp sản phẩm
+  const sortedProducts = [...products].sort((a, b) => {
+    switch (sortKey) {
+      case 'name':
+        return a.name.localeCompare(b.name);
+      case 'price':
+        return Number(a.price) - Number(b.price);
+      case 'stock':
+        return (a.stock_quantity ?? 0) - (b.stock_quantity ?? 0);
+      default:
+        return 0;
     }
-    if (loading) return <p>Đang tải dữ liệu...</p>;
-    return <p>Không có sản phẩm</p>;
-  };
+  });
 
   return (
-    <div style={{ padding: '1rem' }}>
-      <h1>Danh sách sản phẩm</h1>
+    <div>
+      <h1>Sản phẩm</h1>
 
-      {offline && products.length > 0 && (
-        <p style={{ color: 'orange' }}>
-          ⚠️ Đang hiển thị dữ liệu offline trong khi cập nhật dữ liệu
-        </p>
+      {/* ✅ Thanh chọn sắp xếp */}
+      <div style={{ marginBottom: '1rem' }}>
+        <label>
+          Sắp xếp theo:{' '}
+          <select value={sortKey} onChange={e => setSortKey(e.target.value as SortKey)}>
+            <option value="name">Tên</option>
+            <option value="price">Giá</option>
+            <option value="stock">Số lượng</option>
+          </select>
+        </label>
+      </div>
+
+      {/* ✅ Banner offline */}
+      {offline && <p style={{ color: 'orange' }}>⚠️ Đang hiển thị dữ liệu offline</p>}
+
+      {/* ✅ Hiển thị trạng thái */}
+      {loading ? (
+        <p>Đang tải dữ liệu...</p>
+      ) : sortedProducts.length === 0 ? (
+        <p>Không có sản phẩm</p>
+      ) : (
+        <div className="product-grid">
+          {sortedProducts.map(p => (
+            <Link key={p.id} href={`/product/${p.id}`} className="product-card">
+              <img src={getImageURL(p.image_url)} alt={p.name} />
+              <h2>{p.name}</h2>
+              <p>Giá: {p.price}đ</p>
+              <p>Còn lại: {p.stock_quantity ?? 'N/A'}</p>
+            </Link>
+          ))}
+        </div>
       )}
-
-      {renderContent()}
     </div>
   );
 }
