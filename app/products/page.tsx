@@ -20,7 +20,7 @@ export default function ProductsListPage() {
 
       // Thử sync từ API
       try {
-        const res = await fetch('/api/product');
+        const res = await fetch('/api/products');
         if (res.ok) {
           const fresh = await res.json();
           await syncProducts(fresh);
