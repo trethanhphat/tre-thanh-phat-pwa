@@ -69,7 +69,7 @@ export default function ProductsTable({
             >
               {imageCache[p.id] ? (
                 <Link href={`/product/${p.id}`}>
-                  <img src={imageCache[p.id]} alt={p.name} style={{ maxWidth: '60px' }} />
+                  <img src={imageCache[p.id]} alt={p.name} style={{ maxWidth: '150px' }} />
                 </Link>
               ) : (
                 <span>...</span>
