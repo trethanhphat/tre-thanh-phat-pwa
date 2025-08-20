@@ -6,7 +6,9 @@ import { useEffect, useState } from 'react';
 
 interface Batch {
   batch_id: string;
+  batch_location: string;
   region_id: string;
+  region_name: string;
   planting_date: string;
   quantity: string;
   area: string;
@@ -58,7 +60,10 @@ export default function BatchDetailPage() {
             <strong>Mã lô:</strong> {batch.batch_id}
           </p>
           <p>
-            <strong>Khu vực:</strong> {batch.region_id}
+            <strong>Mã vùng trồng:</strong> {batch.region_id}
+          </p>
+          <p>
+            <strong>Tên vùng trồng:</strong> {batch.region_name}
           </p>
           <p>
             <strong>Ngày trồng:</strong> {batch.planting_date}
@@ -71,6 +76,12 @@ export default function BatchDetailPage() {
           </p>
           <p>
             <strong>Ghi chú:</strong> {batch.note || 'Không có'}
+          </p>
+          <p>
+            <strong>Vị trí trên bản đồ:</strong>{' '}
+            <Link href={batch.batch_location || '#'}>
+              {batch.batch_location || 'Đang cập nhật'}
+            </Link>
           </p>
           <p>
             <a className="button" href="/batchs">

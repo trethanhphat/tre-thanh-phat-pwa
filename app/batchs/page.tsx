@@ -174,7 +174,7 @@ export default function BatchListPage() {
                 }}
                 data-label="Vị trí"
               >
-                <Link href={batch.batch_location || ''}>Mở bản đồ</Link>
+                <Link href={batch.batch_location || '#'}>Mở bản đồ</Link>
               </td>
             </tr>
           ))}
