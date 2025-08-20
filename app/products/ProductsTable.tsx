@@ -78,7 +78,7 @@ export default function ProductsTable({
             <td
               style={{ border: '1px solid var(--color-border)', padding: '8px' }}
               data-label="Tên sản phẩm"
-              onClick={() => onSortChange('name')}
+              // onClick={() => onSortChange('name')}
             >
               <Link
                 href={`/product/${p.id}`}
@@ -86,6 +86,9 @@ export default function ProductsTable({
               >
                 {p.name}
               </Link>
+              <span onClick={() => onSortChange('name')} style={{ cursor: 'pointer' }}>
+                {sortField === 'name' ? (sortOrder === 'asc' ? '⬆️' : '⬇️') : '↕️'}
+              </span>
             </td>
             <td
               style={{ border: '1px solid var(--color-border)', padding: '8px' }}
