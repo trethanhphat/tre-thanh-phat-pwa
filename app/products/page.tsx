@@ -3,61 +3,88 @@
 
 import { useEffect, useState } from 'react';
 import { Product, loadProductsFromDB, syncProducts } from '@/lib/products';
-import Link from 'next/link';
+import { getImageURL } from '@/lib/images';
 
 export default function ProductsListPage() {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
-  const [offline, setOffline] = useState(false);
+  const [updated, setUpdated] = useState(false);
+  const [sortBy, setSortBy] = useState<'name' | 'price' | 'stock_quantity'>('name');
 
+  // Tải dữ liệu offline trước
   useEffect(() => {
-    async function loadOfflineFirst() {
-      const offlineData = await loadProductsFromDB();
-      if (offlineData.length > 0) {
-        setProducts(offlineData);
-        setOffline(true);
-        setLoading(false);
-      }
-      // luôn thử fetch online để cập nhật mới
-      await syncOnline();
-    }
+    const loadData = async () => {
+      const cached = await loadProductsFromDB();
+      setProducts(cached);
+      setLoading(false);
 
-    async function syncOnline() {
+      // Thử sync từ API
       try {
-        const res = await fetch('/api/products');
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-
-        const data = await res.json();
-        if (data?.products) {
-          // ✅ truyền data.products vào syncProducts
-          const freshProducts = await syncProducts(data.products);
-          setProducts(freshProducts);
-          setOffline(false);
+        const res = await fetch('/api/product');
+        if (res.ok) {
+          const fresh = await res.json();
+          await syncProducts(fresh);
+          setProducts(fresh);
+          setUpdated(true);
+          setTimeout(() => setUpdated(false), 2000);
         }
       } catch (err) {
-        console.error('Sync error', err);
-        setOffline(true);
-      } finally {
-        setLoading(false);
+        console.warn('Không thể sync sản phẩm:', err);
       }
-    }
-
-    loadOfflineFirst();
+    };
+    loadData();
   }, []);
 
-  if (loading) return <p>Đang tải dữ liệu...</p>;
-  if (products.length === 0) return <p>Không có sản phẩm</p>;
+  // Hàm lấy ảnh offline
+  const resolveImage = async (p: Product) => {
+    if (!p.image_url) return '';
+    return await getImageURL(p.image_url);
+  };
+
+  // Sắp xếp danh sách
+  const sortedProducts = [...products].sort((a, b) => {
+    if (sortBy === 'name') return a.name.localeCompare(b.name);
+    if (sortBy === 'price') return Number(a.price) - Number(b.price);
+    if (sortBy === 'stock_quantity') return (a.stock_quantity || 0) - (b.stock_quantity || 0);
+    return 0;
+  });
+
+  if (loading) return <div>⏳ Đang tải dữ liệu...</div>;
 
   return (
-    <div>
-      {offline && <p>⚠️ Đang hiển thị dữ liệu offline</p>}
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-        {products.map(p => (
-          <Link key={p.id} href={`/products/${p.id}`} className="border p-2 rounded block">
-            <h2 className="font-bold">{p.name}</h2>
-            <p>Giá: {p.price}₫</p>
-            <p>Tồn kho: {p.stock_quantity ?? 'Không rõ'}</p>
-          </Link>
+    <div style={{ padding: 16 }}>
+      <h1>Sản phẩm</h1>
+
+      {updated && <div style={{ color: 'green', marginBottom: 8 }}>✅ Đã cập nhật dữ liệu mới</div>}
+
+      <div style={{ marginBottom: 12 }}>
+        <label>Sắp xếp theo: </label>
+        <select value={sortBy} onChange={e => setSortBy(e.target.value as any)}>
+          <option value="name">Tên</option>
+          <option value="price">Giá</option>
+          <option value="stock_quantity">Số lượng</option>
+        </select>
+      </div>
+
+      <div style={{ display: 'grid', gap: 12 }}>
+        {sortedProducts.map(p => (
+          <div key={p.id} style={{ border: '1px solid #ccc', padding: 12, borderRadius: 8 }}>
+            <strong>{p.name}</strong>
+            <div>Giá: {p.price} đ</div>
+            <div>Số lượng: {p.stock_quantity}</div>
+            <div>Trạng thái: {p.stock_status}</div>
+            {p.image_url && (
+              <img
+                src={p.image_url}
+                alt={p.name}
+                style={{ maxWidth: '100%', marginTop: 8, borderRadius: 4 }}
+                onError={async e => {
+                  const offlineURL = await resolveImage(p);
+                  if (offlineURL) (e.currentTarget as HTMLImageElement).src = offlineURL;
+                }}
+              />
+            )}
+          </div>
         ))}
       </div>
     </div>

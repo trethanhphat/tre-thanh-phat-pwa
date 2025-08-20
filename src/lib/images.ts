@@ -6,7 +6,7 @@ export const saveImageIfNotExists = async (url: string) => {
   const db = await initDB();
   const existing = await db.get(STORE_IMAGES, url);
   if (existing) {
-    console.log('Ảnh đã tồn tại IndexedDB:', url);
+    console.log('Ảnh đã tồn tại trong IndexedDB:', url);
     return; // ảnh đã có, không cần tải lại
   }
   try {
@@ -20,6 +20,7 @@ export const saveImageIfNotExists = async (url: string) => {
 };
 
 export const getImageURL = async (url: string) => {
+  if (!url) return ''; //
   const db = await initDB();
   const record = await db.get(STORE_IMAGES, url);
   if (record?.blob) {
