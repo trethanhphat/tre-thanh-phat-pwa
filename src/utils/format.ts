@@ -14,6 +14,8 @@ export function formatStockStatus(status: string | null): { text: string; color:
       return { text: 'Còn hàng', color: 'green' };
     case 'outofstock':
       return { text: 'Hết hàng', color: 'red' };
+    case 'onbackorder':
+      return { text: 'Hàng đặt', color: 'orange' };
     default:
       return { text: 'Đang cập nhật', color: 'gray' };
   }
