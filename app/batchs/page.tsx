@@ -6,11 +6,12 @@ import { useEffect, useState } from 'react';
 
 interface Batch {
   batch_id: string;
-  region_id: string;
+  region_name: string;
   planting_date: string;
   quantity: string;
   area: string;
   note: string;
+  batch_location: string;
 }
 
 export default function BatchListPage() {
@@ -61,7 +62,7 @@ export default function BatchListPage() {
               className="border p-2"
               style={{ border: '1px solid var(--color-border)', padding: '8px' }}
             >
-              Khu vực
+              Tên vùng trồng
             </th>
             <th
               className="border p-2"
@@ -87,6 +88,12 @@ export default function BatchListPage() {
             >
               Ghi chú
             </th>
+            <th
+              className="border p-2"
+              style={{ border: '1px solid var(--color-border)', padding: '8px' }}
+            >
+              Vị trí
+            </th>
           </tr>
         </thead>
         <tbody>
@@ -110,9 +117,9 @@ export default function BatchListPage() {
                   padding: '8px',
                   textAlign: 'center',
                 }}
-                data-label="Khu vực"
+                data-label="Tên vùng trồng"
               >
-                {batch.region_id}
+                {batch.region_name}
               </td>
               <td
                 className="border p-2"
@@ -157,6 +164,17 @@ export default function BatchListPage() {
                 data-label="Ghi chú"
               >
                 {batch.note || '—'}
+              </td>
+              <td
+                className="border p-2 text-blue-600 underline"
+                style={{
+                  border: '1px solid var(--color-border)',
+                  padding: '8px',
+                  textAlign: 'center',
+                }}
+                data-label="Vị trí"
+              >
+                <Link href={batch.batch_location || ''}>Mở bản đồ</Link>
               </td>
             </tr>
           ))}
