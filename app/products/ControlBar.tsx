@@ -103,7 +103,7 @@ export default function ControlBar({
         </div>
       </div>
 
-      {/* CSS responsive cho control bar */}
+      {/* CSS */}
       <style jsx>{`
         .control-bar {
           display: flex;
@@ -127,13 +127,29 @@ export default function ControlBar({
         .select {
           padding: 4px 6px;
         }
+        .pagination {
+          display: flex;
+          align-items: center;
+          gap: 6px;
+          flex-wrap: nowrap;
+        }
         .pagination button {
-          padding: 4px 8px;
+          padding: 6px 10px;
+          border: 1px solid var(--color-border, #ccc);
+          border-radius: 4px;
+          background: #fff;
+          cursor: pointer;
+        }
+        .pagination button:disabled {
+          opacity: 0.5;
+          cursor: not-allowed;
         }
         .page-input {
           width: 56px;
-          padding: 2px 6px;
-          margin: 0 4px;
+          padding: 6px;
+          border: 1px solid var(--color-border, #ccc);
+          border-radius: 4px;
+          text-align: center;
         }
         @media (max-width: 768px) {
           .control-bar {
