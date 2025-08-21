@@ -9,7 +9,7 @@ export const initDB = async () => {
   return openDB(DB_NAME, 1, {
     upgrade(db) {
       if (!db.objectStoreNames.contains(STORE_PRODUCTS)) {
-        db.createObjectStore(STORE_PRODUCTS, { keyPath: 'id' });
+        db.createObjectStore(STORE_PRODUCTS, { keyPath: 'id' }); // key là id sản phẩm từ trang gốc
       }
       if (!db.objectStoreNames.contains(STORE_IMAGES)) {
         db.createObjectStore(STORE_IMAGES, { keyPath: 'url' }); // key là URL ảnh gốc

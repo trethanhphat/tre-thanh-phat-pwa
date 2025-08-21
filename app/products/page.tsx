@@ -2,12 +2,12 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import ProductsTable from './ProductsTable';
-import { Product, loadProductsFromDB, syncProducts } from '@/lib/products';
-import { getImageURL } from '@/lib/images';
+import ProductsTable from './ProductsTable'; // View hiển thị bảng sản phẩm
+import { Product, loadProductsFromDB, syncProducts } from '@/lib/products'; // Nguồn dữ liệu sản phẩm
+import { getImageURL } from '@/lib/images'; // Nguồn dữ liệu ảnh
 
-type SortField = 'name' | 'price' | 'stock_quantity' | 'stock_status';
-type SortOrder = 'asc' | 'desc';
+type SortField = 'stock_status' | 'price' | 'stock_quantity' | 'name'; // Các trường có thể sắp xếp
+type SortOrder = 'asc' | 'desc'; // Chiều có thể sắp xếp
 
 export default function ProductsListPage() {
   const [products, setProducts] = useState<Product[]>([]);
@@ -15,8 +15,9 @@ export default function ProductsListPage() {
   const [loading, setLoading] = useState(true); // lần đầu: DB trống -> spinner
   const [offline, setOffline] = useState(false); // đang hiển thị offline
   const [justUpdated, setJustUpdated] = useState(false); // banner "Đã cập nhật"
-  const [sortField, setSortField] = useState<SortField>('name');
-  const [sortOrder, setSortOrder] = useState<SortOrder>('asc');
+  const [errorMessage, setErrorMessage] = useState<string | null>(null); // ✅ thêm state lỗi
+  const [sortField, setSortField] = useState<SortField>('stock_status'); // Tiêu chí sắp xếp mặc định
+  const [sortOrder, setSortOrder] = useState<SortOrder>('asc'); // Chiều sắp xếp mặc định
 
   // giữ tham chiếu để so sánh & biết trạng thái trước đó
   const productsRef = useRef<Product[]>([]);
@@ -72,7 +73,7 @@ export default function ProductsListPage() {
         ? payload
         : payload?.products ?? payload?.data ?? [];
 
-      if (!Array.isArray(fresh)) throw new Error('API không trả về mảng sản phẩm hợp lệ');
+      if (!Array.isArray(fresh)) throw new Error('⚠️ API không trả về mảng sản phẩm hợp lệ');
 
       // 🎯 Tránh xoá DB khi API tạm thời trả rỗng
       if (fresh.length === 0) {
@@ -81,6 +82,7 @@ export default function ProductsListPage() {
       }
 
       await syncProducts(fresh);
+      setErrorMessage(null);
 
       // chỉ setState khi khác
       const prev = productsRef.current;
@@ -97,11 +99,13 @@ export default function ProductsListPage() {
       setLoading(false);
       if (wasOffline) {
         setJustUpdated(true);
-        setTimeout(() => setJustUpdated(false), 2500);
+        // setTimeout(() => setJustUpdated(false), 2500); // Thời gian ẩn thông báo đã cập nhật
       }
     } catch (err) {
       console.warn('⚠️ Không thể tải online:', err);
+      setErrorMessage(err.message || '⚠️ Có lỗi khi tải dữ liệu'); // ✅ thêm dòng này
       if (productsRef.current.length === 0) setLoading(false);
+      setOffline(true); // Nếu lỗi thì hiển thị offline
     }
   };
 
@@ -150,19 +154,16 @@ export default function ProductsListPage() {
       <h1>Danh sách sản phẩm</h1>
 
       {/* trạng thái hiển thị */}
-      {offline && (
-        <p style={{ color: 'orange', marginBottom: 8 }}>
-          ⚠️ Đang hiển thị dữ liệu offline và đang chờ cập nhật...
-        </p>
-      )}
+      {errorMessage && <p style={{ color: 'red', marginBottom: 8 }}>{errorMessage}</p>}
+      {offline && <p style={{ color: 'orange', marginBottom: 8 }}>⚠️ Đang chờ cập nhật...</p>}
       {justUpdated && !offline && (
         <p style={{ color: 'green', marginBottom: 8 }}>✅ Đã cập nhật dữ liệu mới</p>
       )}
 
       {loading ? (
-        <p>Đang tải dữ liệu...</p>
+        <p>⚠️ Đang tải dữ liệu...</p>
       ) : products.length === 0 ? (
-        <p>Không có sản phẩm</p>
+        <p>⚠️ Không có sản phẩm</p>
       ) : (
         <ProductsTable
           products={sortedProducts}
