@@ -1,125 +1,192 @@
 // File: app/products/ProductsTable.tsx
 'use client';
-import React from 'react';
-import { Product } from '@/lib/products'; // Kiểu dữ liệu sản phẩm (id, name, price,...)
+
+import Link from 'next/link';
+import { Product } from '@/lib/products'; // ✅ dùng type gốc của bạn
+import { formatPrice, formatStockStatus } from '@/utils/format'; // ✅ giữ logic format sẵn có
 
 /**
- * Props mà ProductsTable nhận từ component cha (page.tsx):
- * - products: danh sách sản phẩm đã lọc, sắp xếp, phân trang
- * - imageCache: map { productId -> url ảnh } (có thể online hoặc offline blob)
- * - sortField / sortOrder: trạng thái đang sắp xếp theo cột nào, chiều nào
- * - onSortChange: callback khi user click vào tiêu đề cột để đổi sort
+ * Component này CHỈ lo HIỂN THỊ bảng.
+ * - Nhận danh sách đã phân trang từ page.tsx
+ * - Nhận imageCache để hiện ảnh sản phẩm (URL online hoặc blob)
+ * - Giữ nguyên HAI hàm sort icon: renderSortArrow + renderSortSpan (KHÔNG bỏ)
+ * - Highlight từ khoá search trong tên sản phẩm
  */
-type ProductsTableProps = {
-  products: Product[];
-  imageCache: Record<number, string>;
-  sortField: 'stock_status' | 'price' | 'stock_quantity' | 'name';
+interface ProductsTableProps {
+  products: Product[]; // ✅ đã phân trang
+  imageCache: { [id: number]: string };
+  sortField: 'name' | 'price' | 'stock_quantity' | 'stock_status';
   sortOrder: 'asc' | 'desc';
-  onSortChange: (field: 'stock_status' | 'price' | 'stock_quantity' | 'name') => void;
-};
+  onSortChange: (field: 'name' | 'price' | 'stock_quantity' | 'stock_status') => void;
+  searchText?: string;
+  pageSizeOptions?: number[]; // (giữ lại nếu bạn có nhu cầu tái dùng)
+}
 
-/**
- * Component hiển thị bảng sản phẩm.
- * Dữ liệu gốc (fetch từ API + sync IndexedDB) được xử lý ở page.tsx,
- * sau đó truyền vào ProductsTable qua props.
- */
 export default function ProductsTable({
   products,
   imageCache,
   sortField,
   sortOrder,
   onSortChange,
+  searchText = '',
+  pageSizeOptions = [5, 10, 20, 50], // (không dùng ở đây nhưng GIỮ lại theo yêu cầu "không bỏ gì")
 }: ProductsTableProps) {
-  /**
-   * Hàm hiển thị mũi tên sort ▲ ▼ ở tiêu đề cột.
-   * Nếu cột chưa được chọn sort thì trả về ↕️ (icon trung tính).
-   */
+  // ================== ICON SORT Ở HEADER ==================
+  // ✅ KHÔNG BỎ: Giữ nguyên theo bạn
+  const renderSortArrow = (field: string) => {
+    if (sortField !== (field as any)) return null;
+    return sortOrder === 'asc' ? ' ▲' : ' ▼';
+  };
+
+  // ================== ICON SORT TRONG CELL ==================
+  // ✅ KHÔNG BỎ: Giữ nguyên theo bạn
   const renderSortSpan = (field: 'name' | 'price' | 'stock_quantity' | 'stock_status') => (
-    <span
-      onClick={() => onSortChange(field)} // Khi click => gọi hàm cha đổi sortField/sortOrder
-      style={{ cursor: 'pointer', marginLeft: 4 }}
-    >
+    <span onClick={() => onSortChange(field)} style={{ cursor: 'pointer', marginLeft: 4 }}>
       {sortField === field ? (sortOrder === 'asc' ? '⬆️' : '⬇️') : '↕️'}
     </span>
   );
 
+  // Helper: highlight searchText trong tên (escape regex để an toàn)
+  const escapeReg = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
   return (
-    <div style={{ overflowX: 'auto' }}>
-      {/* Bảng hiển thị sản phẩm */}
-      <table style={{ borderCollapse: 'collapse', width: '100%' }}>
-        <thead>
+    <>
+      <table style={{ borderCollapse: 'collapse', width: '100%', border: '1px solid #ccc' }}>
+        <thead
+          style={{
+            position: 'sticky',
+            top: 0,
+            background: 'var(--color-primary)',
+            color: 'var(--color-secondary)',
+            zIndex: 1,
+          }}
+        >
           <tr>
-            {/* Ảnh sản phẩm (không sort) */}
-            <th style={{ borderBottom: '1px solid #ccc', padding: 8 }}>Ảnh</th>
-
-            {/* Tên sản phẩm (có sort) */}
-            <th style={{ borderBottom: '1px solid #ccc', padding: 8 }}>
-              Tên {renderSortSpan('name')}
+            <th style={{ border: '1px solid var(--color-border)', padding: '8px' }}>
+              Ảnh sản phẩm
             </th>
 
-            {/* Giá sản phẩm (có sort) */}
-            <th style={{ borderBottom: '1px solid #ccc', padding: 8 }}>
-              Giá {renderSortSpan('price')}
+            <th
+              style={{ border: '1px solid var(--color-border)', padding: '8px', cursor: 'pointer' }}
+              onClick={() => onSortChange('name')}
+            >
+              Tên sản phẩm{renderSortArrow('name')}
             </th>
 
-            {/* Tồn kho (có sort) */}
-            <th style={{ borderBottom: '1px solid #ccc', padding: 8 }}>
-              Tồn kho {renderSortSpan('stock_quantity')}
+            <th
+              style={{ border: '1px solid var(--color-border)', padding: '8px', cursor: 'pointer' }}
+              onClick={() => onSortChange('price')}
+            >
+              Giá{renderSortArrow('price')}
             </th>
 
-            {/* Trạng thái tồn (có sort) */}
-            <th style={{ borderBottom: '1px solid #ccc', padding: 8 }}>
-              Trạng thái {renderSortSpan('stock_status')}
+            <th
+              style={{ border: '1px solid var(--color-border)', padding: '8px', cursor: 'pointer' }}
+              onClick={() => onSortChange('stock_quantity')}
+            >
+              Tồn kho{renderSortArrow('stock_quantity')}
+            </th>
+
+            <th
+              style={{ border: '1px solid var(--color-border)', padding: '8px', cursor: 'pointer' }}
+              onClick={() => onSortChange('stock_status')}
+            >
+              Trạng thái{renderSortArrow('stock_status')}
             </th>
           </tr>
         </thead>
 
         <tbody>
           {products.map(p => (
-            <tr key={p.id}>
-              {/* Ảnh: lấy từ imageCache (truyền từ page.tsx) */}
-              <td style={{ borderBottom: '1px solid #eee', padding: 8 }}>
+            <tr
+              key={p.id}
+              style={{
+                border: '1px solid var(--color-border)',
+                transition: 'background 0.2s',
+              }}
+              onMouseEnter={e => (e.currentTarget.style.background = '#f0f0f0')}
+              onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
+            >
+              {/* Ảnh */}
+              <td
+                style={{
+                  border: '1px solid var(--color-border)',
+                  padding: '8px',
+                  textAlign: 'center',
+                }}
+                data-label="Ảnh sản phẩm"
+              >
                 {imageCache[p.id] ? (
-                  <img
-                    src={imageCache[p.id]}
-                    alt={p.name}
-                    style={{ width: 50, height: 50, objectFit: 'cover' }}
-                  />
+                  <Link href={`/product/${p.id}`}>
+                    <img src={imageCache[p.id]} alt={p.name} style={{ maxWidth: '150px' }} />
+                  </Link>
                 ) : (
-                  <span style={{ color: '#999' }}>No image</span>
+                  <span>...</span>
                 )}
               </td>
 
-              {/* Tên sản phẩm */}
-              <td style={{ borderBottom: '1px solid #eee', padding: 8 }}>
-                {p.name || '(Không có tên)'}
-              </td>
-
-              {/* Giá */}
-              <td style={{ borderBottom: '1px solid #eee', padding: 8 }}>
-                {p.price ? `${p.price} ₫` : '-'}
-              </td>
-
-              {/* Số lượng tồn */}
-              <td style={{ borderBottom: '1px solid #eee', padding: 8 }}>
-                {p.stock_quantity ?? '-'}
-              </td>
-
-              {/* Trạng thái tồn (in đậm nếu còn hàng) */}
+              {/* Tên + highlight + icon sort */}
               <td
-                style={{
-                  borderBottom: '1px solid #eee',
-                  padding: 8,
-                  fontWeight: p.stock_status === 'instock' ? 'bold' : 'normal',
-                  color: p.stock_status === 'instock' ? 'green' : 'red',
-                }}
+                style={{ border: '1px solid var(--color-border)', padding: '8px' }}
+                data-label="Tên sản phẩm"
               >
-                {p.stock_status || '-'}
+                <Link
+                  href={`/product/${p.id}`}
+                  style={{ color: 'var(--color-link)', textDecoration: 'underline' }}
+                >
+                  {searchText
+                    ? String(p.name)
+                        .split(new RegExp(`(${escapeReg(searchText)})`, 'gi'))
+                        .map((part, i) =>
+                          part.toLowerCase() === searchText.toLowerCase() ? (
+                            <mark key={i}>{part}</mark>
+                          ) : (
+                            part
+                          )
+                        )
+                    : p.name}
+                </Link>
+                {renderSortSpan('name')}
+              </td>
+
+              {/* Giá + icon sort */}
+              <td
+                style={{ border: '1px solid var(--color-border)', padding: '8px' }}
+                data-label="Giá"
+              >
+                {formatPrice((p as any).price)} {renderSortSpan('price')}
+              </td>
+
+              {/* Tồn kho + icon sort */}
+              <td
+                style={{ border: '1px solid var(--color-border)', padding: '8px' }}
+                data-label="Tồn kho"
+              >
+                {(p as any).stock_quantity ?? '-'} {renderSortSpan('stock_quantity')}
+              </td>
+
+              {/* Trạng thái + màu + icon sort */}
+              <td
+                style={{ border: '1px solid var(--color-border)', padding: '8px' }}
+                data-label="Trạng thái"
+              >
+                {(() => {
+                  const { text, color } = formatStockStatus((p as any).stock_status);
+                  return <span style={{ color }}>{text}</span>;
+                })()}
+                {renderSortSpan('stock_status')}
               </td>
             </tr>
           ))}
         </tbody>
       </table>
-    </div>
+
+      {/* style slot giữ chỗ nếu bạn cần */}
+      <style jsx>{`
+        td::before {
+          /* bạn có thể thêm responsive label ở mobile tại đây nếu muốn */
+        }
+      `}</style>
+    </>
   );
 }
