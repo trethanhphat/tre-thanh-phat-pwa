@@ -194,12 +194,6 @@ button:hover,
 }
 
 /* CSS của Header*/
-header,
-div.menu div.header {
-  padding: 0 1.5rem 1.5rem;
-  text-align: center;
-  line-height: 1;
-}
 
 header a,
 div.menu div.header a {
@@ -212,7 +206,6 @@ header p {
 }
 
 /* Thêm mới cho header co lại */
-
 .header-wrapper {
   background: var(--color-primary);
   color: var(--color-secondary);
@@ -222,37 +215,37 @@ header p {
   z-index: 1;
   padding: 1rem 1.5rem;
   text-align: center;
-  transition: all 0.5s ease;
+  transform-origin: top center;
+  transition: transform 0.3s ease, background 0.3s ease;
 }
 
+/* Khi shrink → thu nhỏ toàn bộ header */
 .header-wrapper.shrink {
-  padding: 0.25rem 1.5rem;
+  transform: scale(0.9);
 }
 
+/* Title */
 .app-title {
   color: var(--color-secondary);
   font-size: 1.8rem;
   margin-bottom: 0.25rem;
-  transition: font-size 0.4s ease, margin 0.4s ease;
+  transition: margin 0.3s ease;
 }
 
 .header-wrapper.shrink .app-title {
-  font-size: 1.3rem;
   margin-bottom: 0;
 }
 
-/* Description — fade out thay vì remove */
+/* Description */
 .app-description {
+  margin: 0;
+  font-size: 1rem;
   opacity: 1;
-  max-height: 2rem; /* giữ chỗ */
-  overflow: hidden;
-  transition: opacity 0.4s ease, max-height 0.4s ease, margin 0.4s ease;
+  transition: opacity 0.3s ease;
 }
 
 .header-wrapper.shrink .app-description {
   opacity: 0;
-  max-height: 0; /* co lại */
-  margin: 0; /* bỏ khoảng trống */
 }
 
 /* CSS của Menu */
@@ -339,11 +332,6 @@ nav button span {
 .menu .bottom button {
   background-color: var(--color-accent);
   color: var(--color-primary);
-}
-.app-description {
-  margin: 0;
-  font-size: 1rem;
-  transition: opacity 0.3s ease;
 }
 
 img.max-w-full {
