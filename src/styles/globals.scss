@@ -248,6 +248,18 @@ header p {
   pointer-events: none; /* tránh tương tác khi gần như ẩn */
 }
 
+.app-description {
+  opacity: 1;
+  max-height: auto; /* hoặc auto */
+  overflow: hidden;
+  transition: opacity 0.3s ease, max-height 0.3s ease;
+}
+
+.header-wrapper.shrink .app-description {
+  opacity: 0;
+  max-height: 0;
+}
+
 /* CSS của Menu */
 .nav-bar {
   display: flex;

@@ -72,7 +72,7 @@ export default function Header() {
   return (
     <header ref={ref} className="header-wrapper header-staged">
       <a href={`//${appUrl}`}>
-        <h1 className="app-title">{appName}</h1>
+        <h1 className="app-title font-ttp">{appName}</h1>
       </a>
       <p className="app-description">{appDescription}</p>
     </header>
