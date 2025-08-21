@@ -206,56 +206,33 @@ header p {
 }
 
 /* Thêm mới cho header co lại */
-/* ==== HEADER MƯỢT 3 GIAI ĐOẠN ==== */
-.header-wrapper.header-auto {
-  /* màu & vị trí */
+.header-wrapper {
   background: var(--color-primary);
   color: var(--color-secondary);
   border-bottom: 1px solid var(--color-border);
   position: sticky;
   top: 0;
   z-index: 10;
-
-  /* CSS variables điều khiển bằng JS (có giá trị mặc định cho SSR) */
-  --padY: 16px; /* padding-block (trên/dưới) */
-  --titleSize: 28.8px; /* cỡ chữ tiêu đề */
-  --descH: 40px; /* fallback chiều cao mô tả (sẽ đo lại bằng JS) */
-  --descMax: var(--descH);
-  --descOpacity: 1;
-
-  /* layout */
-  padding: var(--padY) 1.5rem;
   text-align: center;
-
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center; /* luôn căn giữa dọc */
+  padding: var(--padTop, 1rem) 1.5rem;
+  transition: padding 0.3s ease;
 }
 
-/* Tiêu đề: dùng đúng font của bạn */
 .app-title {
-  font-family: var(--font-ttp); /* giữ font TTP */
+  font-family: var(--font-ttp);
   font-weight: 700;
-  color: var(--color-secondary);
-  font-size: var(--titleSize);
-  line-height: 1.1;
+  font-size: var(--titleSize, 1.8rem);
   margin: 0;
+  transition: font-size 0.3s ease;
 }
 
-/* Mô tả: mờ dần & co chiều cao thực, không để nền thừa */
 .app-description {
   margin: 0.25rem 0 0;
   font-size: 1rem;
-  opacity: var(--descOpacity);
-  max-height: var(--descMax);
+  opacity: var(--descOpacity, 1);
+  max-height: var(--descMax, 100px);
   overflow: hidden;
-}
-
-/* Link trong header giữ màu kế thừa */
-.header-wrapper a {
-  color: inherit;
-  text-decoration: none;
+  transition: opacity 0.3s ease, max-height 0.3s ease;
 }
 
 /* CSS của Menu */

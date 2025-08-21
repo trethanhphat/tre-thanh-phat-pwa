@@ -4,82 +4,54 @@
 import { useEffect, useRef } from 'react';
 import { appName, appDescription, appUrl } from '@/lib/env';
 
-// clamp về [min, max]
-const clamp = (n: number, min = 0, max = 1) => Math.min(max, Math.max(min, n));
-// nội suy tuyến tính
-const lerp = (a: number, b: number, t: number) => a + (b - a) * t;
-
 export default function Header() {
-  const hdrRef = useRef<HTMLElement | null>(null);
-  const descRef = useRef<HTMLParagraphElement | null>(null);
+  const headerRef = useRef<HTMLElement>(null);
+  const descRef = useRef<HTMLParagraphElement>(null);
 
   useEffect(() => {
-    const el = hdrRef.current;
+    const el = headerRef.current;
     const desc = descRef.current;
-    if (!el) return;
+    if (!el || !desc) return;
 
-    // ==== NGƯỠNG PX CHO 3 GIAI ĐOẠN ====
-    const T1 = 80; // 0 -> T1: ẩn dần mô tả (opacity & max-height)
-    const T2 = 80; // T1 -> T1+T2: co padding (nền)
-    const T3 = 80; // T1+T2 -> T1+T2+T3: thu nhỏ cỡ chữ tiêu đề
-
-    // ==== THÔNG SỐ ĐÍCH ====
-    const PAD_START = 16; // px (padding-block lúc top)
-    const PAD_END = 6; // px (padding-block khi đã co nền)
-    const TITLE_START = 28.8; // px ~ 1.8rem (cỡ chữ tiêu đề lúc top)
-    const TITLE_END = 20.8; // px ~ 1.3rem (khi đã nhỏ)
-
-    // đo chiều cao thực của mô tả để co gọn mượt (kể cả nhiều dòng)
+    // đo chiều cao thật của description và set vào CSS var
     const measureDesc = () => {
-      const h = desc?.offsetHeight ?? 0;
-      el.style.setProperty('--descH', `${h}px`); // chiều cao tối đa khi hiện
+      const h = desc.scrollHeight; // chiều cao nội dung thật
+      el.style.setProperty('--descH', `${h}px`);
     };
 
-    let ticking = false;
+    // cập nhật style khi cuộn
     const update = () => {
-      ticking = false;
       const y = window.scrollY;
+      const T1 = 80,
+        T2 = 80; // ngưỡng px
+      const opacity = Math.max(0, 1 - y / T1);
+      const padding = Math.max(0.25, 1 - ((y - T1) / T2) * 0.75);
 
-      // Giai đoạn 1: mô tả (opacity + max-height)
-      const p1 = clamp(1 - y / T1); // 1 -> 0
-      el.style.setProperty('--descOpacity', String(p1));
-      el.style.setProperty('--descMax', `calc(var(--descH) * ${p1.toFixed(3)})`);
-
-      // Giai đoạn 2: co nền (padding-block)
-      const p2 = clamp((y - T1) / T2); // 0 -> 1
-      const pad = Math.round(lerp(PAD_START, PAD_END, p2));
-      el.style.setProperty('--padY', `${pad}px`);
-
-      // Giai đoạn 3: thu nhỏ tiêu đề (font-size)
-      const p3 = clamp((y - T1 - T2) / T3); // 0 -> 1
-      const titleSize = lerp(TITLE_START, TITLE_END, p3);
-      el.style.setProperty('--titleSize', `${titleSize}px`);
+      el.style.setProperty('--descOpacity', `${opacity}`);
+      el.style.setProperty('--descMax', opacity > 0 ? `${desc.scrollHeight}px` : '0px');
+      el.style.setProperty('--padTop', `${padding}rem`);
+      el.style.setProperty('--titleSize', `${1.8 - Math.min(1.8 - 1.3, (y / (T1 + T2)) * 0.5)}rem`);
     };
 
-    const onScroll = () => {
-      if (!ticking) {
-        ticking = true;
-        requestAnimationFrame(update);
-      }
-    };
+    // chờ React render xong rồi đo
+    setTimeout(() => {
+      measureDesc();
+      update();
+    }, 0);
 
-    // đo khi mount & khi resize (để mô tả nhiều dòng vẫn mượt)
-    measureDesc();
-    update();
-
-    window.addEventListener('scroll', onScroll, { passive: true });
+    window.addEventListener('scroll', update, { passive: true });
     window.addEventListener('resize', measureDesc);
+
     return () => {
-      window.removeEventListener('scroll', onScroll);
+      window.removeEventListener('scroll', update);
       window.removeEventListener('resize', measureDesc);
     };
   }, []);
 
   return (
-    <header ref={hdrRef} className="header-wrapper header-auto">
+    <header ref={headerRef} className="header-wrapper">
       <a href={`//${appUrl}`}>
-        {/* Giữ đúng font TTP của bạn */}
-        <h1 className="app-title font-ttp">{appName}</h1>
+        <h1 className="font-ttp app-title">{appName}</h1>
       </a>
       <p ref={descRef} className="app-description">
         {appDescription}
