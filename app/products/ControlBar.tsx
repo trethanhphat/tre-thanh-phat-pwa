@@ -1,15 +1,17 @@
-// app/products/ControlBar.tsx
+// File: app/products/ControlBar.tsx
+'use client';
+
 import React from 'react';
 
-interface Props {
+type Props = {
   searchText: string;
   setSearchText: (v: string) => void;
   pageSize: number;
-  setPageSize: (v: number) => void;
+  setPageSize: (n: number) => void;
   currentPage: number;
-  setCurrentPage: (v: number) => void;
+  setCurrentPage: (n: number) => void;
   totalPages: number;
-}
+};
 
 export default function ControlBar({
   searchText,
@@ -20,100 +22,154 @@ export default function ControlBar({
   setCurrentPage,
   totalPages,
 }: Props) {
+  const handlePageInput = (e: React.ChangeEvent<HTMLInputElement>) => {
+    let val = Number(e.target.value);
+    if (isNaN(val) || val < 1) val = 1;
+    if (val > totalPages) val = totalPages;
+    setCurrentPage(val);
+  };
+
   return (
-    <div className="control-bar">
-      {/* Search */}
-      <input
-        type="text"
-        placeholder="Tìm kiếm..."
-        value={searchText}
-        onChange={e => setSearchText(e.target.value)}
-        className="search-input"
-      />
-
-      {/* Page size */}
-      <select value={pageSize} onChange={e => setPageSize(Number(e.target.value))}>
-        <option value={10}>10 / trang</option>
-        <option value={20}>20 / trang</option>
-        <option value={50}>50 / trang</option>
-      </select>
-
-      {/* Pagination */}
-      <div className="pagination-group">
-        <button disabled={currentPage === 1} onClick={() => setCurrentPage(1)}>
-          «
-        </button>
-        <button
-          disabled={currentPage === 1}
-          onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
-        >
-          ‹
-        </button>
-
-        <span className="page-indicator">
-          Trang{' '}
+    <>
+      <div className="control-bar">
+        {/* Nhóm 1: Ô tìm kiếm */}
+        <div className="ctrl-group">
           <input
-            type="number"
-            value={currentPage}
-            min={1}
-            max={totalPages}
+            type="text"
+            placeholder="🔎 Tìm theo tên..."
+            value={searchText}
             onChange={e => {
-              let val = Number(e.target.value);
-              if (isNaN(val) || val < 1) val = 1;
-              if (val > totalPages) val = totalPages;
-              setCurrentPage(val);
+              setSearchText(e.target.value);
+              setCurrentPage(1);
             }}
-            className="page-input"
-          />{' '}
-          / {totalPages}
-        </span>
+            className="search-input"
+          />
+        </div>
 
-        <button
-          disabled={currentPage === totalPages}
-          onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
-        >
-          ›
-        </button>
-        <button disabled={currentPage === totalPages} onClick={() => setCurrentPage(totalPages)}>
-          »
-        </button>
+        {/* Nhóm 2: Số sản phẩm/trang */}
+        <div className="ctrl-group">
+          <label>
+            Hiển thị:&nbsp;
+            <select
+              value={pageSize}
+              onChange={e => {
+                setPageSize(Number(e.target.value));
+                setCurrentPage(1);
+              }}
+              className="select"
+            >
+              {[5, 10, 20, 50].map(n => (
+                <option key={n} value={n}>
+                  {n}
+                </option>
+              ))}
+            </select>
+            &nbsp;sản phẩm/trang
+          </label>
+        </div>
+
+        {/* Nhóm 3: Pagination */}
+        <div className="ctrl-group pagination">
+          <button onClick={() => setCurrentPage(1)} disabled={currentPage === 1}>
+            «
+          </button>
+          <button
+            onClick={() => setCurrentPage(Math.max(currentPage - 1, 1))}
+            disabled={currentPage === 1}
+          >
+            ‹
+          </button>
+
+          <span className="page-indicator">
+            Trang{' '}
+            <input
+              type="number"
+              value={currentPage}
+              min={1}
+              max={totalPages}
+              onChange={handlePageInput}
+              className="page-input"
+            />{' '}
+            / {totalPages}
+          </span>
+
+          <button
+            onClick={() => setCurrentPage(Math.min(currentPage + 1, totalPages))}
+            disabled={currentPage === totalPages}
+          >
+            ›
+          </button>
+          <button onClick={() => setCurrentPage(totalPages)} disabled={currentPage === totalPages}>
+            »
+          </button>
+        </div>
       </div>
 
+      {/* CSS */}
       <style jsx>{`
         .control-bar {
           display: flex;
-          flex-wrap: wrap;
-          gap: 0.5rem;
           align-items: center;
-          margin: 0.5rem 0;
+          gap: 12px;
+          justify-content: space-between;
+          flex-wrap: wrap;
+          margin: 10px 0 12px;
+        }
+        .ctrl-group {
+          display: flex;
+          align-items: center;
+          gap: 8px;
         }
         .search-input {
-          flex: 1;
-          min-width: 120px;
-          padding: 0.25rem 0.5rem;
+          padding: 6px 10px;
+          min-width: 240px;
+          border: 1px solid var(--color-border, #ccc);
+          border-radius: 6px;
         }
-        .pagination-group {
-          display: flex;
-          flex-wrap: nowrap; /* ✅ buộc nằm 1 dòng */
-          gap: 0.25rem;
-          align-items: center;
-          overflow-x: auto; /* ✅ tránh tràn trên mobile */
+        .select {
+          padding: 4px 6px;
         }
-        .pagination-group button {
-          padding: 0.25rem 0.5rem;
-          min-width: 2rem;
-        }
-        .page-indicator {
+        .pagination {
           display: flex;
           align-items: center;
+          gap: 6px;
+          flex-wrap: nowrap;
+          overflow-x: auto; /* Cho mobile trượt ngang thay vì xuống dòng */
+          padding: 2px;
+        }
+        .pagination button {
+          padding: 6px 10px;
+          border: 1px solid var(--color-border, #ccc);
+          border-radius: 4px;
+          background: #fff;
+          cursor: pointer;
           white-space: nowrap;
-          gap: 0.25rem;
+        }
+        .pagination button:disabled {
+          opacity: 0.5;
+          cursor: not-allowed;
         }
         .page-input {
-          width: 3rem;
+          width: 56px;
+          padding: 6px;
+          border: 1px solid var(--color-border, #ccc);
+          border-radius: 4px;
           text-align: center;
         }
+        @media (max-width: 768px) {
+          .control-bar {
+            flex-direction: column;
+            align-items: stretch;
+            gap: 10px;
+          }
+          .ctrl-group {
+            justify-content: space-between;
+          }
+          .pagination {
+            justify-content: flex-start;
+          }
+        }
       `}</style>
-    </div>
+    </>
   );
 }
