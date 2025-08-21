@@ -46,6 +46,11 @@ export default function ProductsTable({
     setCurrentPage(page);
   };
 
+  const renderSortArrow = (field: string) => {
+    if (sortField !== field) return null;
+    return sortOrder === 'asc' ? ' ▲' : ' ▼';
+  };
+
   const renderSortSpan = (field: 'name' | 'price' | 'stock_quantity' | 'stock_status') => (
     <span onClick={() => onSortChange(field)} style={{ cursor: 'pointer', marginLeft: 4 }}>
       {sortField === field ? (sortOrder === 'asc' ? '⬆️' : '⬇️') : '↕️'}
@@ -114,23 +119,27 @@ export default function ProductsTable({
             </th>
             <th
               style={{ border: '1px solid var(--color-border)', padding: '8px', cursor: 'pointer' }}
+              onClick={() => onSortChange('name')}
             >
-              Tên sản phẩm {renderSortSpan('name')}
+              Tên sản phẩm {renderSortArrow('name')}
             </th>
             <th
               style={{ border: '1px solid var(--color-border)', padding: '8px', cursor: 'pointer' }}
+              onClick={() => onSortChange('price')}
             >
-              Giá {renderSortSpan('price')}
+              Giá {renderSortArrow('price')}
             </th>
             <th
               style={{ border: '1px solid var(--color-border)', padding: '8px', cursor: 'pointer' }}
+              onClick={() => onSortChange('stock_quantity')}
             >
-              Tồn kho {renderSortSpan('stock_quantity')}
+              Tồn kho {renderSortArrow('stock_quantity')}
             </th>
             <th
               style={{ border: '1px solid var(--color-border)', padding: '8px', cursor: 'pointer' }}
+              onClick={() => onSortChange('stock_status')}
             >
-              Trạng thái {renderSortSpan('stock_status')}
+              Trạng thái {renderSortArrow('stock_status')}
             </th>
           </tr>
         </thead>
@@ -213,10 +222,6 @@ export default function ProductsTable({
 
       <style jsx>{`
         td::before {
-          content: attr(data-label);
-          font-weight: bold;
-          margin-right: 10px;
-          color: var(--color-primary);
         }
       `}</style>
     </>
