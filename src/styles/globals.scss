@@ -213,12 +213,17 @@ header p {
   position: sticky;
   top: 0;
   z-index: 10;
-  padding: 0.5rem 1.5rem 2rem; /* luôn chừa chỗ cho description */
+  padding: 0.5rem 1.5rem;
   text-align: center;
-  transition: padding 0.3s ease;
+  min-height: 4.5rem; /* ✅ luôn cố định chiều cao, không nháy */
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  transition: all 0.3s ease;
 }
 
-/* Tiêu đề */
+/* Title */
 .app-title {
   color: var(--color-secondary);
   font-size: 1.8rem;
@@ -230,19 +235,16 @@ header p {
   font-size: 1.4rem;
 }
 
-/* Description không làm thay đổi layout */
+/* Description */
 .app-description {
-  position: absolute; /* ✅ tách khỏi flow */
-  left: 50%;
-  transform: translateX(-50%);
-  bottom: 0.3rem; /* nằm dưới app-title */
-  width: 100%;
+  font-size: 1rem;
+  margin-top: 0.2rem;
   opacity: 1;
   transition: opacity 0.3s ease;
 }
 
 .header-wrapper.shrink .app-description {
-  opacity: 0;
+  opacity: 0; /* ✅ biến mất nhưng vẫn giữ layout */
 }
 
 /* CSS của Menu */
