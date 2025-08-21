@@ -1,26 +1,27 @@
-// ✅ File: app/products/table/page.tsx
+// ✅ File: app/products/page.tsx
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import ProductsTable from '../all/ProductsTable';
-import { Product, loadProductsFromDB, syncProducts } from '@/lib/products';
-import { getImageURL } from '@/lib/images';
+import ProductsTable from './ProductsTable'; // View hiển thị bảng sản phẩm
+import { Product, loadProductsFromDB, syncProducts } from '@/lib/products'; // Nguồn dữ liệu sản phẩm
+import { getImageURL } from '@/lib/images'; // Nguồn dữ liệu ảnh
 
-type SortField = 'name' | 'price' | 'stock_quantity';
-type SortOrder = 'asc' | 'desc';
+type SortField = 'stock_status' | 'price' | 'stock_quantity' | 'name'; // Các trường có thể sắp xếp
+type SortOrder = 'asc' | 'desc'; // Chiều có thể sắp xếp
 
 export default function ProductsListPage() {
   const [products, setProducts] = useState<Product[]>([]);
   const [imageCache, setImageCache] = useState<Record<number, string>>({});
-  const [loading, setLoading] = useState(true); // chỉ true khi chưa có offline và đang đợi online
-  const [offline, setOffline] = useState(false); // đang hiển thị dữ liệu offline
+  const [loading, setLoading] = useState(true); // lần đầu: DB trống -> spinner
+  const [offline, setOffline] = useState(false); // đang hiển thị offline
   const [justUpdated, setJustUpdated] = useState(false); // banner "Đã cập nhật"
-  const [sortField, setSortField] = useState<SortField>('name');
-  const [sortOrder, setSortOrder] = useState<SortOrder>('asc');
+  const [errorMessage, setErrorMessage] = useState<string | null>(null); // ✅ thêm state lỗi
+  const [sortField, setSortField] = useState<SortField>('stock_status'); // Tiêu chí sắp xếp mặc định
+  const [sortOrder, setSortOrder] = useState<SortOrder>('asc'); // Chiều sắp xếp mặc định
 
+  // giữ tham chiếu để so sánh & biết trạng thái trước đó
   const productsRef = useRef<Product[]>([]);
   const offlineRef = useRef<boolean>(false);
-
   useEffect(() => {
     productsRef.current = products;
   }, [products]);
@@ -28,7 +29,7 @@ export default function ProductsListPage() {
     offlineRef.current = offline;
   }, [offline]);
 
-  // Tải ảnh song song -> trả về map { id: objectURLOrDirectUrl }
+  // tải ảnh song song và trả map id -> url (online hoặc blob offline)
   const loadImages = async (list: Product[]) => {
     const entries = await Promise.all(
       list.map(async p => {
@@ -39,7 +40,7 @@ export default function ProductsListPage() {
     return Object.fromEntries(entries);
   };
 
-  // Thay thế imageCache và revoke blob cũ để tránh memory leak
+  // thay image cache và revoke blob cũ để tránh leak
   const replaceImageCache = (next: Record<number, string>) => {
     Object.values(imageCache).forEach(url => {
       if (url && url.startsWith('blob:')) URL.revokeObjectURL(url);
@@ -47,39 +48,43 @@ export default function ProductsListPage() {
     setImageCache(next);
   };
 
-  // 1) Load offline trước: nếu có thì hiển thị ngay & bật cờ offline
+  // 1) load offline trước
   const loadOfflineFirst = async () => {
     const cached = await loadProductsFromDB();
     if (cached.length > 0) {
       setProducts(cached);
       replaceImageCache(await loadImages(cached));
       setOffline(true);
-      setLoading(false); // đã có offline để hiển thị, không cần spinner
+      setLoading(false); // đã có offline để hiển thị
     } else {
-      setLoading(true); // lần đầu, DB trống -> chờ online
+      setLoading(true); // chưa có gì -> spinner
     }
   };
 
-  // 2) Fetch online và cập nhật nếu có dữ liệu
+  // 2) fetch online và cập nhật
   const fetchOnlineAndUpdate = async () => {
     try {
       const res = await fetch('/api/products', { cache: 'no-store' });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const payload = await res.json();
 
-      // Hỗ trợ cả 3 dạng: [], { products: [] }, { data: [] }
+      // ✅ PARSE ĐÚNG: API của bạn là { products: [...] }
       const fresh: Product[] = Array.isArray(payload)
         ? payload
         : payload?.products ?? payload?.data ?? [];
 
-      if (!Array.isArray(fresh)) {
-        throw new Error('API không trả về mảng sản phẩm hợp lệ');
+      if (!Array.isArray(fresh)) throw new Error('⚠️ API không trả về mảng sản phẩm hợp lệ');
+
+      // 🎯 Tránh xoá DB khi API tạm thời trả rỗng
+      if (fresh.length === 0) {
+        setLoading(false);
+        return;
       }
 
-      // Đồng bộ IndexedDB
       await syncProducts(fresh);
+      setErrorMessage(null);
 
-      // So sánh với danh sách đang hiển thị (tránh setState thừa)
+      // chỉ setState khi khác
       const prev = productsRef.current;
       const isDifferent =
         prev.length !== fresh.length || JSON.stringify(prev) !== JSON.stringify(fresh);
@@ -89,18 +94,18 @@ export default function ProductsListPage() {
         replaceImageCache(await loadImages(fresh));
       }
 
-      // Nếu trước đó đang hiển thị offline -> show banner "Đã cập nhật"
       const wasOffline = offlineRef.current;
       setOffline(false);
       setLoading(false);
       if (wasOffline) {
         setJustUpdated(true);
-        setTimeout(() => setJustUpdated(false), 2500);
+        // setTimeout(() => setJustUpdated(false), 2500); // Thời gian ẩn thông báo đã cập nhật
       }
     } catch (err) {
       console.warn('⚠️ Không thể tải online:', err);
-      // Nếu chưa có offline thì thôi không còn gì để hiển thị -> tắt loading để show "Không có sản phẩm"
+      setErrorMessage(err.message || '⚠️ Có lỗi khi tải dữ liệu'); // ✅ thêm dòng này
       if (productsRef.current.length === 0) setLoading(false);
+      setOffline(true); // Nếu lỗi thì hiển thị offline
     }
   };
 
@@ -110,10 +115,9 @@ export default function ProductsListPage() {
 
     const handleOnline = () => fetchOnlineAndUpdate();
     window.addEventListener('online', handleOnline);
-
     return () => {
       window.removeEventListener('online', handleOnline);
-      // Revoke mọi blob khi unmount
+      // revoke blob khi unmount
       Object.values(imageCache).forEach(url => {
         if (url && url.startsWith('blob:')) URL.revokeObjectURL(url);
       });
@@ -121,9 +125,10 @@ export default function ProductsListPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Sắp xếp dữ liệu để truyền vào bảng
+  // sort client-side
   const sortedProducts = [...products].sort((a, b) => {
     const getVal = (p: Product) => {
+      if (sortField === 'stock_status') return (p.stock_status || '').toLowerCase();
       if (sortField === 'name') return (p.name || '').toLowerCase();
       if (sortField === 'price') return Number(p.price || '0') || 0;
       if (sortField === 'stock_quantity') return Number(p.stock_quantity ?? 0);
@@ -137,9 +142,8 @@ export default function ProductsListPage() {
   });
 
   const handleSortChange = (field: SortField) => {
-    if (field === sortField) {
-      setSortOrder(o => (o === 'asc' ? 'desc' : 'asc'));
-    } else {
+    if (field === sortField) setSortOrder(o => (o === 'asc' ? 'desc' : 'asc'));
+    else {
       setSortField(field);
       setSortOrder('asc');
     }
@@ -149,21 +153,17 @@ export default function ProductsListPage() {
     <div style={{ padding: '1rem' }}>
       <h1>Danh sách sản phẩm</h1>
 
-      {/* Banner trạng thái */}
-      {offline && (
-        <p style={{ color: 'orange', marginBottom: 8 }}>
-          ⚠️ Đang hiển thị dữ liệu offline và đang chờ cập nhật...
-        </p>
-      )}
+      {/* trạng thái hiển thị */}
+      {errorMessage && <p style={{ color: 'red', marginBottom: 8 }}>{errorMessage}</p>}
+      {offline && <p style={{ color: 'orange', marginBottom: 8 }}>⚠️ Đang chờ cập nhật...</p>}
       {justUpdated && !offline && (
         <p style={{ color: 'green', marginBottom: 8 }}>✅ Đã cập nhật dữ liệu mới</p>
       )}
 
-      {/* Màn hình lần đầu (DB trống) → chỉ hiển thị spinner */}
       {loading ? (
-        <p>Đang tải dữ liệu...</p>
+        <p>⚠️ Đang tải dữ liệu...</p>
       ) : products.length === 0 ? (
-        <p>Không có sản phẩm</p>
+        <p>⚠️ Không có sản phẩm</p>
       ) : (
         <ProductsTable
           products={sortedProducts}
