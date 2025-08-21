@@ -1,27 +1,24 @@
-// ✅ File: src/components/Header.tsx
 'use client';
 
 import { useState, useEffect } from 'react';
 import { appName, appDescription, appUrl } from '@/lib/env';
 
 export default function Header() {
-  // Khởi tạo shrink đúng ngay từ đầu theo vị trí scroll
-  const [shrink, setShrink] = useState(typeof window !== 'undefined' ? window.scrollY > 30 : false);
+  const [shrink, setShrink] = useState(typeof window !== 'undefined' ? window.scrollY > 40 : false);
 
   useEffect(() => {
     const handleScroll = () => {
       const y = window.scrollY;
       setShrink(prev => {
-        if (!prev && y > 40) return true; // chuyển sang shrink
-        if (prev && y < 20) return false; // bỏ shrink
-        return prev; // giữ nguyên
+        if (!prev && y > 40) return true; // chỉ co khi vượt 40px
+        if (prev && y < 20) return false; // chỉ giãn khi nhỏ hơn 20px
+        return prev; // không đổi → không re-render
       });
     };
 
-    // Gọi 1 lần để đồng bộ trạng thái khi vừa mount
-    handleScroll();
+    handleScroll(); // đồng bộ ngay lần đầu
 
-    window.addEventListener('scroll', handleScroll);
+    window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
