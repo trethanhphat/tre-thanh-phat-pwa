@@ -7,7 +7,7 @@ export default function Footer() {
   return (
     <footer className="footer">
       <a href={`//${appUrl}`}>
-        <h3 className="font-ttp app-title">{appName}</h3>
+        <h3 className="font-ttp">{appName}</h3>
       </a>
       <p>
         Điện thoại: <a href={`tel:${phone}`}>{phone}</a>

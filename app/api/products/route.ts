@@ -13,7 +13,7 @@ if (!CONSUMER_KEY || !CONSUMER_SECRET) {
 export async function GET() {
   try {
     const response = await axios.get(API_PRODUCTS_URL, {
-      auth: { username: CONSUMER_KEY, password: '', // CONSUMER_SECRET },
+      auth: { username: CONSUMER_KEY, password: CONSUMER_SECRET },
       params: { per_page: 100, page: 1 },
     });
 
