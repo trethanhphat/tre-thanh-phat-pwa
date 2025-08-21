@@ -39,32 +39,28 @@ type SortField = 'stock_status' | 'price' | 'stock_quantity' | 'name';
 type SortOrder = 'asc' | 'desc';
 
 export default function ProductsListPage() {
-  // ---------------------- STATE CHÍNH ----------------------
+  // ---------------------- STATE ----------------------
   const [products, setProducts] = useState<Product[]>([]);
   const [imageCache, setImageCache] = useState<Record<number, string>>({});
-  const [loading, setLoading] = useState(true); // spinner lần đầu
-  const [offline, setOffline] = useState(false); // đang hiển thị dữ liệu offline
-  const [justUpdated, setJustUpdated] = useState(false); // banner "Đã cập nhật"
-  const [errorMessage, setErrorMessage] = useState<string | null>(null); // báo lỗi online
+  const [loading, setLoading] = useState(true);
+  const [offline, setOffline] = useState(false);
+  const [justUpdated, setJustUpdated] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   // Sort / Filter / Pagination
-  const [sortField, setSortField] = useState<SortField>('stock_status'); // mặc định
+  const [sortField, setSortField] = useState<SortField>('stock_status');
   const [sortOrder, setSortOrder] = useState<SortOrder>('asc');
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [searchText, setSearchText] = useState('');
 
-  // Refs để so sánh/tham chiếu trạng thái trước (tránh setState thừa)
+  // Ref để so sánh
   const productsRef = useRef<Product[]>([]);
-  const offlineRef = useRef<boolean>(false);
   useEffect(() => {
     productsRef.current = products;
   }, [products]);
-  useEffect(() => {
-    offlineRef.current = offline;
-  }, [offline]);
 
-  // ---------------------- ẢNH: TẠO CACHE SONG SONG ----------------------
+  // ---------------------- IMAGE CACHE ----------------------
   const loadImages = async (list: Product[]) => {
     const entries = await Promise.all(
       list.map(async p => {
@@ -89,10 +85,8 @@ export default function ProductsListPage() {
       setProducts(cached);
       replaceImageCache(await loadImages(cached));
       setOffline(true);
-      setLoading(false); // có dữ liệu → render ngay
-    } else {
-      setLoading(false); // chưa có gì → spinner
     }
+    setLoading(false);
   };
 
   // ---------------------- ONLINE UPDATE ----------------------
@@ -129,12 +123,7 @@ export default function ProductsListPage() {
       if (isDifferent) {
         setProducts(fresh);
         replaceImageCache(await loadImages(fresh));
-
-        // ✅ chỉ báo "Đã cập nhật" khi có mạng thật sự
-        if (navigator.onLine) {
-          setJustUpdated(true);
-          // setTimeout(() => setJustUpdated(false), 2500);
-        }
+        setJustUpdated(true);
       }
 
       setOffline(false);
@@ -142,21 +131,29 @@ export default function ProductsListPage() {
     } catch (err: any) {
       console.warn('⚠️ Không thể tải online:', err);
       setErrorMessage(err.message || '⚠️ Có lỗi khi tải dữ liệu');
-
+      setOffline(true);
+      setJustUpdated(false);
       if (productsRef.current.length === 0) setLoading(false);
-
-      setOffline(true); // Nếu lỗi: vẫn bám offline
-      setJustUpdated(false); // 🔑 reset lại, tránh hiển thị sai
     }
   };
 
   // ---------------------- MOUNT ----------------------
   useEffect(() => {
-    loadOfflineFirst();
-    fetchOnlineAndUpdate();
+    const init = async () => {
+      await loadOfflineFirst();
+
+      if (navigator.onLine) {
+        await fetchOnlineAndUpdate();
+      } else {
+        setOffline(true);
+        setLoading(false);
+      }
+    };
+    init();
 
     const handleOnline = () => fetchOnlineAndUpdate();
     window.addEventListener('online', handleOnline);
+
     return () => {
       window.removeEventListener('online', handleOnline);
       Object.values(imageCache).forEach(url => {
