@@ -394,3 +394,19 @@ td {
     height: auto;
   }
 }
+
+/* Pagination mặc định: 1 dòng (desktop) */
+.pagination {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin: 12px 0;
+}
+
+/* Mobile: chia thành 3 dòng */
+@media (max-width: 768px) {
+  .pagination {
+    flex-direction: column; /* xếp dọc */
+    align-items: flex-start;
+  }
+}

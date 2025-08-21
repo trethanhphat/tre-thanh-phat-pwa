@@ -4,7 +4,7 @@
 import { useEffect, useRef, useState } from 'react';
 import ProductsTable from './ProductsTable'; // View hiển thị bảng sản phẩm
 import { Product, loadProductsFromDB, syncProducts } from '@/lib/products'; // Nguồn dữ liệu sản phẩm
-import { getImageURL } from '@/lib/images'; // Nguồn dữ liệu ảnh
+import { getImageURL } from '@/lib/images'; // Nguồn dữ liệu ảnh sản phẩm
 
 type SortField = 'stock_status' | 'price' | 'stock_quantity' | 'name'; // Các trường có thể sắp xếp
 type SortOrder = 'asc' | 'desc'; // Chiều có thể sắp xếp
@@ -18,10 +18,14 @@ export default function ProductsListPage() {
   const [errorMessage, setErrorMessage] = useState<string | null>(null); // ✅ thêm state lỗi
   const [sortField, setSortField] = useState<SortField>('stock_status'); // Tiêu chí sắp xếp mặc định
   const [sortOrder, setSortOrder] = useState<SortOrder>('asc'); // Chiều sắp xếp mặc định
+  const [currentPage, setCurrentPage] = useState(1); // Đặt trang hiển thị đầu tiên là 1
+  const [pageSize, setPageSize] = useState(10); // số sản phẩm / trang
+  const [searchText, setSearchText] = useState('');
 
   // giữ tham chiếu để so sánh & biết trạng thái trước đó
   const productsRef = useRef<Product[]>([]);
   const offlineRef = useRef<boolean>(false);
+
   useEffect(() => {
     productsRef.current = products;
   }, [products]);

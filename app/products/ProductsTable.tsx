@@ -1,328 +1,125 @@
-// ✅ File: app/products/ProductsTable.tsx
+// File: app/products/ProductsTable.tsx
 'use client';
+import React from 'react';
+import { Product } from '@/lib/products'; // Kiểu dữ liệu sản phẩm (id, name, price,...)
 
-import Link from 'next/link';
-import { useState } from 'react';
-import { Product } from '@/lib/products';
-import { formatPrice, formatStockStatus } from '@/utils/format';
-
-interface ProductsTableProps {
+/**
+ * Props mà ProductsTable nhận từ component cha (page.tsx):
+ * - products: danh sách sản phẩm đã lọc, sắp xếp, phân trang
+ * - imageCache: map { productId -> url ảnh } (có thể online hoặc offline blob)
+ * - sortField / sortOrder: trạng thái đang sắp xếp theo cột nào, chiều nào
+ * - onSortChange: callback khi user click vào tiêu đề cột để đổi sort
+ */
+type ProductsTableProps = {
   products: Product[];
-  imageCache: { [id: number]: string };
-  sortField: 'name' | 'price' | 'stock_quantity' | 'stock_status';
+  imageCache: Record<number, string>;
+  sortField: 'stock_status' | 'price' | 'stock_quantity' | 'name';
   sortOrder: 'asc' | 'desc';
-  onSortChange: (field: 'name' | 'price' | 'stock_quantity' | 'stock_status') => void;
-  searchText?: string;
-  pageSizeOptions?: number[];
-}
+  onSortChange: (field: 'stock_status' | 'price' | 'stock_quantity' | 'name') => void;
+};
 
+/**
+ * Component hiển thị bảng sản phẩm.
+ * Dữ liệu gốc (fetch từ API + sync IndexedDB) được xử lý ở page.tsx,
+ * sau đó truyền vào ProductsTable qua props.
+ */
 export default function ProductsTable({
   products,
   imageCache,
   sortField,
   sortOrder,
   onSortChange,
-  searchText = '',
-  pageSizeOptions = [5, 10, 20, 50],
 }: ProductsTableProps) {
-  const [currentPage, setCurrentPage] = useState(1);
-  const [pageSize, setPageSize] = useState(pageSizeOptions[0]);
-
-  const filteredProducts = products.filter(p =>
-    p.name.toLowerCase().includes(searchText.toLowerCase())
-  );
-
-  const totalPages = Math.ceil(filteredProducts.length / pageSize);
-  const paginatedProducts = filteredProducts.slice(
-    (currentPage - 1) * pageSize,
-    currentPage * pageSize
-  );
-
-  const handleJumpToPage = (e: React.ChangeEvent<HTMLInputElement>) => {
-    let page = parseInt(e.target.value);
-    if (isNaN(page)) page = 1;
-    if (page < 1) page = 1;
-    if (page > totalPages) page = totalPages;
-    setCurrentPage(page);
-  };
-
-  const renderSortArrow = (field: string) => {
-    if (sortField !== field) return null;
-    return sortOrder === 'asc' ? ' ▲' : ' ▼';
-  };
-
+  /**
+   * Hàm hiển thị mũi tên sort ▲ ▼ ở tiêu đề cột.
+   * Nếu cột chưa được chọn sort thì trả về ↕️ (icon trung tính).
+   */
   const renderSortSpan = (field: 'name' | 'price' | 'stock_quantity' | 'stock_status') => (
-    <span onClick={() => onSortChange(field)} style={{ cursor: 'pointer', marginLeft: 4 }}>
+    <span
+      onClick={() => onSortChange(field)} // Khi click => gọi hàm cha đổi sortField/sortOrder
+      style={{ cursor: 'pointer', marginLeft: 4 }}
+    >
       {sortField === field ? (sortOrder === 'asc' ? '⬆️' : '⬇️') : '↕️'}
     </span>
   );
 
-  const renderPagination = () => (
-    <div style={{ margin: '10px 0', display: 'flex', alignItems: 'center', gap: '10px' }}>
-      <button onClick={() => setCurrentPage(1)} disabled={currentPage === 1}>
-        « Đầu
-      </button>
-      <button
-        onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
-        disabled={currentPage === 1}
-      >
-        ‹ Trước
-      </button>
-      <span>
-        Trang{' '}
-        <input
-          type="number"
-          value={currentPage}
-          onChange={handleJumpToPage}
-          style={{ width: '50px' }}
-        />{' '}
-        / {totalPages}
-      </span>
-      <button
-        onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
-        disabled={currentPage === totalPages}
-      >
-        Tiếp ›
-      </button>
-      <button onClick={() => setCurrentPage(totalPages)} disabled={currentPage === totalPages}>
-        Cuối »
-      </button>
-      <span>
-        Sản phẩm/trang:{' '}
-        <select
-          value={pageSize}
-          onChange={e => {
-            setPageSize(parseInt(e.target.value));
-            setCurrentPage(1);
-          }}
-        >
-          {pageSizeOptions.map(n => (
-            <option key={n} value={n}>
-              {n}
-            </option>
-          ))}
-        </select>
-      </span>
-    </div>
-  );
-
-  const renderControls = () => (
-    <div className="controls">
-      <div className="search-box">
-        <input
-          type="text"
-          placeholder="Tìm theo tên..."
-          defaultValue={searchText}
-          readOnly
-          style={{ flex: 1, minWidth: '150px', padding: '4px' }}
-        />
-      </div>
-
-      <div className="pagination-controls">
-        <button onClick={() => setCurrentPage(1)} disabled={currentPage === 1}>
-          « Đầu
-        </button>
-        <button
-          onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
-          disabled={currentPage === 1}
-        >
-          ‹ Trước
-        </button>
-        <span>
-          Trang{' '}
-          <input
-            type="number"
-            value={currentPage}
-            onChange={handleJumpToPage}
-            style={{ width: '50px' }}
-          />{' '}
-          / {totalPages}
-        </span>
-        <button
-          onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
-          disabled={currentPage === totalPages}
-        >
-          Tiếp ›
-        </button>
-        <button onClick={() => setCurrentPage(totalPages)} disabled={currentPage === totalPages}>
-          Cuối »
-        </button>
-      </div>
-
-      <div className="page-size">
-        Sản phẩm/trang:{' '}
-        <select
-          value={pageSize}
-          onChange={e => {
-            setPageSize(parseInt(e.target.value));
-            setCurrentPage(1);
-          }}
-        >
-          {pageSizeOptions.map(n => (
-            <option key={n} value={n}>
-              {n}
-            </option>
-          ))}
-        </select>
-      </div>
-
-      <style jsx>{`
-        .controls {
-          display: flex;
-          flex-wrap: wrap;
-          gap: 10px;
-          margin: 10px 0;
-          align-items: center;
-        }
-        @media (min-width: 768px) {
-          .controls {
-            flex-direction: row;
-            justify-content: space-between;
-          }
-          .search-box {
-            flex: 1;
-          }
-        }
-        @media (max-width: 767px) {
-          .controls {
-            flex-direction: column;
-            align-items: flex-start;
-          }
-          .search-box,
-          .pagination-controls,
-          .page-size {
-            width: 100%;
-          }
-        }
-      `}</style>
-    </div>
-  );
-
   return (
-    <>
-      {/*renderPagination()*/}
-      {renderControls()}
-      <table style={{ borderCollapse: 'collapse', width: '100%', border: '1px solid #ccc' }}>
-        <thead
-          style={{
-            position: 'sticky',
-            top: 0,
-            background: 'var(--color-primary)',
-            color: 'var(--color-secondary)',
-            zIndex: 1,
-          }}
-        >
+    <div style={{ overflowX: 'auto' }}>
+      {/* Bảng hiển thị sản phẩm */}
+      <table style={{ borderCollapse: 'collapse', width: '100%' }}>
+        <thead>
           <tr>
-            <th style={{ border: '1px solid var(--color-border)', padding: '8px' }}>
-              Ảnh sản phẩm
+            {/* Ảnh sản phẩm (không sort) */}
+            <th style={{ borderBottom: '1px solid #ccc', padding: 8 }}>Ảnh</th>
+
+            {/* Tên sản phẩm (có sort) */}
+            <th style={{ borderBottom: '1px solid #ccc', padding: 8 }}>
+              Tên {renderSortSpan('name')}
             </th>
-            <th
-              style={{ border: '1px solid var(--color-border)', padding: '8px', cursor: 'pointer' }}
-              onClick={() => onSortChange('name')}
-            >
-              Tên sản phẩm {renderSortArrow('name')}
+
+            {/* Giá sản phẩm (có sort) */}
+            <th style={{ borderBottom: '1px solid #ccc', padding: 8 }}>
+              Giá {renderSortSpan('price')}
             </th>
-            <th
-              style={{ border: '1px solid var(--color-border)', padding: '8px', cursor: 'pointer' }}
-              onClick={() => onSortChange('price')}
-            >
-              Giá {renderSortArrow('price')}
+
+            {/* Tồn kho (có sort) */}
+            <th style={{ borderBottom: '1px solid #ccc', padding: 8 }}>
+              Tồn kho {renderSortSpan('stock_quantity')}
             </th>
-            <th
-              style={{ border: '1px solid var(--color-border)', padding: '8px', cursor: 'pointer' }}
-              onClick={() => onSortChange('stock_quantity')}
-            >
-              Tồn kho {renderSortArrow('stock_quantity')}
-            </th>
-            <th
-              style={{ border: '1px solid var(--color-border)', padding: '8px', cursor: 'pointer' }}
-              onClick={() => onSortChange('stock_status')}
-            >
-              Trạng thái {renderSortArrow('stock_status')}
+
+            {/* Trạng thái tồn (có sort) */}
+            <th style={{ borderBottom: '1px solid #ccc', padding: 8 }}>
+              Trạng thái {renderSortSpan('stock_status')}
             </th>
           </tr>
         </thead>
+
         <tbody>
-          {paginatedProducts.map(p => (
-            <tr
-              key={p.id}
-              style={{
-                border: '1px solid var(--color-border)',
-                transition: 'background 0.2s',
-              }}
-              onMouseEnter={e => (e.currentTarget.style.background = '#f0f0f0')}
-              onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
-            >
-              <td
-                style={{
-                  border: '1px solid var(--color-border)',
-                  padding: '8px',
-                  textAlign: 'center',
-                }}
-                data-label="Ảnh sản phẩm"
-              >
+          {products.map(p => (
+            <tr key={p.id}>
+              {/* Ảnh: lấy từ imageCache (truyền từ page.tsx) */}
+              <td style={{ borderBottom: '1px solid #eee', padding: 8 }}>
                 {imageCache[p.id] ? (
-                  <Link href={`/product/${p.id}`}>
-                    <img src={imageCache[p.id]} alt={p.name} style={{ maxWidth: '150px' }} />
-                  </Link>
+                  <img
+                    src={imageCache[p.id]}
+                    alt={p.name}
+                    style={{ width: 50, height: 50, objectFit: 'cover' }}
+                  />
                 ) : (
-                  <span>...</span>
+                  <span style={{ color: '#999' }}>No image</span>
                 )}
               </td>
-              <td
-                style={{ border: '1px solid var(--color-border)', padding: '8px' }}
-                data-label="Tên sản phẩm"
-              >
-                <Link
-                  href={`/product/${p.id}`}
-                  style={{ color: 'var(--color-link)', textDecoration: 'underline' }}
-                >
-                  {p.name
-                    .split(new RegExp(`(${searchText})`, 'gi'))
-                    .map((part, i) =>
-                      part.toLowerCase() === searchText.toLowerCase() ? (
-                        <mark key={i}>{part}</mark>
-                      ) : (
-                        part
-                      )
-                    )}
-                </Link>
-                {renderSortSpan('name')}
+
+              {/* Tên sản phẩm */}
+              <td style={{ borderBottom: '1px solid #eee', padding: 8 }}>
+                {p.name || '(Không có tên)'}
               </td>
-              <td
-                style={{ border: '1px solid var(--color-border)', padding: '8px' }}
-                data-label="Giá"
-              >
-                {formatPrice(p.price)}
-                {renderSortSpan('price')}
+
+              {/* Giá */}
+              <td style={{ borderBottom: '1px solid #eee', padding: 8 }}>
+                {p.price ? `${p.price} ₫` : '-'}
               </td>
-              <td
-                style={{ border: '1px solid var(--color-border)', padding: '8px' }}
-                data-label="Tồn kho"
-              >
+
+              {/* Số lượng tồn */}
+              <td style={{ borderBottom: '1px solid #eee', padding: 8 }}>
                 {p.stock_quantity ?? '-'}
-                {renderSortSpan('stock_quantity')}
               </td>
+
+              {/* Trạng thái tồn (in đậm nếu còn hàng) */}
               <td
-                style={{ border: '1px solid var(--color-border)', padding: '8px' }}
-                data-label="Trạng thái"
+                style={{
+                  borderBottom: '1px solid #eee',
+                  padding: 8,
+                  fontWeight: p.stock_status === 'instock' ? 'bold' : 'normal',
+                  color: p.stock_status === 'instock' ? 'green' : 'red',
+                }}
               >
-                {(() => {
-                  const { text, color } = formatStockStatus(p.stock_status);
-                  return <span style={{ color }}>{text}</span>;
-                })()}
-                {renderSortSpan('stock_status')}
+                {p.stock_status || '-'}
               </td>
             </tr>
           ))}
         </tbody>
       </table>
-      {/*renderPagination()*/}
-      {renderControls()}
-      <style jsx>{`
-        td::before {
-        }
-      `}</style>
-    </>
+    </div>
   );
 }
