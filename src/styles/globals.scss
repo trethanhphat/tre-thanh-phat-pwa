@@ -206,6 +206,7 @@ header p {
 }
 
 /* Thêm mới cho header co lại */
+/* HEADER */
 .header-wrapper {
   background: var(--color-primary);
   color: var(--color-secondary);
@@ -213,14 +214,21 @@ header p {
   position: sticky;
   top: 0;
   z-index: 10;
+
+  /* cố định chiều cao để không nháy */
+  min-height: 4.5rem;
   padding: 0.5rem 1.5rem;
-  text-align: center;
-  min-height: 4.5rem; /* ✅ luôn cố định chiều cao, không nháy */
+
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  transition: all 0.3s ease;
+
+  transition: padding 0.3s ease;
+}
+
+.header-wrapper.shrink {
+  padding: 0.25rem 1.5rem;
 }
 
 /* Title */
@@ -244,7 +252,7 @@ header p {
 }
 
 .header-wrapper.shrink .app-description {
-  opacity: 0; /* ✅ biến mất nhưng vẫn giữ layout */
+  opacity: 0;
 }
 
 /* CSS của Menu */
