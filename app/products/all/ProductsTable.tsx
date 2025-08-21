@@ -1,4 +1,3 @@
-// File: app/products/ProductsTable.tsx
 'use client';
 
 import Link from 'next/link';
@@ -11,6 +10,7 @@ interface ProductsTableProps {
   sortField: 'name' | 'price' | 'stock_quantity' | 'stock_status';
   sortOrder: 'asc' | 'desc';
   onSortChange: (field: 'name' | 'price' | 'stock_quantity' | 'stock_status') => void;
+  searchQuery?: string;
 }
 
 export default function ProductsTable({
@@ -19,16 +19,32 @@ export default function ProductsTable({
   sortField,
   sortOrder,
   onSortChange,
+  searchQuery = '',
 }: ProductsTableProps) {
   const renderSortIcon = (field: 'name' | 'price' | 'stock_quantity' | 'stock_status') => {
     if (sortField !== field) return null;
     return sortOrder === 'asc' ? ' ↑' : ' ↓';
   };
 
+  const highlightText = (text: string) => {
+    if (!searchQuery) return text;
+    const regex = new RegExp(`(${searchQuery})`, 'gi');
+    const parts = text.split(regex);
+    return parts.map((part, i) =>
+      regex.test(part) ? (
+        <span key={i} style={{ backgroundColor: 'yellow' }}>
+          {part}
+        </span>
+      ) : (
+        part
+      )
+    );
+  };
+
   return (
     <table style={{ borderCollapse: 'collapse', width: '100%', border: '1px solid #ccc' }}>
-      <thead>
-        <tr style={{ background: 'var(--color-primary)' }}>
+      <thead style={{ position: 'sticky', top: 0, zIndex: 10, background: 'var(--color-primary)' }}>
+        <tr>
           <th style={{ border: '1px solid var(--color-border)', padding: '8px' }}>Ảnh sản phẩm</th>
           <th
             style={{ border: '1px solid var(--color-border)', padding: '8px', cursor: 'pointer' }}
@@ -49,7 +65,7 @@ export default function ProductsTable({
             Tồn kho{renderSortIcon('stock_quantity')}
           </th>
           <th
-            style={{ border: '1px solid var(--color-border)', padding: '8px' }}
+            style={{ border: '1px solid var(--color-border)', padding: '8px', cursor: 'pointer' }}
             onClick={() => onSortChange('stock_status')}
           >
             Trạng thái{renderSortIcon('stock_status')}
@@ -58,7 +74,15 @@ export default function ProductsTable({
       </thead>
       <tbody>
         {products.map(p => (
-          <tr key={p.id}>
+          <tr
+            key={p.id}
+            style={{
+              transition: 'background 0.2s',
+              cursor: 'default',
+            }}
+            onMouseEnter={e => (e.currentTarget.style.backgroundColor = '#f0f8ff')}
+            onMouseLeave={e => (e.currentTarget.style.backgroundColor = 'transparent')}
+          >
             <td
               style={{
                 border: '1px solid var(--color-border)',
@@ -78,13 +102,12 @@ export default function ProductsTable({
             <td
               style={{ border: '1px solid var(--color-border)', padding: '8px' }}
               data-label="Tên sản phẩm"
-              // onClick={() => onSortChange('name')}
             >
               <Link
                 href={`/product/${p.id}`}
                 style={{ color: 'var(--color-link)', textDecoration: 'underline' }}
               >
-                {p.name}
+                {highlightText(p.name)}
               </Link>
               <span onClick={() => onSortChange('name')} style={{ cursor: 'pointer' }}>
                 {sortField === 'name' ? (sortOrder === 'asc' ? '⬆️' : '⬇️') : '↕️'}
@@ -93,7 +116,6 @@ export default function ProductsTable({
             <td
               style={{ border: '1px solid var(--color-border)', padding: '8px' }}
               data-label="Giá"
-              // onClick={() => onSortChange('price')}
             >
               {formatPrice(p.price)}
               <span onClick={() => onSortChange('price')} style={{ cursor: 'pointer' }}>
@@ -103,7 +125,6 @@ export default function ProductsTable({
             <td
               style={{ border: '1px solid var(--color-border)', padding: '8px' }}
               data-label="Tồn kho"
-              //onClick={() => onSortChange('stock_quantity')}
             >
               {p.stock_quantity ?? '-'}
               <span onClick={() => onSortChange('stock_quantity')} style={{ cursor: 'pointer' }}>
@@ -113,7 +134,6 @@ export default function ProductsTable({
             <td
               style={{ border: '1px solid var(--color-border)', padding: '8px' }}
               data-label="Trạng thái"
-              // onClick={() => onSortChange('stock_status')}
             >
               {(() => {
                 const { text, color } = formatStockStatus(p.stock_status);
