@@ -4,6 +4,7 @@
 import { useEffect, useRef, useState } from 'react';
 import axios from 'axios';
 import ProductsTable from './ProductsTable'; // ✅ chỉ lo HIỂN THỊ bảng + sort icon
+import ControlBar from './ControlBar';
 import { Product, loadProductsFromDB, syncProducts } from '@/lib/products'; // ✅ IndexedDB helpers + type
 import { getImageURL } from '@/lib/images'; // ✅ Lấy URL ảnh (online hoặc blob offline)
 
@@ -185,134 +186,6 @@ export default function ProductsListPage() {
     setCurrentPage(val);
   };
 
-  // ---------------------- CONTROL BAR (TRÊN & DƯỚI) ----------------------
-  // Yêu cầu: PC = 1 hàng; Mobile = 3 hàng (Search | Page size | Pagination)
-  const ControlBar = () => (
-    <>
-      <div className="control-bar">
-        {/* Nhóm 1: Ô tìm kiếm */}
-        <div className="ctrl-group">
-          <input
-            type="text"
-            placeholder="🔎 Tìm theo tên..."
-            value={searchText}
-            onChange={e => {
-              setSearchText(e.target.value);
-              setCurrentPage(1);
-            }}
-            className="search-input"
-          />
-        </div>
-
-        {/* Nhóm 2: Số sản phẩm/trang */}
-        <div className="ctrl-group">
-          <label>
-            Hiển thị:&nbsp;
-            <select
-              value={pageSize}
-              onChange={e => {
-                setPageSize(Number(e.target.value));
-                setCurrentPage(1);
-              }}
-              className="select"
-            >
-              {[5, 10, 20, 50].map(n => (
-                <option key={n} value={n}>
-                  {n}
-                </option>
-              ))}
-            </select>
-            &nbsp;sản phẩm/trang
-          </label>
-        </div>
-
-        {/* Nhóm 3: Pagination (Đầu / Trước / input / Sau / Cuối) */}
-        <div className="ctrl-group pagination">
-          <button onClick={() => setCurrentPage(1)} disabled={currentPage === 1}>
-            «
-          </button>
-          <button
-            onClick={() => setCurrentPage(p => Math.max(p - 1, 1))}
-            disabled={currentPage === 1}
-          >
-            ‹
-          </button>
-
-          <span className="page-indicator">
-            Trang{' '}
-            <input
-              type="number"
-              value={currentPage}
-              onChange={handlePageInput}
-              className="page-input"
-            />{' '}
-            / {totalPages}
-          </span>
-
-          <button
-            onClick={() => setCurrentPage(p => Math.min(p + 1, totalPages))}
-            disabled={currentPage === totalPages}
-          >
-            ›
-          </button>
-          <button onClick={() => setCurrentPage(totalPages)} disabled={currentPage === totalPages}>
-            »
-          </button>
-        </div>
-      </div>
-
-      {/* CSS responsive cho control bar */}
-      <style jsx>{`
-        .control-bar {
-          display: flex;
-          align-items: center;
-          gap: 12px;
-          justify-content: space-between;
-          flex-wrap: wrap;
-          margin: 10px 0 12px;
-        }
-        .ctrl-group {
-          display: flex;
-          align-items: center;
-          gap: 8px;
-        }
-        .search-input {
-          padding: 6px 10px;
-          min-width: 240px;
-          border: 1px solid var(--color-border, #ccc);
-          border-radius: 6px;
-        }
-        .select {
-          padding: 4px 6px;
-        }
-        .pagination button {
-          padding: 4px 8px;
-        }
-        .page-input {
-          width: 56px;
-          padding: 2px 6px;
-          margin: 0 4px;
-        }
-        /* Mobile: tách thành 3 hàng, không đẩy ngang */
-        @media (max-width: 768px) {
-          .control-bar {
-            flex-direction: column;
-            align-items: stretch;
-            gap: 10px;
-          }
-          .ctrl-group {
-            justify-content: space-between;
-          }
-          .pagination {
-            justify-content: flex-start;
-            flex-wrap: wrap;
-            gap: 6px;
-          }
-        }
-      `}</style>
-    </>
-  );
-
   // ---------------------- RENDER ----------------------
   return (
     <div style={{ padding: '1rem' }}>
@@ -329,7 +202,15 @@ export default function ProductsListPage() {
       ) : (
         <>
           {/* Control bar TRÊN bảng */}
-          <ControlBar />
+          <ControlBar
+            searchText={searchText}
+            setSearchText={setSearchText}
+            pageSize={pageSize}
+            setPageSize={setPageSize}
+            currentPage={currentPage}
+            setCurrentPage={setCurrentPage}
+            totalPages={totalPages}
+          />
 
           {/* Bảng sản phẩm chỉ lo hiển thị + sort icon + highlight */}
           <ProductsTable
@@ -342,7 +223,15 @@ export default function ProductsListPage() {
           />
 
           {/* Control bar DƯỚI bảng */}
-          <ControlBar />
+          <ControlBar
+            searchText={searchText}
+            setSearchText={setSearchText}
+            pageSize={pageSize}
+            setPageSize={setPageSize}
+            currentPage={currentPage}
+            setCurrentPage={setCurrentPage}
+            totalPages={totalPages}
+          />
         </>
       )}
     </div>

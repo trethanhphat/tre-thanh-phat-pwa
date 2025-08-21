@@ -240,7 +240,11 @@ header p {
 }
 
 /* CSS của Menu */
-.nav-bar {
+.menu .font-ttp.app-title {
+  text-align: center;
+}
+
+.menu .nav-bar {
   display: flex;
   justify-content: space-around;
   align-items: center;
