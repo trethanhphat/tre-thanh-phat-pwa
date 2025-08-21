@@ -10,7 +10,12 @@ export default function Header() {
 
   useEffect(() => {
     const handleScroll = () => {
-      setShrink(window.scrollY > 30);
+      const y = window.scrollY;
+      setShrink(prev => {
+        if (!prev && y > 40) return true; // chuyển sang shrink
+        if (prev && y < 20) return false; // bỏ shrink
+        return prev; // giữ nguyên
+      });
     };
 
     // Gọi 1 lần để đồng bộ trạng thái khi vừa mount
