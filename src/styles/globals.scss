@@ -206,8 +206,9 @@ header p {
 }
 
 /* Thêm mới cho header co lại */
-/* HEADER */
-.header-wrapper {
+/* HEADER staged (3 bước: mô tả → padding → scale header) */
+.header-wrapper.header-staged {
+  /* nền & bố cục */
   background: var(--color-primary);
   color: var(--color-secondary);
   border-bottom: 1px solid var(--color-border);
@@ -215,44 +216,36 @@ header p {
   top: 0;
   z-index: 10;
 
-  /* cố định chiều cao để không nháy */
-  min-height: 4.5rem;
-  padding: 0.5rem 1.5rem;
+  /* dùng CSS variables điều khiển theo scroll */
+  /* giá trị mặc định (khi chưa scroll) */
+  --desc-opacity: 1;
+  --pad-y: 16px;
+  --title-size: 28.8px;
+  --header-scale: 1;
 
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
+  /* bố cục ổn định, hạn chế nháy */
+  padding: var(--pad-y) 1.5rem;
+  text-align: center;
+  transform-origin: top center;
+  transform: scale(var(--header-scale));
 
-  transition: padding 0.3s ease;
+  /* Không dùng transition ở container; animation mượt nhờ RAF + variables */
 }
 
-.header-wrapper.shrink {
-  padding: 0.25rem 1.5rem;
-}
-
-/* Title */
-.app-title {
+/* Tiêu đề: kích thước theo biến */
+.header-wrapper.header-staged .app-title {
   color: var(--color-secondary);
-  font-size: 1.8rem;
+  font-size: var(--title-size);
+  line-height: 1.1;
   margin: 0;
-  transition: font-size 0.3s ease;
 }
 
-.header-wrapper.shrink .app-title {
-  font-size: 1.4rem;
-}
-
-/* Description */
-.app-description {
+/* Mô tả: fade dần bằng biến opacity */
+.header-wrapper.header-staged .app-description {
+  margin: 0.25rem 0 0;
   font-size: 1rem;
-  margin-top: 0.2rem;
-  opacity: 1;
-  transition: opacity 0.3s ease;
-}
-
-.header-wrapper.shrink .app-description {
-  opacity: 0;
+  opacity: var(--desc-opacity);
+  pointer-events: none; /* tránh tương tác khi gần như ẩn */
 }
 
 /* CSS của Menu */
