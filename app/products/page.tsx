@@ -130,9 +130,11 @@ export default function ProductsListPage() {
         setProducts(fresh);
         replaceImageCache(await loadImages(fresh));
 
-        // ✅ chỉ báo "Đã cập nhật" khi dữ liệu mới thật sự khác
-        setJustUpdated(true);
-        // setTimeout(() => setJustUpdated(false), 2500);
+        // ✅ chỉ báo "Đã cập nhật" khi có mạng thật sự
+        if (navigator.onLine) {
+          setJustUpdated(true);
+          // setTimeout(() => setJustUpdated(false), 2500);
+        }
       }
 
       setOffline(false);
