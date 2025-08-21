@@ -92,7 +92,7 @@ export default function ProductsListPage() {
       setLoading(false);
       if (wasOffline) {
         setJustUpdated(true);
-        setTimeout(() => setJustUpdated(false), 2500);
+        // setTimeout(() => setJustUpdated(false), 2500);
       }
     } catch (err: any) {
       console.warn('⚠️ Không thể tải online:', err);

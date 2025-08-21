@@ -201,7 +201,7 @@ export default function ProductsTable({
   return (
     <>
       {/*renderPagination()*/}
-
+      {renderControls()}
       <table style={{ borderCollapse: 'collapse', width: '100%', border: '1px solid #ccc' }}>
         <thead
           style={{
@@ -318,7 +318,7 @@ export default function ProductsTable({
         </tbody>
       </table>
       {/*renderPagination()*/}
-
+      {renderControls()}
       <style jsx>{`
         td::before {
         }
