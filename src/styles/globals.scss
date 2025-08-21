@@ -206,9 +206,9 @@ header p {
 }
 
 /* Thêm mới cho header co lại */
-/* HEADER staged (3 bước: mô tả → padding → scale header) */
-.header-wrapper.header-staged {
-  /* nền & bố cục */
+/* ==== HEADER MƯỢT 3 GIAI ĐOẠN ==== */
+.header-wrapper.header-auto {
+  /* màu & vị trí */
   background: var(--color-primary);
   color: var(--color-secondary);
   border-bottom: 1px solid var(--color-border);
@@ -216,48 +216,46 @@ header p {
   top: 0;
   z-index: 10;
 
-  /* dùng CSS variables điều khiển theo scroll */
-  /* giá trị mặc định (khi chưa scroll) */
-  --desc-opacity: 1;
-  --pad-y: 16px;
-  --title-size: 28.8px;
-  --header-scale: 1;
+  /* CSS variables điều khiển bằng JS (có giá trị mặc định cho SSR) */
+  --padY: 16px; /* padding-block (trên/dưới) */
+  --titleSize: 28.8px; /* cỡ chữ tiêu đề */
+  --descH: 40px; /* fallback chiều cao mô tả (sẽ đo lại bằng JS) */
+  --descMax: var(--descH);
+  --descOpacity: 1;
 
-  /* bố cục ổn định, hạn chế nháy */
-  padding: var(--pad-y) 1.5rem;
+  /* layout */
+  padding: var(--padY) 1.5rem;
   text-align: center;
-  transform-origin: top center;
-  transform: scale(var(--header-scale));
 
-  /* Không dùng transition ở container; animation mượt nhờ RAF + variables */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center; /* luôn căn giữa dọc */
 }
 
-/* Tiêu đề: kích thước theo biến */
-.header-wrapper.header-staged .app-title {
+/* Tiêu đề: dùng đúng font của bạn */
+.app-title {
+  font-family: var(--font-ttp); /* giữ font TTP */
+  font-weight: 700;
   color: var(--color-secondary);
-  font-size: var(--title-size);
+  font-size: var(--titleSize);
   line-height: 1.1;
   margin: 0;
 }
 
-/* Mô tả: fade dần bằng biến opacity */
-.header-wrapper.header-staged .app-description {
+/* Mô tả: mờ dần & co chiều cao thực, không để nền thừa */
+.app-description {
   margin: 0.25rem 0 0;
   font-size: 1rem;
-  opacity: var(--desc-opacity);
-  pointer-events: none; /* tránh tương tác khi gần như ẩn */
-}
-
-.app-description {
-  opacity: 1;
-  max-height: auto; /* hoặc auto */
+  opacity: var(--descOpacity);
+  max-height: var(--descMax);
   overflow: hidden;
-  transition: opacity 0.3s ease, max-height 0.3s ease;
 }
 
-.header-wrapper.shrink .app-description {
-  opacity: 0;
-  max-height: 0;
+/* Link trong header giữ màu kế thừa */
+.header-wrapper a {
+  color: inherit;
+  text-decoration: none;
 }
 
 /* CSS của Menu */
