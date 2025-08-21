@@ -1,16 +1,20 @@
-// File: app/products/ProductsTable.tsx
-'use client';
-import React from 'react';
-import { Product } from '@/lib/products';
+// ✅ File: app/products/ProductsTable.tsx
 
-type Props = {
+'use client';
+
+import Link from 'next/link';
+import { useState, useEffect } from 'react';
+import { Product } from '@/lib/products';
+import { formatPrice, formatStockStatus } from '@/utils/format';
+
+interface ProductsTableProps {
   products: Product[];
-  imageCache: Record<number, string>;
-  sortField: string;
+  imageCache: { [id: number]: string };
+  sortField: 'name' | 'price' | 'stock_quantity' | 'stock_status';
   sortOrder: 'asc' | 'desc';
-  onSortChange: (field: string) => void;
-  searchText?: string;
-};
+  onSortChange: (field: 'name' | 'price' | 'stock_quantity' | 'stock_status') => void;
+  searchText?: string; // highlight search
+}
 
 export default function ProductsTable({
   products,
@@ -19,91 +23,161 @@ export default function ProductsTable({
   sortOrder,
   onSortChange,
   searchText = '',
-}: Props) {
-  const renderSortArrow = (field: string) => {
-    if (sortField !== field) return null;
-    return sortOrder === 'asc' ? ' ▲' : ' ▼';
-  };
+}: ProductsTableProps) {
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
+
+  const totalPages = Math.ceil(products.length / pageSize);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [sortField, sortOrder, products, pageSize]);
+
+  const paginatedProducts = products.slice((currentPage - 1) * pageSize, currentPage * pageSize);
 
   const highlightText = (text: string) => {
     if (!searchText) return text;
     const regex = new RegExp(`(${searchText})`, 'gi');
-    const parts = text.split(regex);
-    return (
-      <>
-        {parts.map((part, idx) =>
-          regex.test(part) ? (
-            <mark key={idx} style={{ backgroundColor: 'yellow', color: 'black' }}>
-              {part}
-            </mark>
-          ) : (
-            <span key={idx}>{part}</span>
-          )
-        )}
-      </>
+    return text.split(regex).map((part, i) =>
+      regex.test(part) ? (
+        <span key={i} style={{ background: 'yellow' }}>
+          {part}
+        </span>
+      ) : (
+        part
+      )
     );
   };
 
+  const PaginationControls = () => (
+    <div
+      style={{
+        margin: '8px 0',
+        display: 'flex',
+        alignItems: 'center',
+        gap: '8px',
+        flexWrap: 'wrap',
+      }}
+    >
+      <button onClick={() => setCurrentPage(p => Math.max(p - 1, 1))} disabled={currentPage === 1}>
+        Prev
+      </button>
+      <span>Trang</span>
+      <input
+        type="number"
+        value={currentPage}
+        onChange={e => {
+          const v = parseInt(e.target.value);
+          if (!isNaN(v) && v >= 1 && v <= totalPages) setCurrentPage(v);
+        }}
+        style={{ width: '50px' }}
+      />
+      <span>/ {totalPages}</span>
+      <button
+        onClick={() => setCurrentPage(p => Math.min(p + 1, totalPages))}
+        disabled={currentPage === totalPages}
+      >
+        Next
+      </button>
+      <span>Sản phẩm/trang:</span>
+      <select value={pageSize} onChange={e => setPageSize(parseInt(e.target.value))}>
+        {[5, 10, 20, 50].map(n => (
+          <option key={n} value={n}>
+            {n}
+          </option>
+        ))}
+      </select>
+    </div>
+  );
+
+  const renderSortIcon = (field: 'name' | 'price' | 'stock_quantity' | 'stock_status') => {
+    if (sortField !== field) return '↕️';
+    return sortOrder === 'asc' ? '⬆️' : '⬇️';
+  };
+
   return (
-    <div style={{ maxHeight: '500px', overflowY: 'auto', border: '1px solid #ccc' }}>
-      <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-        <thead style={{ position: 'sticky', top: 0, backgroundColor: '#f5f5f5', zIndex: 10 }}>
-          <tr>
+    <div>
+      <PaginationControls />
+      <table style={{ borderCollapse: 'collapse', width: '100%', border: '1px solid #ccc' }}>
+        <thead>
+          <tr style={{ background: 'var(--color-primary)', position: 'sticky', top: 0, zIndex: 1 }}>
+            <th style={{ border: '1px solid var(--color-border)', padding: '8px' }}>
+              Ảnh sản phẩm
+            </th>
             <th
-              style={{ cursor: 'pointer', padding: '4px 8px', borderBottom: '1px solid #ccc' }}
+              style={{ border: '1px solid var(--color-border)', padding: '8px', cursor: 'pointer' }}
               onClick={() => onSortChange('name')}
             >
-              Tên{renderSortArrow('name')}
+              Tên sản phẩm {renderSortIcon('name')}
             </th>
             <th
-              style={{ cursor: 'pointer', padding: '4px 8px', borderBottom: '1px solid #ccc' }}
+              style={{ border: '1px solid var(--color-border)', padding: '8px', cursor: 'pointer' }}
               onClick={() => onSortChange('price')}
             >
-              Giá{renderSortArrow('price')}
+              Giá {renderSortIcon('price')}
             </th>
             <th
-              style={{ cursor: 'pointer', padding: '4px 8px', borderBottom: '1px solid #ccc' }}
+              style={{ border: '1px solid var(--color-border)', padding: '8px', cursor: 'pointer' }}
               onClick={() => onSortChange('stock_quantity')}
             >
-              SL{renderSortArrow('stock_quantity')}
+              Tồn kho {renderSortIcon('stock_quantity')}
             </th>
             <th
-              style={{ cursor: 'pointer', padding: '4px 8px', borderBottom: '1px solid #ccc' }}
+              style={{ border: '1px solid var(--color-border)', padding: '8px', cursor: 'pointer' }}
               onClick={() => onSortChange('stock_status')}
             >
-              Trạng thái{renderSortArrow('stock_status')}
+              Trạng thái {renderSortIcon('stock_status')}
             </th>
-            <th style={{ padding: '4px 8px', borderBottom: '1px solid #ccc' }}>Ảnh</th>
           </tr>
         </thead>
         <tbody>
-          {products.map(p => (
+          {paginatedProducts.map(p => (
             <tr
               key={p.id}
-              style={{
-                transition: 'background-color 0.2s',
-                cursor: 'default',
-              }}
-              onMouseEnter={e => (e.currentTarget.style.backgroundColor = '#f0f8ff')}
-              onMouseLeave={e => (e.currentTarget.style.backgroundColor = 'transparent')}
+              style={{ cursor: 'default', transition: 'background 0.2s' }}
+              onMouseEnter={e => (e.currentTarget.style.background = '#f0f0f0')}
+              onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
             >
-              <td style={{ padding: '4px 8px' }}>{highlightText(p.name || '')}</td>
-              <td style={{ padding: '4px 8px' }}>{p.price}</td>
-              <td style={{ padding: '4px 8px' }}>{p.stock_quantity ?? 0}</td>
-              <td style={{ padding: '4px 8px' }}>{p.stock_status}</td>
-              <td style={{ padding: '4px 8px' }}>
-                {imageCache[p.id] && (
-                  <img
-                    src={imageCache[p.id]}
-                    alt={p.name}
-                    style={{ width: 50, height: 50, objectFit: 'cover' }}
-                  />
+              <td
+                style={{
+                  border: '1px solid var(--color-border)',
+                  padding: '8px',
+                  textAlign: 'center',
+                }}
+              >
+                {imageCache[p.id] ? (
+                  <Link href={`/product/${p.id}`}>
+                    <img src={imageCache[p.id]} alt={p.name} style={{ maxWidth: '150px' }} />
+                  </Link>
+                ) : (
+                  <span>...</span>
                 )}
+              </td>
+              <td style={{ border: '1px solid var(--color-border)', padding: '8px' }}>
+                <Link
+                  href={`/product/${p.id}`}
+                  style={{ color: 'var(--color-link)', textDecoration: 'underline' }}
+                >
+                  {highlightText(p.name)}
+                </Link>
+              </td>
+              <td style={{ border: '1px solid var(--color-border)', padding: '8px' }}>
+                {formatPrice(p.price)}
+              </td>
+              <td style={{ border: '1px solid var(--color-border)', padding: '8px' }}>
+                {p.stock_quantity ?? '-'}
+              </td>
+              <td style={{ border: '1px solid var(--color-border)', padding: '8px' }}>
+                {(() => {
+                  const { text, color } = formatStockStatus(p.stock_status);
+                  return <span style={{ color }}>{text}</span>;
+                })()}
               </td>
             </tr>
           ))}
         </tbody>
       </table>
+      <PaginationControls />
     </div>
   );
 }

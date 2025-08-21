@@ -1,4 +1,4 @@
-// ✅ File: app/products/page.tsx
+// ✅ File: app/products/all/page.tsx
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
