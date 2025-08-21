@@ -121,15 +121,14 @@ export default function ProductsListPage() {
       if (isDifferent) {
         setProducts(fresh);
         replaceImageCache(await loadImages(fresh));
-      }
 
-      const wasOffline = offlineRef.current;
-      setOffline(false);
-      setLoading(false);
-      if (wasOffline) {
+        // ✅ chỉ báo "Đã cập nhật" khi dữ liệu mới thật sự khác
         setJustUpdated(true);
         // setTimeout(() => setJustUpdated(false), 2500);
       }
+
+      setOffline(false);
+      setLoading(false);
     } catch (err: any) {
       console.warn('⚠️ Không thể tải online:', err);
       setErrorMessage(err.message || '⚠️ Có lỗi khi tải dữ liệu');
@@ -230,13 +229,13 @@ export default function ProductsListPage() {
         {/* Nhóm 3: Pagination (Đầu / Trước / input / Sau / Cuối) */}
         <div className="ctrl-group pagination">
           <button onClick={() => setCurrentPage(1)} disabled={currentPage === 1}>
-            « Đầu
+            «
           </button>
           <button
             onClick={() => setCurrentPage(p => Math.max(p - 1, 1))}
             disabled={currentPage === 1}
           >
-            ‹ Trước
+            ‹
           </button>
 
           <span className="page-indicator">
@@ -254,10 +253,10 @@ export default function ProductsListPage() {
             onClick={() => setCurrentPage(p => Math.min(p + 1, totalPages))}
             disabled={currentPage === totalPages}
           >
-            Tiếp ›
+            ›
           </button>
           <button onClick={() => setCurrentPage(totalPages)} disabled={currentPage === totalPages}>
-            Cuối »
+            »
           </button>
         </div>
       </div>
