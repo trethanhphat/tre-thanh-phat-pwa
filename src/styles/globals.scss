@@ -206,7 +206,6 @@ header p {
 }
 
 /* Thêm mới cho header co lại */
-/* Header wrapper */
 .header-wrapper {
   background: var(--color-primary);
   color: var(--color-secondary);
@@ -214,16 +213,12 @@ header p {
   position: sticky;
   top: 0;
   z-index: 10;
-  padding: 1rem 1.5rem;
+  padding: 0.5rem 1.5rem 2rem; /* luôn chừa chỗ cho description */
   text-align: center;
   transition: padding 0.3s ease;
 }
 
-.header-wrapper.shrink {
-  padding: 0.3rem 1.5rem;
-}
-
-/* Title */
+/* Tiêu đề */
 .app-title {
   color: var(--color-secondary);
   font-size: 1.8rem;
@@ -232,22 +227,22 @@ header p {
 }
 
 .header-wrapper.shrink .app-title {
-  font-size: 1.3rem;
+  font-size: 1.4rem;
 }
 
-/* Description with fade + slide-up */
+/* Description không làm thay đổi layout */
 .app-description {
-  margin: 0.2rem 0 0;
-  font-size: 1rem;
+  position: absolute; /* ✅ tách khỏi flow */
+  left: 50%;
+  transform: translateX(-50%);
+  bottom: 0.3rem; /* nằm dưới app-title */
+  width: 100%;
   opacity: 1;
-  transform: translateY(0); /* mặc định ở vị trí ban đầu */
-  transition: opacity 0.4s ease, transform 0.4s ease;
+  transition: opacity 0.3s ease;
 }
 
 .header-wrapper.shrink .app-description {
   opacity: 0;
-  transform: translateY(-10px); /* trượt lên trên một chút */
-  margin: 0; /* loại bỏ khoảng trống */
 }
 
 /* CSS của Menu */
