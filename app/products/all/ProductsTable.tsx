@@ -28,7 +28,7 @@ export default function ProductsTable({
   return (
     <table style={{ borderCollapse: 'collapse', width: '100%', border: '1px solid #ccc' }}>
       <thead>
-        <tr style={{ background: 'var(--color-primary)' }}>
+        <tr style={{ background: 'var(--color-primary)', color: 'var(--color-secondary' }}>
           <th style={{ border: '1px solid var(--color-border)', padding: '8px' }}>Ảnh sản phẩm</th>
           <th
             style={{ border: '1px solid var(--color-border)', padding: '8px', cursor: 'pointer' }}
