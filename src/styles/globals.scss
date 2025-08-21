@@ -206,46 +206,48 @@ header p {
 }
 
 /* Thêm mới cho header co lại */
+/* Header wrapper */
 .header-wrapper {
   background: var(--color-primary);
   color: var(--color-secondary);
   border-bottom: 1px solid var(--color-border);
   position: sticky;
   top: 0;
-  z-index: 1;
+  z-index: 10;
   padding: 1rem 1.5rem;
   text-align: center;
-  transform-origin: top center;
-  transition: transform 0.3s ease, background 0.3s ease;
+  transition: padding 0.3s ease;
 }
 
-/* Khi shrink → thu nhỏ toàn bộ header */
 .header-wrapper.shrink {
-  transform: scale(0.9);
+  padding: 0.3rem 1.5rem;
 }
 
 /* Title */
 .app-title {
   color: var(--color-secondary);
   font-size: 1.8rem;
-  margin-bottom: 0.25rem;
-  transition: margin 0.3s ease;
+  margin: 0;
+  transition: font-size 0.3s ease;
 }
 
 .header-wrapper.shrink .app-title {
-  margin-bottom: 0;
+  font-size: 1.3rem;
 }
 
-/* Description */
+/* Description with fade + slide-up */
 .app-description {
-  margin: 0;
+  margin: 0.2rem 0 0;
   font-size: 1rem;
   opacity: 1;
-  transition: opacity 0.3s ease;
+  transform: translateY(0); /* mặc định ở vị trí ban đầu */
+  transition: opacity 0.4s ease, transform 0.4s ease;
 }
 
 .header-wrapper.shrink .app-description {
   opacity: 0;
+  transform: translateY(-10px); /* trượt lên trên một chút */
+  margin: 0; /* loại bỏ khoảng trống */
 }
 
 /* CSS của Menu */
