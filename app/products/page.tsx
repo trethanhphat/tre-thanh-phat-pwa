@@ -136,14 +136,8 @@ export default function ProductsListPage() {
     if (!isNaN(val) && val >= 1 && val <= totalPages) setCurrentPage(val);
   };
 
-  return (
-    <div style={{ padding: '1rem' }}>
-      <h1>Danh sách sản phẩm</h1>
-
-      {errorMessage && <p style={{ color: 'red' }}>{errorMessage}</p>}
-      {offline && <p style={{ color: 'orange' }}>⚠️ Đang chờ cập nhật...</p>}
-      {justUpdated && !offline && <p style={{ color: 'green' }}>✅ Đã cập nhật dữ liệu mới</p>}
-
+  const renderControls = () => (
+    <>
       <div style={{ margin: '0.5rem 0' }}>
         <input
           type="text"
@@ -173,6 +167,40 @@ export default function ProductsListPage() {
           </select>
         </label>
       </div>
+      <div style={{ marginTop: 12, display: 'flex', alignItems: 'center', gap: 8 }}>
+        <button
+          onClick={() => setCurrentPage(p => Math.max(p - 1, 1))}
+          disabled={currentPage === 1}
+        >
+          Prev
+        </button>
+        <span>
+          Trang{' '}
+          <input
+            type="number"
+            value={currentPage}
+            onChange={handlePageInput}
+            style={{ width: 50 }}
+          />{' '}
+          / {totalPages}
+        </span>
+        <button
+          onClick={() => setCurrentPage(p => Math.min(p + 1, totalPages))}
+          disabled={currentPage === totalPages}
+        >
+          Next
+        </button>
+      </div>
+    </>
+  );
+
+  return (
+    <div style={{ padding: '1rem' }}>
+      <h1>Danh sách sản phẩm</h1>
+
+      {errorMessage && <p style={{ color: 'red' }}>{errorMessage}</p>}
+      {offline && <p style={{ color: 'orange' }}>⚠️ Đang chờ cập nhật...</p>}
+      {justUpdated && !offline && <p style={{ color: 'green' }}>✅ Đã cập nhật dữ liệu mới</p>}
 
       {loading ? (
         <p>⚠️ Đang tải dữ liệu...</p>
@@ -187,31 +215,6 @@ export default function ProductsListPage() {
             sortOrder={sortOrder}
             onSortChange={handleSortChange}
           />
-
-          <div style={{ marginTop: 12, display: 'flex', alignItems: 'center', gap: 8 }}>
-            <button
-              onClick={() => setCurrentPage(p => Math.max(p - 1, 1))}
-              disabled={currentPage === 1}
-            >
-              Prev
-            </button>
-            <span>
-              Trang{' '}
-              <input
-                type="number"
-                value={currentPage}
-                onChange={handlePageInput}
-                style={{ width: 50 }}
-              />{' '}
-              / {totalPages}
-            </span>
-            <button
-              onClick={() => setCurrentPage(p => Math.min(p + 1, totalPages))}
-              disabled={currentPage === totalPages}
-            >
-              Next
-            </button>
-          </div>
         </>
       )}
     </div>
