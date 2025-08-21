@@ -135,6 +135,7 @@ export default function ProductsListPage() {
       setErrorMessage(err.message || '⚠️ Có lỗi khi tải dữ liệu');
       if (productsRef.current.length === 0) setLoading(false);
       setOffline(true); // Nếu lỗi: vẫn bám offline
+      setJustUpdated(false); // 🔑 reset lại, tránh hiển thị sai
     }
   };
 

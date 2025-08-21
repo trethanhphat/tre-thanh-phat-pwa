@@ -33,7 +33,7 @@ export default function ControlBar({
     <>
       <div className="control-bar">
         {/* Nhóm 1: Ô tìm kiếm */}
-        <div className="ctrl-group">
+        <div className="ctrl-group search-wrapper">
           <input
             type="text"
             placeholder="🔎 Tìm theo tên..."
@@ -44,6 +44,11 @@ export default function ControlBar({
             }}
             className="search-input"
           />
+          {searchText && (
+            <button type="button" className="clear-btn" onClick={() => setSearchText('')}>
+              ×
+            </button>
+          )}
         </div>
 
         {/* Nhóm 2: Số sản phẩm/trang */}
@@ -87,6 +92,8 @@ export default function ControlBar({
               value={currentPage}
               onChange={handlePageInput}
               className="page-input"
+              min={1}
+              max={totalPages}
             />{' '}
             / {totalPages}
           </span>
@@ -118,26 +125,55 @@ export default function ControlBar({
           align-items: center;
           gap: 8px;
         }
+
+        /* Search box + nút clear */
+        .search-wrapper {
+          position: relative;
+          display: inline-flex;
+          align-items: center;
+        }
         .search-input {
-          padding: 6px 10px;
+          padding: 6px 30px 6px 10px;
           min-width: 240px;
           border: 1px solid var(--color-border, #ccc);
           border-radius: 6px;
         }
+        .clear-btn {
+          position: absolute;
+          right: 8px;
+          background: transparent;
+          border: none;
+          cursor: pointer;
+          font-size: 16px;
+          line-height: 1;
+          color: #888;
+        }
+        .clear-btn:hover {
+          color: #000;
+        }
+
+        /* Select */
         .select {
           padding: 4px 6px;
         }
+
+        /* Pagination */
         .pagination {
           display: flex;
           align-items: center;
           gap: 6px;
-          flex-wrap: nowrap;
+          flex-wrap: nowrap; /* ✅ ép 1 dòng */
+          overflow-x: auto; /* ✅ nếu hẹp quá thì cuộn ngang */
         }
-        .pagination button {
+        .pagination button,
+        .pagination .page-input {
           padding: 6px 10px;
           border: 1px solid var(--color-border, #ccc);
           border-radius: 4px;
           background: #fff;
+          font-size: 14px;
+        }
+        .pagination button {
           cursor: pointer;
         }
         .pagination button:disabled {
@@ -146,11 +182,9 @@ export default function ControlBar({
         }
         .page-input {
           width: 56px;
-          padding: 6px;
-          border: 1px solid var(--color-border, #ccc);
-          border-radius: 4px;
           text-align: center;
         }
+
         @media (max-width: 768px) {
           .control-bar {
             flex-direction: column;
