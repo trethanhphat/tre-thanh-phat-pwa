@@ -106,12 +106,111 @@ export default function ProductsTable({
     </div>
   );
 
+  const renderControls = () => (
+    <div className="controls">
+      <div className="search-box">
+        <input
+          type="text"
+          placeholder="Tìm theo tên..."
+          defaultValue={searchText}
+          readOnly
+          style={{ flex: 1, minWidth: '150px', padding: '4px' }}
+        />
+      </div>
+
+      <div className="pagination-controls">
+        <button onClick={() => setCurrentPage(1)} disabled={currentPage === 1}>
+          « Đầu
+        </button>
+        <button
+          onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+          disabled={currentPage === 1}
+        >
+          ‹ Trước
+        </button>
+        <span>
+          Trang{' '}
+          <input
+            type="number"
+            value={currentPage}
+            onChange={handleJumpToPage}
+            style={{ width: '50px' }}
+          />{' '}
+          / {totalPages}
+        </span>
+        <button
+          onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+          disabled={currentPage === totalPages}
+        >
+          Tiếp ›
+        </button>
+        <button onClick={() => setCurrentPage(totalPages)} disabled={currentPage === totalPages}>
+          Cuối »
+        </button>
+      </div>
+
+      <div className="page-size">
+        Sản phẩm/trang:{' '}
+        <select
+          value={pageSize}
+          onChange={e => {
+            setPageSize(parseInt(e.target.value));
+            setCurrentPage(1);
+          }}
+        >
+          {pageSizeOptions.map(n => (
+            <option key={n} value={n}>
+              {n}
+            </option>
+          ))}
+        </select>
+      </div>
+
+      <style jsx>{`
+        .controls {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 10px;
+          margin: 10px 0;
+          align-items: center;
+        }
+        @media (min-width: 768px) {
+          .controls {
+            flex-direction: row;
+            justify-content: space-between;
+          }
+          .search-box {
+            flex: 1;
+          }
+        }
+        @media (max-width: 767px) {
+          .controls {
+            flex-direction: column;
+            align-items: flex-start;
+          }
+          .search-box,
+          .pagination-controls,
+          .page-size {
+            width: 100%;
+          }
+        }
+      `}</style>
+    </div>
+  );
+
   return (
     <>
-      {renderPagination()}
+      {/*renderPagination()*/}
+      {renderControls()}
       <table style={{ borderCollapse: 'collapse', width: '100%', border: '1px solid #ccc' }}>
         <thead
-          style={{ position: 'sticky', top: 0, background: 'var(--color-primary)', zIndex: 1 }}
+          style={{
+            position: 'sticky',
+            top: 0,
+            background: 'var(--color-primary)',
+            color: 'var(--color-secondary)',
+            zIndex: 1,
+          }}
         >
           <tr>
             <th style={{ border: '1px solid var(--color-border)', padding: '8px' }}>
@@ -218,7 +317,8 @@ export default function ProductsTable({
           ))}
         </tbody>
       </table>
-      {renderPagination()}
+      {/*renderPagination()*/}
+      {renderControls()}
 
       <style jsx>{`
         td::before {
