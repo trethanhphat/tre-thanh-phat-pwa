@@ -233,12 +233,26 @@ header p {
   color: var(--color-secondary);
   font-size: 1.8rem;
   margin-bottom: 0.25rem;
-  transition: font-size 0.5s ease;
+  transition: font-size 0.4s ease, margin 0.4s ease;
 }
 
 .header-wrapper.shrink .app-title {
   font-size: 1.3rem;
   margin-bottom: 0;
+}
+
+/* Description — fade out thay vì remove */
+.app-description {
+  opacity: 1;
+  max-height: 2rem; /* giữ chỗ */
+  overflow: hidden;
+  transition: opacity 0.4s ease, max-height 0.4s ease, margin 0.4s ease;
+}
+
+.header-wrapper.shrink .app-description {
+  opacity: 0;
+  max-height: 0; /* co lại */
+  margin: 0; /* bỏ khoảng trống */
 }
 
 /* CSS của Menu */
