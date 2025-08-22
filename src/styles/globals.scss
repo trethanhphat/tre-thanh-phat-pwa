@@ -1,13 +1,17 @@
-/* src/styles/globals.scss */
+/* // File: src/styles/globals.scss */
 
+/* Phần import fonts cho TTP*/
 @import '../fonts/font-ttp.scss';
 
+/* Phần quy định màu cho giao diện sáng và tối */
 :root {
   --font-ttp: 'TTP', 'SVN-Digitalis', Arial, sans-serif;
   --font-primary: Arial, sans-serif;
-  /* Light Mode */
+  /* Màu cho giao diện sáng - bắt đầu */
+  /* Màu chủ đạo cho giao diện sáng - bắt đầu */
   --color-primary: #054219;
   --color-secondary: #e2ffe2;
+  /* Màu chủ đạo cho giao diện sáng - kết thúc */
   --color-accent: #ef9651;
   --color-alert: #ec5228;
   --color-background: #efefef;
@@ -15,12 +19,16 @@
   --color-text: #1e1e1e;
   --color-muted: #666666;
   --color-border: #cccccc;
+  /* Màu cho giao diện sáng - kết thúc */
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
+    /* Màu cho giao diện tối - bắt đầu */
+    /* Màu chủ đạo cho giao diện tối - bắt đầu */
     --color-primary: #0a8030;
     --color-secondary: #e2ffe2;
+    /* Màu chủ đạo cho giao diện tối - kết thúc */
     --color-accent: #89f7a7;
     --color-alert: #ff7f5e;
     --color-background: #0d1b12;
@@ -28,19 +36,20 @@
     --color-text: #f5f5f5;
     --color-muted: #9aa39b;
     --color-border: #2e4b3c;
+    /* Màu cho giao diện tối - bắt đầu */
   }
 }
 
 html {
-  font-size: 16px;
+  font-size: 16px; // Kích cỡ font to cho người dùng dễ đọc
   height: 100%;
 }
 
 body {
-  font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
-  background-color: var(--color-background);
-  color: var(--color-text);
-  margin: 8px;
+  font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif; // Font hệ thống cho dễ đọc
+  background-color: var(--color-background); // Màu nền chính theo giao diện thiết bị
+  color: var(--color-text); // Màu chữ chính theo giao diện thiết bị
+  margin: 0; // Phần cố định cho tràn viền
   padding: 0;
   line-height: 1.6;
   min-height: 100%;
