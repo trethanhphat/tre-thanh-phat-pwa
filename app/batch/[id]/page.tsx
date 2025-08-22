@@ -8,6 +8,8 @@ import { useEffect, useState } from 'react';
 interface Batch {
   batch_id: string;
   batch_location: string;
+  batch_longitude: string;
+  batch_latitude: string;
   region_id: string;
   region_name: string;
   planting_date: string;
@@ -77,6 +79,12 @@ export default function BatchDetailPage() {
           </p>
           <p>
             <strong>Ghi chú:</strong> {batch.note || 'Không có'}
+          </p>
+          <p>
+            <strong>Kinh độ:</strong> {batch.batch_longitude || 'Chưa cập nhật'}
+          </p>
+          <p>
+            <strong>Vĩ độ:</strong> {batch.batch_latitude || 'Chưa cập nhật'}
           </p>
           <p>
             <strong>Vị trí trên bản đồ:</strong>{' '}

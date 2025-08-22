@@ -12,6 +12,8 @@ interface Batch {
   area: string;
   note: string;
   batch_location: string;
+  batch_longitude: string;
+  batch_latitude: string;
 }
 
 export default function BatchListPage() {
@@ -86,13 +88,25 @@ export default function BatchListPage() {
               className="border p-2"
               style={{ border: '1px solid var(--color-border)', padding: '8px' }}
             >
-              Ghi chú
+              Kinh độ
             </th>
             <th
               className="border p-2"
               style={{ border: '1px solid var(--color-border)', padding: '8px' }}
             >
-              Vị trí
+              Vĩ độ
+            </th>
+            <th
+              className="border p-2"
+              style={{ border: '1px solid var(--color-border)', padding: '8px' }}
+            >
+              Vị trí trên bản đồ
+            </th>
+            <th
+              className="border p-2"
+              style={{ border: '1px solid var(--color-border)', padding: '8px' }}
+            >
+              Ghi chú
             </th>
           </tr>
         </thead>
@@ -161,9 +175,20 @@ export default function BatchListPage() {
                   padding: '8px',
                   textAlign: 'center',
                 }}
-                data-label="Ghi chú"
+                data-label="Kinh độ"
               >
-                {batch.note || '—'}
+                {batch.batch_longitude || 'Đang cập nhật'}
+              </td>
+              <td
+                className="border p-2"
+                style={{
+                  border: '1px solid var(--color-border)',
+                  padding: '8px',
+                  textAlign: 'center',
+                }}
+                data-label="Vĩ độ"
+              >
+                {batch.batch_latitude || 'Đang cập nhật'}
               </td>
               <td
                 className="border p-2 text-blue-600 underline"
@@ -172,13 +197,24 @@ export default function BatchListPage() {
                   padding: '8px',
                   textAlign: 'center',
                 }}
-                data-label="Vị trí"
+                data-label="Vị trí trên bản đồ"
               >
                 {batch.batch_location ? (
                   <Link href={batch.batch_location}>Mở bản đồ</Link>
                 ) : (
                   <span className="text-gray-500">Đang cập nhật</span>
                 )}
+              </td>
+              <td
+                className="border p-2"
+                style={{
+                  border: '1px solid var(--color-border)',
+                  padding: '8px',
+                  textAlign: 'center',
+                }}
+                data-label="Ghi chú"
+              >
+                {batch.note || '—'}
               </td>
             </tr>
           ))}
