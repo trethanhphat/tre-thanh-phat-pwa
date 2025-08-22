@@ -104,7 +104,7 @@ export default function ProductsTable({
                 border: '1px solid var(--color-border)',
                 transition: 'background 0.2s',
               }}
-              onMouseEnter={e => (e.currentTarget.style.background = '#f0f0f0')}
+              onMouseEnter={e => (e.currentTarget.style.background = 'var(--color-muted)')}
               onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
             >
               {/* Ảnh */}

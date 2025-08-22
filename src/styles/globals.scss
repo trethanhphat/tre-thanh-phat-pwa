@@ -55,10 +55,15 @@ body {
   min-height: 100%;
 }
 
-/* Cớ font cho các mục */
+footer {
+  padding: 1rem;
+}
+
+/* Cớ font lớn cho các mục */
 p,
 li,
 button,
+select,
 input {
   font-size: 1.125rem; /* 20px */
   line-height: 1.6;
