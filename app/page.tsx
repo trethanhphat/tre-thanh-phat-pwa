@@ -7,7 +7,7 @@ import { appName, appDescription, appUrl, phone, email, copyright } from '@/lib/
 
 export default function Home() {
   return (
-    <main className="main">
+    <>
       <div>
         <h1 className="font-ttp">{appName}</h1>
         <p>{appDescription}</p>
@@ -32,6 +32,6 @@ export default function Home() {
           📋 Xem báo cáo cây trồng
         </a>
       </section>
-    </main>
+    </>
   );
 }

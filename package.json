@@ -17,13 +17,15 @@
     "axios": "^1.6.8",
     "swr": "^2.2.0",
     "sass": "^1.75.0",
-    "he": "^1.2.0"
+    "he": "^1.2.0",
+    "papaparse": "^5.4.1"
   },
   "devDependencies": {
     "@types/react": "18.2.8",
     "autoprefixer": "^10.4.0",
     "postcss": "^8.4.0",
     "axios": "^1.6.8",
-    "typescript": "^5.4.0"
+    "typescript": "^5.4.0",
+    "papaparse": "^5.4.1"
   }
 }
