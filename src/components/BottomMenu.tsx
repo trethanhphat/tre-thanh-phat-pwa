@@ -25,19 +25,6 @@ export default function BottomMenu() {
 
       {/* Menu nổi dưới cùng */}
       <nav style={{ height: `${menuHeight}px` }} className="nav-bar">
-        <button onClick={() => setMenuOpen(true)} className="nav-btn">
-          <span className="nav-icon">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-              <path
-                d="M3 6h18M3 12h18M3 18h18"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-              />
-            </svg>
-          </span>
-          <span className="nav-label">Mở menu</span>
-        </button>
         <button
           onClick={() => {
             setMenuOpen(false);
@@ -53,6 +40,20 @@ export default function BottomMenu() {
           </span>
           <span className="nav-label">Tài khoản</span>
         </button>
+        <button onClick={() => setMenuOpen(true)} className="nav-btn">
+          <span className="nav-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+              <path
+                d="M3 6h18M3 12h18M3 18h18"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+              />
+            </svg>
+          </span>
+          <span className="nav-label">Mở menu</span>
+        </button>
+
         <button
           onClick={() => {
             setMenuOpen(false);
