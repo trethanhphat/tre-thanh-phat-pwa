@@ -51,7 +51,7 @@ body {
   color: var(--color-text); // Màu chữ chính theo giao diện thiết bị
   margin: 0; // Phần cố định cho tràn viền
   padding: 0;
-  line-height: 1.6;
+  line-height: 1.6; // Giãn dòng cho dễ đọc
   min-height: 100%;
 }
 
@@ -67,9 +67,11 @@ input {
 p {
   text-align: justify;
 }
+
 .font-ttp {
   color: var(--color-primary);
 }
+
 span.font-ttp {
   font-family: var(--font-ttp);
   font-size: 1.125em;
@@ -113,7 +115,7 @@ h6 {
   text-transform: uppercase;
 }
 
-// Liên kết trong bài
+// Liên kết không có gạch chân
 a {
   color: inherit;
   text-decoration: none;
@@ -200,6 +202,12 @@ button:hover,
   font-weight: 600;
   color: var(--color-primary);
   margin-bottom: 0.5rem;
+}
+
+// Màu tiêu đề bảng
+table th {
+  background-color: var(--color-primary);
+  color: var(--color-secondary);
 }
 
 /* CSS của Header*/
