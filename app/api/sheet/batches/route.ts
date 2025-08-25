@@ -1,5 +1,5 @@
-// ✅ File: app/api/sheet/batch/route.ts
-// ✅ File: app/api/sheet/batch/route.ts
+// ✅ File: app/api/sheet/batches/route.ts
+
 import Papa from 'papaparse';
 
 export async function GET(request: Request) {

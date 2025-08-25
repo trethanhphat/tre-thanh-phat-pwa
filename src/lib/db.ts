@@ -4,6 +4,7 @@ import { openDB } from 'idb';
 export const DB_NAME = 'TPBC_DB';
 export const STORE_PRODUCTS = 'products';
 export const STORE_IMAGES = 'images';
+export const STORE_BATCHES = 'batches';
 
 export const initDB = async () => {
   return openDB(DB_NAME, 1, {

@@ -1,4 +1,4 @@
-// ✅ File: app/batchs/page.tsx
+// ✅ File: app/batches/page.tsx
 'use client';
 
 import Link from 'next/link';
@@ -22,7 +22,7 @@ export default function BatchListPage() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    fetch('/api/sheet/batch')
+    fetch('/api/sheet/batches')
       .then(res => {
         if (!res.ok) throw new Error('Không thể lấy dữ liệu');
         return res.json();

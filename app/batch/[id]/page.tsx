@@ -28,7 +28,7 @@ export default function BatchDetailPage() {
   useEffect(() => {
     if (!id) return;
     setLoading(true);
-    fetch(`/api/sheet/batch?id=${id}`)
+    fetch(`/api/sheet/batches?id=${id}`)
       .then(res => {
         if (!res.ok) throw new Error('Không thể lấy dữ liệu');
         return res.json();
