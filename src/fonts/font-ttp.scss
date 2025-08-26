@@ -1,4 +1,5 @@
 /*  // ✅ File: src/fonts/font-ttp.scss */
+@forward 'self';
 
 @font-face {
   font-family: 'TTP';
@@ -12,5 +13,3 @@
 .font-ttp {
   font-family: 'TTP', 'SVN-Digitalis', Arial, sans-serif;
 }
-
-@forward 'self';
