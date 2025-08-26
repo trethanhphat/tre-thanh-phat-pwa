@@ -4,9 +4,9 @@ import Papa from 'papaparse';
 
 export async function GET(request: Request) {
   try {
-    const batchApi = process.env.API_BATCH_URL;
-    if (!batchApi) {
-      return new Response(JSON.stringify({ error: 'Thiếu API_BATCH_URL trong .env' }), {
+    const batchesApi = process.env.API_BATCHES_URL;
+    if (!batchesApi) {
+      return new Response(JSON.stringify({ error: 'Thiếu API_BATCHES_URL trong .env' }), {
         status: 500,
         headers: { 'Content-Type': 'application/json' },
       });
@@ -15,7 +15,7 @@ export async function GET(request: Request) {
     const url = new URL(request.url);
     const id = url.searchParams.get('id'); // ?id=...
 
-    const res = await fetch(batchApi);
+    const res = await fetch(batchesApi);
     const csvText = await res.text();
 
     // ✅ Parse CSV bằng PapaParse (chuẩn RFC 4180)
