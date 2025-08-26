@@ -1,7 +1,7 @@
 /* // File: src/styles/globals.scss */
 
-/* Phần fonts cho TTP */
-@use '../fonts/font-ttp.scss' as *;
+/* Phần fonts */
+@use '../fonts' as *;
 
 /* Phần quy định màu cho giao diện sáng và tối */
 :root {
