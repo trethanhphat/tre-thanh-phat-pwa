@@ -6,6 +6,8 @@
 .next
 node_modules
 dist
+public/sw.js
+public/workbox-*.js 
 
 # Optional: macOS/Windows files
 .DS_Store
