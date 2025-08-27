@@ -111,14 +111,20 @@ export default function BatchListPage() {
           </tr>
         </thead>
         <tbody>
-          {data.map(batch => (
-            <tr key={batch.batch_id} className="hover:bg-gray-50">
+          {data.map((batch, index) => (
+            <tr
+              key={batch.batch_id}
+              className="hover:bg-gray-50"
+              style={{
+                backgroundColor:
+                  index % 2 === 0 ? 'var(--color-background)' : 'var(--color-surface)',
+              }}
+            >
               <td
                 className="border p-2 text-blue-600 underline"
                 style={{
                   border: '1px solid var(--color-border)',
-                  padding: '8px',
-                  textAlign: 'center',
+                  padding: '0.5rem',
                 }}
                 data-label="Mã lô"
               >
@@ -128,8 +134,7 @@ export default function BatchListPage() {
                 className="border p-2"
                 style={{
                   border: '1px solid var(--color-border)',
-                  padding: '8px',
-                  textAlign: 'center',
+                  padding: '0.5rem',
                 }}
                 data-label="Tên vùng trồng"
               >
@@ -139,8 +144,7 @@ export default function BatchListPage() {
                 className="border p-2"
                 style={{
                   border: '1px solid var(--color-border)',
-                  padding: '8px',
-                  textAlign: 'center',
+                  padding: '0.5rem',
                 }}
                 data-label="Ngày trồng"
               >
@@ -150,8 +154,7 @@ export default function BatchListPage() {
                 className="border p-2"
                 style={{
                   border: '1px solid var(--color-border)',
-                  padding: '8px',
-                  textAlign: 'center',
+                  padding: '0.5rem',
                 }}
                 data-label="Số lượng"
               >
@@ -161,8 +164,7 @@ export default function BatchListPage() {
                 className="border p-2"
                 style={{
                   border: '1px solid var(--color-border)',
-                  padding: '8px',
-                  textAlign: 'center',
+                  padding: '0.5rem',
                 }}
                 data-label="Diện tích (ha)"
               >
@@ -172,8 +174,7 @@ export default function BatchListPage() {
                 className="border p-2"
                 style={{
                   border: '1px solid var(--color-border)',
-                  padding: '8px',
-                  textAlign: 'center',
+                  padding: '0.5rem',
                 }}
                 data-label="Kinh độ"
               >
@@ -183,8 +184,7 @@ export default function BatchListPage() {
                 className="border p-2"
                 style={{
                   border: '1px solid var(--color-border)',
-                  padding: '8px',
-                  textAlign: 'center',
+                  padding: '0.5rem',
                 }}
                 data-label="Vĩ độ"
               >
@@ -194,8 +194,7 @@ export default function BatchListPage() {
                 className="border p-2 text-blue-600 underline"
                 style={{
                   border: '1px solid var(--color-border)',
-                  padding: '8px',
-                  textAlign: 'center',
+                  padding: '0.5rem',
                 }}
                 data-label="Vị trí trên bản đồ"
               >
@@ -209,8 +208,7 @@ export default function BatchListPage() {
                 className="border p-2"
                 style={{
                   border: '1px solid var(--color-border)',
-                  padding: '8px',
-                  textAlign: 'center',
+                  padding: '0.5rem',
                 }}
                 data-label="Ghi chú"
               >

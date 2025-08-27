@@ -22,8 +22,8 @@ export default function Header() {
     // cập nhật style khi cuộn
     const update = () => {
       const y = window.scrollY;
-      const T1 = 80,
-        T2 = 80; // ngưỡng px
+      const T1 = 30,
+        T2 = 30; // ngưỡng px
       const opacity = Math.max(0, 1 - y / T1);
       const padding = Math.max(0.25, 1 - ((y - T1) / T2) * 0.75);
 
