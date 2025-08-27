@@ -117,7 +117,7 @@ export default function BatchListPage() {
               className="hover:bg-gray-50"
               style={{
                 backgroundColor:
-                  index % 2 === 0 ? 'var(--color-background)' : 'var(--color-surface)',
+                  index % 2 === 0 ? 'var(--color-surface)' : 'var(--color-background)',
               }}
             >
               <td

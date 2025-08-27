@@ -2,5 +2,5 @@
 import { redirect } from 'next/navigation';
 
 export default function BatchIndexPage() {
-  redirect('/batchs');
+  redirect('/batches');
 }

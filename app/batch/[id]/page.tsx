@@ -48,7 +48,7 @@ export default function BatchDetailPage() {
   return (
     <main className="p-4">
       <p>
-        <a className="button" href="/batchs">
+        <a className="button" href="/batches">
           <strong>Quay trở về danh sách lô</strong>
         </a>
       </p>
@@ -95,7 +95,7 @@ export default function BatchDetailPage() {
             )}
           </p>
           <p>
-            <a className="button" href="/batchs">
+            <a className="button" href="/batches">
               <strong>Quay trở về danh sách lô</strong>
             </a>
           </p>
