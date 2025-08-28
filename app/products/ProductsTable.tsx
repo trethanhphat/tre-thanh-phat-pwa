@@ -130,10 +130,7 @@ export default function ProductsTable({
                 style={{ border: '1px solid var(--color-border)', padding: '8px' }}
                 data-label="Tên sản phẩm"
               >
-                <Link
-                  href={`/product/${p.id}`}
-                  style={{ color: 'var(--color-link)', textDecoration: 'underline' }}
-                >
+                <Link href={`/product/${p.id}`} style={{ color: 'var(--color-link)' }}>
                   {searchText
                     ? String(p.name)
                         .split(new RegExp(`(${escapeReg(searchText)})`, 'gi'))
