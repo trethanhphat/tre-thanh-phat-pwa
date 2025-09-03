@@ -43,7 +43,7 @@ export default function ProductsListPage() {
   const [products, setProducts] = useState<Product[]>([]);
   const [imageCache, setImageCache] = useState<Record<number, string>>({});
   const [loading, setLoading] = useState(true);
-  const [offline, setOffline] = useState(false);
+  const [usingCache, setUsingCache] = useState(false);
   const [justUpdated, setJustUpdated] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
@@ -84,7 +84,7 @@ export default function ProductsListPage() {
     if (cached.length > 0) {
       setProducts(cached);
       replaceImageCache(await loadImages(cached));
-      setOffline(true);
+      setUsingCache(true);
     }
     setLoading(false);
   };
@@ -113,25 +113,24 @@ export default function ProductsListPage() {
         return;
       }
 
-      await syncProducts(fresh);
+      const hasChange = await syncProducts(fresh);
       setErrorMessage(null);
 
-      const prev = productsRef.current;
-      const isDifferent =
-        prev.length !== fresh.length || JSON.stringify(prev) !== JSON.stringify(fresh);
-
-      if (isDifferent) {
+      if (hasChange) {
         setProducts(fresh);
         replaceImageCache(await loadImages(fresh));
-        setJustUpdated(true);
+        setJustUpdated(true); // Có cập nhật mới
+      } else {
+        setJustUpdated(false); // Dữ liệu giống hệt
+        setUsingCache(false); // Nhưng confirm là dữ liệu đang hiển thị là bản mới nhất
       }
 
-      setOffline(false);
+      setUsingCache(false);
       setLoading(false);
     } catch (err: any) {
       console.warn('⚠️ Không thể tải online:', err);
       setErrorMessage(err.message || '⚠️ Có lỗi khi tải dữ liệu');
-      setOffline(true);
+      setUsingCache(true);
       setJustUpdated(false);
       if (productsRef.current.length === 0) setLoading(false);
     }
@@ -145,7 +144,7 @@ export default function ProductsListPage() {
       if (navigator.onLine) {
         await fetchOnlineAndUpdate();
       } else {
-        setOffline(true);
+        setUsingCache(true);
         setLoading(false);
       }
     };
@@ -193,13 +192,14 @@ export default function ProductsListPage() {
       <h1>Danh sách sản phẩm</h1>
 
       {errorMessage && <p style={{ color: 'red' }}>{errorMessage}</p>}
-      {offline && !justUpdated && (
+      {usingCache && !justUpdated && (
         <p style={{ color: 'orange' }}>
-          ⚠️ Đang hiển thị dữ liệu offline (chưa có cập nhật mới).
+          ⚠️ Đang hiển thị dữ liệu trên máy (chưa có cập nhật mới).
           {products.length === 0 && ' Chưa có sản phẩm, cần mở online để đồng bộ lần đầu.'}
         </p>
       )}
-      {justUpdated && !offline && <p style={{ color: 'green' }}>✅ Đã cập nhật dữ liệu mới</p>}
+      {justUpdated && !usingCache && <p style={{ color: 'green' }}>✅ Đã cập nhật dữ liệu mới</p>}
+      {!justUpdated && !usingCache && <p style={{ color: 'green' }}>✅ Dữ liệu đã là mới nhất</p>}
 
       {loading ? (
         <p>⏳ Đang tải dữ liệu...</p>

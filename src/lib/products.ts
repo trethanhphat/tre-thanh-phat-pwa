@@ -16,30 +16,37 @@ export const loadProductsFromDB = async (): Promise<Product[]> => {
   return await db.getAll(STORE_PRODUCTS);
 };
 
-export const syncProducts = async (products: Product[]) => {
+export const syncProducts = async (products: Product[]): Promise<boolean> => {
   const db = await initDB();
-
-  // Danh sách ID mới
   const newIds = new Set(products.map(p => p.id));
+
   const tx = db.transaction(STORE_PRODUCTS, 'readwrite');
   const store = tx.store;
 
-  // Xóa bản ghi cũ
+  let hasChange = false;
+
+  // Xóa record cũ
   let cursor = await store.openCursor();
   while (cursor) {
     if (!newIds.has(cursor.key as number)) {
       await cursor.delete();
+      hasChange = true;
     }
     cursor = await cursor.continue();
   }
 
-  // Thêm / cập nhật bản ghi mới + lưu ảnh
+  // Thêm / cập nhật
   for (const p of products) {
-    await store.put(p);
+    const existing = await store.get(p.id);
+    if (!existing || JSON.stringify(existing) !== JSON.stringify(p)) {
+      await store.put(p);
+      hasChange = true;
+    }
     if (p.image_url) {
       saveImageIfNotExists(p.image_url);
     }
   }
 
   await tx.done;
+  return hasChange; // ✅ trả về true/false để component biết có cần setState không
 };
