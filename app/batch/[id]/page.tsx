@@ -14,32 +14,44 @@ export default function BatchDetailPage() {
   const [status, setStatus] = useState<string>('⏳ Đang tải dữ liệu...');
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
+  async function loadData(forceUpdate = false) {
     if (!id) return;
-
     setLoading(true);
-    getBatchDetail(id)
-      .then(({ batch, status }) => {
-        setBatch(batch);
-        setStatus(status);
-      })
-      .finally(() => setLoading(false));
+    const { batch, status } = await getBatchDetail(id, forceUpdate);
+    setBatch(batch);
+    setStatus(status);
+    setLoading(false);
+  }
+
+  useEffect(() => {
+    loadData();
   }, [id]);
 
   return (
-    <main className="p-4">
+    <main className="p-4 space-y-4">
       <p>
         <a className="button" href="/batches">
-          <strong>Quay trở về danh sách lô</strong>
+          <strong>← Quay về danh sách lô</strong>
         </a>
       </p>
-      <h1 className="text-2xl font-bold text-blue-700 mb-4">📦 Lô/Batch: {id}</h1>
+      <h1 className="text-2xl font-bold text-blue-700">📦 Lô/Batch: {id}</h1>
+
+      <div className="flex items-center gap-3">
+        {!loading && (
+          <button
+            onClick={() => loadData(true)}
+            className="px-3 py-1 rounded bg-blue-600 text-white hover:bg-blue-700"
+          >
+            🔄 Cập nhật thủ công
+          </button>
+        )}
+        <span className="text-sm text-gray-500 italic">{status}</span>
+      </div>
 
       {loading && <p>⏳ Đang tải dữ liệu...</p>}
-      {!loading && <p className="text-sm text-gray-500 italic">{status}</p>}
 
       {!loading && batch && (
-        <div className="border rounded-lg p-4 shadow bg-white">
+        <div className="border rounded-lg p-4 shadow bg-white space-y-2">
           <p>
             <strong>Mã lô:</strong> {batch.batch_id}
           </p>

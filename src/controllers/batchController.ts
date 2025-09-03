@@ -1,48 +1,126 @@
 // ✅ Controller: src/controllers/batchController.ts
 import { Batch } from '@/models/Batch';
-import { fetchBatchFromApi, fetchBatchListFromApi } from '@/services/api/batchApi';
-import {
-  getBatchFromDB,
-  saveBatchToDB,
-  getBatchListFromDB,
-  saveBatchListToDB,
-} from '@/services/db/batchDB';
+import { fetchBatchListFromApi, fetchBatchDetailFromApi } from '@/services/api/batchApi';
+import { loadBatchesFromDB, upsertBatches, pruneBatches } from '@/repositories/batchRepository';
 
-// 🔹 Lấy 1 batch
-export async function getBatchDetail(id: string): Promise<{
-  batch: Batch | null;
-  status: string;
-}> {
+const STATUS = {
+  OFFLINE: '❌ Không có dữ liệu offline (cần online lần đầu)',
+  SYNCED: '✅ Dữ liệu đã là mới nhất',
+  UPDATED: '✅ Đã cập nhật dữ liệu mới',
+  FALLBACK: '⚠️ Dùng dữ liệu cũ (offline)',
+  NOT_FOUND: '⚠️ Không tìm thấy lô này trên server',
+};
+
+/**
+ * Lấy danh sách batch (offline-first).
+ */
+export async function getBatchList(
+  forceUpdate = false
+): Promise<{ batches: Batch[]; status: string }> {
+  const offline = await loadBatchesFromDB();
+
+  // 🔹 Nếu có dữ liệu offline và không ép update → trả luôn offline trước
+  if (!forceUpdate && offline.length > 0) {
+    // Sync nền nhưng không block UI
+    syncBatchListInBackground();
+    return { batches: offline, status: STATUS.SYNCED };
+  }
+
+  // 🔹 Nếu không có dữ liệu offline → cần online lần đầu
+  if (offline.length === 0 && !forceUpdate) {
+    try {
+      const serverData = await fetchBatchListFromApi();
+      await upsertBatches(serverData);
+      await pruneBatches(serverData.map(b => b.batch_id));
+      return { batches: serverData, status: STATUS.UPDATED };
+    } catch {
+      return { batches: [], status: STATUS.OFFLINE };
+    }
+  }
+
+  // 🔹 Nếu ép force update hoặc không có offline → gọi API
   try {
-    const batch = await fetchBatchFromApi(id);
-    if (batch) {
-      await saveBatchToDB(batch);
-      return { batch, status: '📡 Dữ liệu mới nhất từ server' };
-    }
-    return { batch: null, status: '⚠️ Không tìm thấy dữ liệu' };
+    const serverData = await fetchBatchListFromApi();
+    await upsertBatches(serverData);
+    await pruneBatches(serverData.map(b => b.batch_id));
+    return { batches: serverData, status: STATUS.UPDATED };
   } catch {
-    const cached = await getBatchFromDB(id);
-    if (cached) {
-      return { batch: cached, status: '⚡ Offline: dữ liệu từ cache' };
+    if (offline.length > 0) {
+      return { batches: offline, status: STATUS.FALLBACK };
     }
-    return { batch: null, status: '❌ Không có dữ liệu offline' };
+    return { batches: [], status: STATUS.OFFLINE };
   }
 }
 
-// 🔹 Lấy danh sách batch
-export async function getBatchList(): Promise<{
-  batches: Batch[];
-  status: string;
-}> {
-  try {
-    const list = await fetchBatchListFromApi();
-    await saveBatchListToDB(list);
-    return { batches: list, status: '📡 Danh sách mới nhất từ server' };
-  } catch {
-    const cached = await getBatchListFromDB();
-    if (cached.length > 0) {
-      return { batches: cached, status: '⚡ Offline: danh sách từ cache' };
+/**
+ * Lấy chi tiết 1 batch theo id (offline-first).
+ */
+export async function getBatchDetail(
+  id: string,
+  forceUpdate = false
+): Promise<{ batch: Batch | null; status: string }> {
+  const offline = await loadBatchesFromDB();
+  const local = offline.find(b => b.batch_id === id) || null;
+
+  // 🔹 Nếu có dữ liệu offline và không ép update → trả offline trước
+  if (!forceUpdate && local) {
+    syncBatchDetailInBackground(id);
+    return { batch: local, status: STATUS.SYNCED };
+  }
+
+  // 🔹 Nếu không có offline → lần đầu cần online
+  if (!local && !forceUpdate) {
+    try {
+      const serverBatch = await fetchBatchDetailFromApi(id);
+      if (serverBatch) {
+        await upsertBatches([serverBatch]);
+        return { batch: serverBatch, status: STATUS.UPDATED };
+      }
+      return { batch: null, status: STATUS.NOT_FOUND };
+    } catch {
+      return { batch: null, status: STATUS.OFFLINE };
     }
-    return { batches: [], status: '❌ Không có dữ liệu offline' };
+  }
+
+  // 🔹 Nếu ép force update hoặc không có offline → gọi API
+  try {
+    const serverBatch = await fetchBatchDetailFromApi(id);
+    if (serverBatch) {
+      await upsertBatches([serverBatch]);
+      return { batch: serverBatch, status: STATUS.UPDATED };
+    }
+    return { batch: null, status: STATUS.NOT_FOUND };
+  } catch {
+    if (local) {
+      return { batch: local, status: STATUS.FALLBACK };
+    }
+    return { batch: null, status: STATUS.OFFLINE };
+  }
+}
+
+/**
+ * Hàm sync nền danh sách batch.
+ */
+async function syncBatchListInBackground() {
+  try {
+    const serverData = await fetchBatchListFromApi();
+    await upsertBatches(serverData);
+    await pruneBatches(serverData.map(b => b.batch_id));
+  } catch {
+    // bỏ qua lỗi sync nền
+  }
+}
+
+/**
+ * Hàm sync nền chi tiết batch.
+ */
+async function syncBatchDetailInBackground(id: string) {
+  try {
+    const serverBatch = await fetchBatchDetailFromApi(id);
+    if (serverBatch) {
+      await upsertBatches([serverBatch]);
+    }
+  } catch {
+    // bỏ qua lỗi sync nền
   }
 }
