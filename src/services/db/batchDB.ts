@@ -1,6 +1,6 @@
 // ✅ Service: src/services/db/batchDB.ts
-import { initDB, STORE_BATCHES } from '@/src/lib/db';
-import { Batch } from '@/src/models/Batch';
+import { initDB, STORE_BATCHES } from '@/lib/db';
+import { Batch } from '@/models/Batch';
 
 // 🔹 Lưu 1 batch
 export async function saveBatchToDB(batch: Batch) {

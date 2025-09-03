@@ -1,5 +1,5 @@
 // ✅ Service: src/services/api/batchApi.ts
-import { Batch } from '@/src/models/Batch';
+import { Batch } from '@/models/Batch';
 
 export async function fetchBatchListFromApi(): Promise<Batch[]> {
   const res = await fetch('/api/sheet/batches');
