@@ -2,6 +2,9 @@
 
 import Papa from 'papaparse';
 
+export const revalidate = 3600; // ISR hint cho Next.js (60 phút)
+
+// API handler
 export async function GET(request: Request) {
   try {
     const batchesApi = process.env.API_BATCHES_URL;
@@ -15,7 +18,8 @@ export async function GET(request: Request) {
     const url = new URL(request.url);
     const id = url.searchParams.get('id'); // ?id=...
 
-    const res = await fetch(batchesApi);
+    // 🔵 Fetch CSV từ nguồn
+    const res = await fetch(batchesApi, { cache: 'no-store' });
     const csvText = await res.text();
 
     // ✅ Parse CSV bằng PapaParse (chuẩn RFC 4180)
@@ -33,8 +37,12 @@ export async function GET(request: Request) {
       });
     }
 
+    // 🔥 Trả toàn bộ danh sách
     return new Response(JSON.stringify(list), {
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        'Cache-Control': 's-maxage=3600, stale-while-revalidate=60', // Cache edge
+      },
     });
   } catch (err) {
     console.error('CSV parse error:', err);

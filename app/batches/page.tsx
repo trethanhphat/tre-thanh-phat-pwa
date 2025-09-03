@@ -1,223 +1,48 @@
-// ✅ File: app/batches/page.tsx
+// ✅ View: app/batches/page.tsx
 'use client';
 
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
-
-interface Batch {
-  batch_id: string;
-  region_name: string;
-  planting_date: string;
-  quantity: string;
-  area: string;
-  note: string;
-  batch_location: string;
-  batch_longitude: string;
-  batch_latitude: string;
-}
+import { Batch } from '@/models/Batch';
+import { getBatchList } from '@/controllers/batchController';
 
 export default function BatchListPage() {
-  const [data, setData] = useState<Batch[]>([]);
+  const [batches, setBatches] = useState<Batch[]>([]);
+  const [status, setStatus] = useState<string>('⏳ Đang tải dữ liệu...');
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    fetch('/api/sheet/batches')
-      .then(res => {
-        if (!res.ok) throw new Error('Không thể lấy dữ liệu');
-        return res.json();
+    getBatchList()
+      .then(({ batches, status }) => {
+        setBatches(batches);
+        setStatus(status);
       })
-      .then(json => {
-        setData(json);
-        setError(null);
-      })
-      .catch(err => {
-        setError(err.message || 'Có lỗi xảy ra');
-      })
-      .finally(() => {
-        setLoading(false);
-      });
+      .finally(() => setLoading(false));
   }, []);
 
-  if (loading)
-    return (
-      <div>
-        <h1 className="text-2xl font-bold mb-4">📋 Danh sách lô / Batch</h1>
-        <p className="p-4">⏳ Đang tải dữ liệu...</p>
-      </div>
-    );
-  if (error) return <p className="p-4 text-red-600">❌ {error}</p>;
-
   return (
-    <div className="p-4">
-      <h1 className="text-2xl font-bold mb-4">📋 Danh sách lô / Batch</h1>
-      <table className="min-w-full border border-gray-300">
-        <thead className="bg-gray-100">
-          <tr style={{ background: 'var(--color-primary)' }}>
-            <th
-              className="border p-2"
-              style={{ border: '1px solid var(--color-border)', padding: '8px' }}
-            >
-              Mã lô
-            </th>
-            <th
-              className="border p-2"
-              style={{ border: '1px solid var(--color-border)', padding: '8px' }}
-            >
-              Tên vùng trồng
-            </th>
-            <th
-              className="border p-2"
-              style={{ border: '1px solid var(--color-border)', padding: '8px' }}
-            >
-              Ngày trồng
-            </th>
-            <th
-              className="border p-2"
-              style={{ border: '1px solid var(--color-border)', padding: '8px' }}
-            >
-              Số lượng
-            </th>
-            <th
-              className="border p-2"
-              style={{ border: '1px solid var(--color-border)', padding: '8px' }}
-            >
-              Diện tích (ha)
-            </th>
-            <th
-              className="border p-2"
-              style={{ border: '1px solid var(--color-border)', padding: '8px' }}
-            >
-              Kinh độ
-            </th>
-            <th
-              className="border p-2"
-              style={{ border: '1px solid var(--color-border)', padding: '8px' }}
-            >
-              Vĩ độ
-            </th>
-            <th
-              className="border p-2"
-              style={{ border: '1px solid var(--color-border)', padding: '8px' }}
-            >
-              Vị trí trên bản đồ
-            </th>
-            <th
-              className="border p-2"
-              style={{ border: '1px solid var(--color-border)', padding: '8px' }}
-            >
-              Ghi chú
-            </th>
-          </tr>
-        </thead>
-        <tbody>
-          {data.map((batch, index) => (
-            <tr
-              key={batch.batch_id}
-              className="hover:bg-gray-50"
-              style={{
-                backgroundColor:
-                  index % 2 === 0 ? 'var(--color-surface)' : 'var(--color-background)',
-              }}
-            >
-              <td
-                className="border p-2 text-blue-600 underline"
-                style={{
-                  border: '1px solid var(--color-border)',
-                  padding: '0.5rem',
-                }}
-                data-label="Mã lô"
-              >
-                <Link href={`/batch/${batch.batch_id}`}>{batch.batch_id}</Link>
-              </td>
-              <td
-                className="border p-2"
-                style={{
-                  border: '1px solid var(--color-border)',
-                  padding: '0.5rem',
-                }}
-                data-label="Tên vùng trồng"
-              >
-                {batch.region_name}
-              </td>
-              <td
-                className="border p-2"
-                style={{
-                  border: '1px solid var(--color-border)',
-                  padding: '0.5rem',
-                }}
-                data-label="Ngày trồng"
-              >
-                {batch.planting_date}
-              </td>
-              <td
-                className="border p-2"
-                style={{
-                  border: '1px solid var(--color-border)',
-                  padding: '0.5rem',
-                }}
-                data-label="Số lượng"
-              >
-                {batch.quantity}
-              </td>
-              <td
-                className="border p-2"
-                style={{
-                  border: '1px solid var(--color-border)',
-                  padding: '0.5rem',
-                }}
-                data-label="Diện tích (ha)"
-              >
-                {batch.area || '—'}
-              </td>
-              <td
-                className="border p-2"
-                style={{
-                  border: '1px solid var(--color-border)',
-                  padding: '0.5rem',
-                }}
-                data-label="Kinh độ"
-              >
-                {batch.batch_longitude || 'Đang cập nhật'}
-              </td>
-              <td
-                className="border p-2"
-                style={{
-                  border: '1px solid var(--color-border)',
-                  padding: '0.5rem',
-                }}
-                data-label="Vĩ độ"
-              >
-                {batch.batch_latitude || 'Đang cập nhật'}
-              </td>
-              <td
-                className="border p-2 text-blue-600 underline"
-                style={{
-                  border: '1px solid var(--color-border)',
-                  padding: '0.5rem',
-                }}
-                data-label="Vị trí trên bản đồ"
-              >
-                {batch.batch_location ? (
-                  <Link href={batch.batch_location}>Mở bản đồ</Link>
-                ) : (
-                  <span className="text-gray-500">Đang cập nhật</span>
-                )}
-              </td>
-              <td
-                className="border p-2"
-                style={{
-                  border: '1px solid var(--color-border)',
-                  padding: '0.5rem',
-                }}
-                data-label="Ghi chú"
-              >
-                {batch.note || '—'}
-              </td>
-            </tr>
+    <main className="p-4">
+      <h1 className="text-2xl font-bold text-green-700 mb-4">📦 Danh sách Lô/Batch</h1>
+
+      {loading && <p>⏳ Đang tải dữ liệu...</p>}
+      {!loading && <p className="text-sm text-gray-500 italic">{status}</p>}
+
+      {!loading && batches.length > 0 && (
+        <ul className="space-y-2">
+          {batches.map(b => (
+            <li key={b.batch_id} className="border p-3 rounded shadow bg-white">
+              <Link href={`/batch/${b.batch_id}`} className="text-blue-600 hover:underline">
+                <strong>{b.batch_id}</strong> — {b.region_name}
+              </Link>
+              <p className="text-sm text-gray-600">🌱 Ngày trồng: {b.planting_date}</p>
+            </li>
           ))}
-        </tbody>
-      </table>
-    </div>
+        </ul>
+      )}
+
+      {!loading && batches.length === 0 && (
+        <p className="text-gray-500">⚠️ Không có dữ liệu lô nào.</p>
+      )}
+    </main>
   );
 }

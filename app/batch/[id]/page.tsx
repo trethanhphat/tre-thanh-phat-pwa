@@ -1,48 +1,29 @@
-// ✅ File: app/batch/[id]/page.tsx
+// ✅ View: app/batch/[id]/page.tsx
 'use client';
 
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
-
-interface Batch {
-  batch_id: string;
-  batch_location: string;
-  batch_longitude: string;
-  batch_latitude: string;
-  region_id: string;
-  region_name: string;
-  planting_date: string;
-  quantity: string;
-  area: string;
-  note: string;
-}
+import { Batch } from '@/models/Batch';
+import { getBatchDetail } from '@/controllers/batchController';
 
 export default function BatchDetailPage() {
   const params = useParams<{ id: string }>();
   const id = params?.id ?? '';
   const [batch, setBatch] = useState<Batch | null>(null);
+  const [status, setStatus] = useState<string>('⏳ Đang tải dữ liệu...');
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!id) return;
+
     setLoading(true);
-    fetch(`/api/sheet/batches?id=${id}`)
-      .then(res => {
-        if (!res.ok) throw new Error('Không thể lấy dữ liệu');
-        return res.json();
+    getBatchDetail(id)
+      .then(({ batch, status }) => {
+        setBatch(batch);
+        setStatus(status);
       })
-      .then(data => {
-        setBatch(data);
-        setError(null);
-      })
-      .catch(err => {
-        setError(err.message || 'Có lỗi xảy ra');
-      })
-      .finally(() => {
-        setLoading(false);
-      });
+      .finally(() => setLoading(false));
   }, [id]);
 
   return (
@@ -55,9 +36,9 @@ export default function BatchDetailPage() {
       <h1 className="text-2xl font-bold text-blue-700 mb-4">📦 Lô/Batch: {id}</h1>
 
       {loading && <p>⏳ Đang tải dữ liệu...</p>}
-      {error && <p className="text-red-600">❌ {error}</p>}
+      {!loading && <p className="text-sm text-gray-500 italic">{status}</p>}
 
-      {!loading && !error && batch && (
+      {!loading && batch && (
         <div className="border rounded-lg p-4 shadow bg-white">
           <p>
             <strong>Mã lô:</strong> {batch.batch_id}
@@ -94,15 +75,10 @@ export default function BatchDetailPage() {
               <span className="text-gray-500">Đang cập nhật</span>
             )}
           </p>
-          <p>
-            <a className="button" href="/batches">
-              <strong>Quay trở về danh sách lô</strong>
-            </a>
-          </p>
         </div>
       )}
 
-      {!loading && !error && !batch && <p className="text-gray-500">⚠️ Không tìm thấy lô này.</p>}
+      {!loading && !batch && <p className="text-gray-500">⚠️ Không tìm thấy lô này.</p>}
     </main>
   );
 }

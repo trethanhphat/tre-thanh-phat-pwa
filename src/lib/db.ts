@@ -8,12 +8,20 @@ export const STORE_BATCHES = 'batches';
 
 export const initDB = async () => {
   return openDB(DB_NAME, 1, {
-    upgrade(db) {
+    upgrade(db, oldVersion) {
+      // 🔹 Store sản phẩm
       if (!db.objectStoreNames.contains(STORE_PRODUCTS)) {
-        db.createObjectStore(STORE_PRODUCTS, { keyPath: 'id' }); // key là id sản phẩm từ trang gốc
+        db.createObjectStore(STORE_PRODUCTS, { keyPath: 'id' });
       }
+
+      // 🔹 Store ảnh
       if (!db.objectStoreNames.contains(STORE_IMAGES)) {
-        db.createObjectStore(STORE_IMAGES, { keyPath: 'url' }); // key là URL ảnh gốc
+        db.createObjectStore(STORE_IMAGES, { keyPath: 'url' });
+      }
+
+      // 🔹 Store batches
+      if (!db.objectStoreNames.contains(STORE_BATCHES)) {
+        db.createObjectStore(STORE_BATCHES, { keyPath: 'batch_id' });
       }
     },
   });
