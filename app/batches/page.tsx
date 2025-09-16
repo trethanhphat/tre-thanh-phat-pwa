@@ -1,4 +1,4 @@
-// ✅ View: app/batches/page.tsx
+// ✅ File: app/batches/page.tsx
 'use client';
 
 import Link from 'next/link';
@@ -13,10 +13,20 @@ export default function BatchListPage() {
 
   async function loadData(forceUpdate = false) {
     setLoading(true);
-    const { batches, status } = await getBatchList(forceUpdate);
-    setBatches(batches);
-    setStatus(status);
-    setLoading(false);
+    try {
+      const { batches: batchData, status } = await getBatchList(forceUpdate);
+      setBatches(batchData);
+      setStatus(status);
+    } catch (err: any) {
+      // Nếu offline hoặc lỗi khác
+      if (batches.length > 0) {
+        setStatus('📂 Hiển thị dữ liệu trên máy, chờ cập nhật');
+      } else {
+        setStatus(err.message || '⚠️ Không thể tải dữ liệu');
+      }
+    } finally {
+      setLoading(false);
+    }
   }
 
   useEffect(() => {

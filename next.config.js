@@ -4,14 +4,96 @@ const isDev = process.env.NODE_ENV === 'development';
 
 const runtimeCaching = [
   {
-    urlPattern: /^https:\/\/app\.trethanhphat\.vn\/.*$/,
+    // 🔹 Cache App Shell (HTML, JS, CSS) 7 ngày
+    //urlPattern: /^https:\/\/app\.trethanhphat\.vn\/.*$/,
+    urlPattern:
+      /^https:\/\/app\.trethanhphat\.vn\/.*\.(?:js|css|woff2?|png|jpg|jpeg|svg|gif|ico|html)$/,
     handler: 'NetworkFirst',
     options: {
       cacheName: 'ttp-app-shell',
       expiration: {
         maxEntries: 50,
-        maxAgeSeconds: 7 * 24 * 60 * 60,
+        maxAgeSeconds: 7 * 24 * 60 * 60, // 7 ngày
       },
+    },
+  },
+  {
+    // 🔹 Cache pages: batches, products, report, photos, policy
+    urlPattern: ({ url }) =>
+      url.origin === 'https://app.trethanhphat.vn' &&
+      /^\/(batches|products|report|photos|policy)/.test(url.pathname),
+    handler: 'NetworkFirst', // Ưu tiên mạng, fallback cache
+    options: {
+      cacheName: 'ttp-api',
+      networkTimeoutSeconds: 5,
+      expiration: {
+        maxEntries: 50,
+        maxAgeSeconds: 4 * 60 * 60, // 4h
+      },
+    },
+  },
+
+  {
+    // 🔹 Cache API batches
+    urlPattern: /^https:\/\/app\.trethanhphat\.vn\/api\/sheet\/batches/,
+    handler: 'StaleWhileRevalidate',
+    options: {
+      cacheName: 'batches-api',
+      expiration: {
+        maxAgeSeconds: 4 * 60 * 60, // 4h
+        maxEntries: 30,
+      },
+      plugins: [
+        {
+          handlerDidError: async () => {
+            return new Response(JSON.stringify([]), {
+              headers: { 'Content-Type': 'application/json' },
+            });
+          },
+        },
+      ],
+    },
+  },
+  {
+    // 🔹 Cache API products
+    urlPattern: /^https:\/\/app\.trethanhphat\.vn\/api\/products/,
+    handler: 'StaleWhileRevalidate',
+    options: {
+      cacheName: 'products-api',
+      expiration: {
+        maxAgeSeconds: 4 * 60 * 60, // 4h
+        maxEntries: 30,
+      },
+      plugins: [
+        {
+          handlerDidError: async () => {
+            return new Response(JSON.stringify([]), {
+              headers: { 'Content-Type': 'application/json' },
+            });
+          },
+        },
+      ],
+    },
+  },
+  {
+    // 🔹 Cache API products
+    urlPattern: /^https:\/\/app\.trethanhphat\.vn\/api\/product/,
+    handler: 'StaleWhileRevalidate',
+    options: {
+      cacheName: 'product-api',
+      expiration: {
+        maxAgeSeconds: 4 * 60 * 60, // 4h
+        maxEntries: 30,
+      },
+      plugins: [
+        {
+          handlerDidError: async () => {
+            return new Response(JSON.stringify([]), {
+              headers: { 'Content-Type': 'application/json' },
+            });
+          },
+        },
+      ],
     },
   },
 ];
