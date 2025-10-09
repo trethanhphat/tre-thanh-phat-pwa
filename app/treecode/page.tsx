@@ -10,26 +10,23 @@ export default function TreeCodePage() {
   const [highlightCode, setHighlightCode] = useState(false);
   const [highlightNumber, setHighlightNumber] = useState(false);
 
-  // Khi code thay đổi → tự động tính number
+  // Khi code thay đổi → tính number (chỉ set khi khác)
   useEffect(() => {
-    if (!code) {
-      setNumber('');
-      return;
-    }
-    const n = codeToNumber(code.toUpperCase());
-    if (n !== '') setNumber(String(n));
-    else setNumber('');
+    const n = codeToNumber(code);
+    const s = n === '' ? '' : String(n);
+    if (s !== number) setNumber(s);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [code]);
 
-  // Khi number thay đổi → tự động tính code
+  // Khi number thay đổi → tính code (chỉ set khi khác)
   useEffect(() => {
     if (!number) {
-      setCode('');
+      if (code) setCode('');
       return;
     }
     const c = numberToCode(Number(number));
-    if (c !== '') setCode(c);
-    else setCode('');
+    if (c !== code) setCode(c);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [number]);
 
   const copyToClipboard = (text: string, type: 'code' | 'number') => {
