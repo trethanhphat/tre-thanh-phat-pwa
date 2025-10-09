@@ -115,7 +115,4 @@ export function numberToCode(num: number): string {
     const third = Math.floor(offset / 26);
     const fourth = offset % 26;
     return LETTERS[first] + LETTERS[second] + LETTERS[third] + LETTERS[fourth];
-  }
-
-  return '';
 }
