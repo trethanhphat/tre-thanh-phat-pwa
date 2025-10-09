@@ -103,8 +103,10 @@ export function numberToCode(num: number): string {
 
   // Giai đoạn 5
   const phase5Start = phase4End + 1;
-  const phase5End = phase5Start + 26 * 26 * 26 * 26 - 1;
-  if (num <= phase5End) {
+  const phase5End = phase5Start + 26 * 26 * 26 * 26 - 1; // 261082..718057
+   if (num > phase5End) {
+    return ''; // cho UI hiển thị thông báo đẹp
+  }
     let offset = num - phase5Start;
     const first = Math.floor(offset / (26 * 26 * 26));
     offset %= 26 * 26 * 26;
