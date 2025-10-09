@@ -128,6 +128,7 @@ export default function BottomMenu() {
               { href: '/report', label: '📊 Báo cáo' },
               // { href: '/survey', label: '📝 Khảo sát' },
               { href: '/photos', label: '📷 Hình ảnh' },
+              { href: '/tools', label: '🛠 Công cụ' },
               // { href: '/contact', label: '🪪 Liên hệ' },
               { href: '/policy', label: '📖 Chính sách' },
               // { href: '/faq', label: '❓ Câu hỏi thường gặp' },
