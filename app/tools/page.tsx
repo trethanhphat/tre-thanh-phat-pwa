@@ -1,19 +1,7 @@
+// File: app/tools/page.tsx
 'use client';
 
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
-
-const buttonStyle = {
-  flexDirection: 'column' as const,
-  width: '100%',
-  padding: '1rem',
-  textAlign: 'left' as const,
-  borderRadius: '0.5rem',
-  border: '1px solid var(--color-border)',
-  marginBottom: '1rem',
-  background: 'var(--color-background)',
-  color: 'var(--color-text)',
-};
 
 const tools = [
     {
@@ -30,53 +18,20 @@ const tools = [
 ];
 
 export default function ToolsPage() {
-    const router = useRouter();
-    const menuHeight = 80;
-
     return (
-        <>
-            {/* Padding để không bị Menu che nội dung */}
-            <div style={{ paddingBottom: `${menuHeight}px` }}></div>
-
-            <div
-                style={{
-                    padding: '1.5rem',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    gap: '1rem',
-                }}
-            >
-                <h1 className="font-ttp text-2xl mb-4">🛠 Công cụ</h1>
-                
-                <div>
-                    {tools.map((tool) => (
-                        <Link 
-                            key={tool.href} 
-                            href={tool.href} 
-                            style={{ textDecoration: 'none' }}
-                        >
-                            <button style={buttonStyle}>
-                                <div style={{ fontWeight: 'bold' }}>{tool.name}</div>
-                                <div style={{ color: 'var(--color-text-secondary)', fontSize: '0.875rem' }}>
-                                    {tool.description}
-                                </div>
-                            </button>
-                        </Link>
-                    ))}
-                </div>
-
-                {/* Nút quay lại */}
-                <button
-                    onClick={() => router.back()}
-                    style={{
-                        ...buttonStyle,
-                        marginTop: '2rem',
-                        textAlign: 'center' as const,
-                    }}
-                >
-                    ⬅️ Quay lại
-                </button>
-            </div>
-        </>
+        <main className="min-h-screen bg-white text-gray-800 px-4 pt-6 pb-24">
+            <section className="space-y-4">
+                <h2>Công cụ quản lý</h2>
+                {tools.map((tool) => (
+                    <Link 
+                        key={tool.href}
+                        href={tool.href}
+                        className="button"
+                    >
+                        🔧 {tool.name}
+                    </Link>
+                ))}
+            </section>
+        </main>
     );
 }

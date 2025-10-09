@@ -1,3 +1,4 @@
+// File: app/photos/page.tsx
 'use client';
 
 import { useServiceWorkerUpdate } from '@/hooks/useServiceWorkerUpdate'; // Module Update
