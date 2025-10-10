@@ -22,14 +22,13 @@ export default function PhotosPage() {
       <section className="space-y-4">
         <h2>Hình ảnh lá tre mai</h2>
         {photos.map((photo) => (
-          <div key={photo.href} className="flex items-center gap-2">
+          <div key={photo.href} className="button flex items-center gap-2">
                         <div className="flex items-center justify-center w-12 h-12 bg-gray-100 rounded-lg">
                             <span className="text-2xl">{photo.icon}</span>
                         </div>
           <Link
             key={photo.href}
             href={photo.href}
-            className="button"
             aria-label={photo.description}
             title={photo.description}
             >

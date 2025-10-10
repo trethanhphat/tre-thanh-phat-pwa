@@ -25,13 +25,12 @@ export default function ToolsPage() {
             <section className="space-y-4">
                 <h2>Công cụ quản lý</h2>
                 {tools.map((tool) => (
-                    <div key={tool.href} className="flex items-center gap-2">
+                    <div key={tool.href} className="button flex items-center gap-2">
                         <div className="flex items-center justify-center w-12 h-12 bg-gray-100 rounded-lg">
                             <span className="text-2xl">{tool.icon}</span>
                         </div>
                         <Link 
                             href={tool.href}
-                            className="button flex-1"
                             aria-label={tool.description}
                             title={tool.description}
                         >
