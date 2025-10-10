@@ -10,9 +10,9 @@ import { appName, appDescription, appUrl, phone, email, website, copyright } fro
 const photos = [
   {
     icon: '📷',
-    name: 'Hình ảnh lá tre mai thái'
+    name: 'Hình ảnh lá tre mai thái',
     href: 'https://photos.app.goo.gl/cTqmqTsygoo9oCjj8',
-    description: 'Những hình ảnh để biết độ to của lá tre mai'
+    description: 'Những hình ảnh để biết độ to của lá tre mai',
   },
 ]
 export default function PhotosPage() {
