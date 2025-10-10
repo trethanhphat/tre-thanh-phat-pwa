@@ -30,7 +30,8 @@ export default function PhotosPage() {
             key={photo.href}
             href={photo.href}
             className="button"
-            //alt={photo.description}
+            aria-label={photo.description}
+            title={photo.description}
             >
               {photo.name}
             </Link>

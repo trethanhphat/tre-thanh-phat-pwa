@@ -32,7 +32,8 @@ export default function ToolsPage() {
                         <Link 
                             href={tool.href}
                             className="button flex-1"
-                            alt={tool.description}
+                            aria-label={tool.description}
+                            title={tool.description}
                         >
                             {tool.name}
                         </Link>
