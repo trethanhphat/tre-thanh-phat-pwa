@@ -1,0 +1,467 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "code": "HN",
+        "name": "Hà Nội"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          100,
+          50
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "code": "HP",
+        "name": "Hải Phòng"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          150,
+          50
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "code": "DN",
+        "name": "Đà Nẵng"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          200,
+          50
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "code": "HU",
+        "name": "Huế"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          250,
+          50
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "code": "SG",
+        "name": "TP Hồ Chí Minh"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          300,
+          50
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "code": "CT",
+        "name": "Cần Thơ"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          350,
+          50
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "code": "SL",
+        "name": "Sơn La"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          100,
+          90
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "code": "PT",
+        "name": "Phú Thọ"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          150,
+          90
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "code": "QN",
+        "name": "Quảng Ninh"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          200,
+          90
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "code": "QG",
+        "name": "Quảng Ngãi"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          250,
+          90
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "code": "QT",
+        "name": "Quảng Trị"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          300,
+          90
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "code": "LS",
+        "name": "Lạng Sơn"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          350,
+          90
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "code": "CB",
+        "name": "Cao Bằng"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          100,
+          130
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "code": "DB",
+        "name": "Điện Biên"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          150,
+          130
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "code": "NB",
+        "name": "Ninh Bình"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          200,
+          130
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "code": "LC",
+        "name": "Lào Cai"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          250,
+          130
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "code": "LH",
+        "name": "Lai Châu"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          300,
+          130
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "code": "HT",
+        "name": "Hà Tĩnh"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          350,
+          130
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "code": "BN",
+        "name": "Bắc Ninh"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          100,
+          170
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "code": "TH",
+        "name": "Thanh Hóa"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          150,
+          170
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "code": "TQ",
+        "name": "Tuyên Quang"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          200,
+          170
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "code": "NA",
+        "name": "Nghệ An"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          250,
+          170
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "code": "AG",
+        "name": "An Giang"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          300,
+          170
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "code": "CM",
+        "name": "Cà Mau"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          350,
+          170
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "code": "DL",
+        "name": "Đắk Lắk"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          100,
+          210
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "code": "DO",
+        "name": "Đồng Nai"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          150,
+          210
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "code": "DT",
+        "name": "Đồng Tháp"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          200,
+          210
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "code": "GL",
+        "name": "Gia Lai"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          250,
+          210
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "code": "KH",
+        "name": "Khánh Hòa"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          300,
+          210
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "code": "LD",
+        "name": "Lâm Đồng"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          350,
+          210
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "code": "TN",
+        "name": "Tây Ninh"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          100,
+          250
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "code": "VL",
+        "name": "Vĩnh Long"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          150,
+          250
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "code": "HY",
+        "name": "Hưng Yên"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          200,
+          250
+        ]
+      }
+    }
+  ]
+}
