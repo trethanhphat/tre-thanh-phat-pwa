@@ -24,8 +24,7 @@ export default function MapPage() {
     script.src = leafletJS;
     script.async = true;
     script.onload = () => {
-      // @ts-ignore
-      const L = window.L;
+      const L = (window as any).L;
       if (!L || !mapRef.current) return;
 
       const map = L.map(mapRef.current).setView([16.047, 108.206], 6);
@@ -56,3 +55,4 @@ export default function MapPage() {
   return (
     <div id="map" ref={mapRef} style={{ height: "600px", width: "100%" }} />
   );
+}
