@@ -16,6 +16,12 @@ const tools = [
         href: '/treecode',
         description: 'Chuyển đổi số thứ tự sang mã cây nhanh chóng.',
     },
+    {
+        icon: '🗺',
+        name: 'Tra cứu mã tỉnh/thành phố',
+        href: '/tools/mapcode',
+        description: 'Công cụ để xem mã tỉnh/thành phố ngắn gọn đầu mã lô.',
+    },
     // Thêm các công cụ khác tại đây nếu cần
 ];
 
