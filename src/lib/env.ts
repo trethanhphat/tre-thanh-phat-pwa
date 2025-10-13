@@ -29,7 +29,7 @@ export const maxImageQueue = Number(process.env.NEXT_PUBLIC_MAX_IMAGE_QUEUE || '
 
 // API tải News
 export const NEXT_PUBLIC_API_NEWS_URL =
-  process.env.NEXT_PUBLIC_API_NEWS_URL || 'https://rungkhoai.com/wp-json/wc/v2';
+  process.env.NEXT_PUBLIC_API_NEWS_URL || '';
 
 // API tải dữ liệu batches
 export const API_BATCH_URL = process.env.API_BATCH_URL || '';

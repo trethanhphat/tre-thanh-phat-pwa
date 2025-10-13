@@ -2,9 +2,11 @@
 import { openDB } from 'idb';
 
 export const DB_NAME = 'TPBC_DB';
-export const STORE_PRODUCTS = 'products';
-export const STORE_IMAGES = 'images';
-export const STORE_BATCHES = 'batches';
+export const STORE_PRODUCTS = 'products'; // Store thông tin sản phẩm
+export const STORE_IMAGES = 'images'; // Store ảnh sản phẩm
+export const STORE_BATCHES = 'batches'; // Store lô trồng
+export const STORE_NEWS = 'news'; // Store tin tức
+export const STORE_NEWS_IMAGES = 'news_images';  // Store ảnh tin tức
 
 export const initDB = async () => {
   return openDB(DB_NAME, 1, {
@@ -22,6 +24,16 @@ export const initDB = async () => {
       // 🔹 Store batches
       if (!db.objectStoreNames.contains(STORE_BATCHES)) {
         db.createObjectStore(STORE_BATCHES, { keyPath: 'batch_id' });
+      }
+      // 🔹 Store tin tức
+      if (!db.objectStoreNames.contains(STORE_NEWS)) {
+        db.createObjectStore(STORE_NEWS, { keyPath: 'news_id' });
+      }
+      // 🔹 Store ảnh tin tức
+      if (!db.objectStoreNames.contains(STORE_NEWS_IMAGES)) {
+        const s = db.createObjectStore(STORE_NEWS_IMAGES, { keyPath: 'key' });
+        s.createIndex('source_url', 'source_url', { unique: false });
+        s.createIndex('updated_at', 'updated_at', { unique: false });
       }
     },
   });
