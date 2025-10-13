@@ -6,6 +6,7 @@
       "@/*": [
         "src/*"
       ],
+      "@app/*": ["app/*"],    // ✅ thêm alias cho app/*
       "@fonts/*": [
         "src/fonts/*"
       ],
