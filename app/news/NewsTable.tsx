@@ -162,7 +162,7 @@ export default function NewsTable({
                     ? n.categories.map((c) => (
                         <span
                           key={c}
-                          style={{ fontSize: 12, background: '#f3f3f3', padding: '2px 6px', borderRadius: 6 }}
+                          style={{ background: '#f3f3f3', padding: '2px 6px', borderRadius: 6  }}
                         >
                           {c}
                         </span>
