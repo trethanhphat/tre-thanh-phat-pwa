@@ -122,7 +122,7 @@ export default function BottomMenu() {
             {[
               { href: '/', label: '🏠 Trang chủ' },
               // { href: '//trethanhphat.vn/', label: 'ℹ️ Giới thiệu' },
-              // { href: '//blog.trethanhphat.vn', label: '📰 Tin tức' },
+              { href: '/news', label: '📰 Tin tức' },
               { href: '/batches', label: '🎋 Lô trồng' },
               { href: '/products', label: '🛒 Sản phẩm' },
               { href: '/report', label: '📊 Báo cáo' },

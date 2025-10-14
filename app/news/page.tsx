@@ -5,7 +5,7 @@ import { useEffect, useRef, useState } from 'react';
 import axios from 'axios';
 
 import ControlBar from '@app/products/ControlBar'; // tái dùng y nguyên
-import NewsTable from '@app/products/ProductsTable'; // tái dùng y nguyên
+import NewsTable from '@app/news/NewsTable'; // tái dùng y nguyên
 
 import { NewsItem, loadNewsFromDB, syncNews } from '@/lib/news';
 import { getNewsImageURLByUrl } from '@/lib/news_images';

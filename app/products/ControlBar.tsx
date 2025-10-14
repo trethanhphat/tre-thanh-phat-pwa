@@ -36,7 +36,7 @@ export default function ControlBar({
         <div className="ctrl-group">
           <input
             type="text"
-            placeholder="🔎 Tìm theo tên..."
+            placeholder="🔎 Tìm kiếm..."
             value={searchText}
             onChange={e => {
               setSearchText(e.target.value);
@@ -64,7 +64,7 @@ export default function ControlBar({
                 </option>
               ))}
             </select>
-            &nbsp;sản phẩm/trang
+            &nbsp;mục/trang
           </label>
         </div>
 
