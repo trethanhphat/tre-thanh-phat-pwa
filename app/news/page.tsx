@@ -3,13 +3,11 @@
 
 import { useEffect, useRef, useState } from 'react';
 import axios from 'axios';
-
 import ControlBar from '@/components/ControlBar'; // tái dùng y nguyên
 import NewsTable from '@app/news/NewsTable'; // tái dùng y nguyên
-
 import { NewsItem, loadNewsFromDB, syncNews } from '@/lib/news';
-import { getNewsImageURLByUrl } from '@/lib/news_images';
 import { useNewsImageCache } from '@/hooks/useNewsImageCache';
+import { useImageLoadTracker } from '@/hooks/useImageLoadTracker';
 
 type SortField = 'published' | 'title' | 'author';
 type SortOrder = 'asc' | 'desc';
@@ -41,6 +39,7 @@ export default function NewsListPage() {
     const cached = await loadNewsFromDB();
     if (cached.length > 0) {
       setItems(cached);
+      useImageLoadTracker(cached.map(i => i.image_url).filter(Boolean));
       setUsingCache(true);
     }
     setLoading(false);
@@ -72,6 +71,7 @@ export default function NewsListPage() {
 
       if (hasChange) {
         setItems(fresh);
+        useImageLoadTracker(fresh.map(i => i.image_url).filter(Boolean));
         setJustUpdated(true); // Có cập nhật mới
       } else {
         setJustUpdated(false); // Dữ liệu giống hệt
