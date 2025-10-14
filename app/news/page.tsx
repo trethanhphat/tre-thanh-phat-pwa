@@ -9,6 +9,7 @@ import NewsTable from '@app/news/NewsTable'; // tái dùng y nguyên
 
 import { NewsItem, loadNewsFromDB, syncNews } from '@/lib/news';
 import { getNewsImageURLByUrl } from '@/lib/news_images';
+import { useNewsImageCache } from '@/hooks/useNewsImageCache';
 
 type SortField = 'published' | 'title' | 'author';
 type SortOrder = 'asc' | 'desc';
@@ -16,7 +17,7 @@ type SortOrder = 'asc' | 'desc';
 export default function NewsListPage() {
   // ---------------------- STATE ----------------------
   const [items, setItems] = useState<NewsItem[]>([]);
-  const [imageCache, setImageCache] = useState<Record<string, string>>({});
+  const imageCache = useNewsImageCache(items);
   const [loading, setLoading] = useState(true);
   const [usingCache, setUsingCache] = useState(false);
   const [justUpdated, setJustUpdated] = useState(false);
@@ -35,26 +36,7 @@ export default function NewsListPage() {
     itemsRef.current = items;
   }, [items]);
 
-  // ---------------------- IMAGE CACHE ----------------------
-  const loadImages = async (list: NewsItem[]) => {
-    const entries = await Promise.all(
-      list.map(async (n) => {
-        const url = await getNewsImageURLByUrl(n.image_url);
-        return [n.news_id, url] as const;
-      })
-    );
-    return Object.fromEntries(entries);
-  };
-
   
-  const replaceImageCache = (next: Record<string, string>) => {
-    Object.values(imageCache).forEach((url) => {
-      if (typeof url === 'string' && url.startsWith('blob:')) {
-        URL.revokeObjectURL(url);
-      }
-    });
-    setImageCache(next);
-  };
 
 
   // ---------------------- OFFLINE FIRST ----------------------
@@ -94,7 +76,6 @@ export default function NewsListPage() {
 
       if (hasChange) {
         setItems(fresh);
-        replaceImageCache(await loadImages(fresh));
         setJustUpdated(true); // Có cập nhật mới
       } else {
         setJustUpdated(false); // Dữ liệu giống hệt
@@ -132,11 +113,6 @@ export default function NewsListPage() {
     return () => {
       window.removeEventListener('online', handleOnline);
       // Revoke blob khi unmount
-      Object.values(imageCache).forEach((url) => {
-        if (typeof url === 'string' && url.startsWith('blob:')) {
-          URL.revokeObjectURL(url);
-        }
-      });
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [imageCache]);

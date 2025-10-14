@@ -1,5 +1,6 @@
 // ✅ File: src/lib/news_images.ts
 import { initDB, STORE_NEWS_IMAGES } from './db';
+import { waitForImageLoadThenFetchBlob } from './image_helpers';
 
 /** Tính SHA-256 cho chuỗi, trả về hex (64 ký tự). */
 export async function sha256Hex(input: string): Promise<string> {
@@ -20,9 +21,8 @@ export async function saveNewsImageByUrl(url: string): Promise<string | null> {
   if (exists?.blob instanceof Blob) return key;
 
   try {
-    const resp = await fetch(url, { cache: 'no-store' });
-    if (!resp.ok) return null;
-    const blob = await resp.blob();
+    const blob = await waitForImageLoadThenFetchBlob(url);
+    if (!blob) return null;
     await db.put(STORE_NEWS_IMAGES, {
       key,
       source_url: url,
