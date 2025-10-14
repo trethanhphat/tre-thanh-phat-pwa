@@ -2,7 +2,6 @@
 import { NextResponse } from 'next/server';
 
 export const runtime = 'edge'; // ✅ Chạy trên Edge Functions → CDN cache toàn cầu
-export const revalidate = 60 * 60 * 24 * 7; // ✅ Cache 7 ngày
 
 // 🔹 Domain được phép GỌI API proxy này (không phải domain ảnh đích)
 const ALLOWED_ORIGINS = [
@@ -33,7 +32,6 @@ export async function GET(req: Request) {
     const response = await fetch(url, {
       method: 'GET',
       redirect: 'follow',
-      cache: 'force-cache', // ✅ Gợi ý CDN giữ cache lâu hơn
     });
 
     if (!response.ok || !response.body) {
@@ -43,11 +41,10 @@ export async function GET(req: Request) {
     // ✅ Thiết lập header cache và CORS
     const headers = new Headers(response.headers);
     headers.set('Access-Control-Allow-Origin', '*');
-    headers.set('Cache-Control', 'public, s-maxage=604800, immutable'); // cache CDN 7 ngày
+    headers.set('Cache-Control', 'public, s-maxage=28800, immutable'); // cache CDN 8h
 
-    if (!headers.has('Content-Type')) {
-      headers.set('Content-Type', 'image/jpeg');
-    }
+    const contentType = response.headers.get('Content-Type') || 'image/jpeg';
+    headers.set('Content-Type', contentType);
 
     return new Response(response.body, {
       status: 200,
