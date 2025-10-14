@@ -1,6 +1,6 @@
 // File: src/lib/image_helpers.ts
 export async function waitForImageLoadThenFetchBlob(url: string): Promise<Blob | null> {
-  return new Promise((resolve) => {
+  return new Promise(resolve => {
     const img = new Image();
     img.crossOrigin = 'anonymous'; // giúp trình duyệt xử lý ảnh từ domain khác
     img.onload = async () => {

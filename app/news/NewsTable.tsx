@@ -5,13 +5,13 @@ import React from 'react';
 import type { NewsItem } from '@/lib/news';
 
 interface NewsTableProps {
-  items: NewsItem[];                          // ✅ đã phân trang từ page.tsx
-  imageCache: { [news_id: string]: string };  // ✅ map news_id -> URL (có thể là blob:)
+  items: NewsItem[]; // ✅ đã phân trang từ page.tsx
+  imageCache: { [news_id: string]: string }; // ✅ map news_id -> URL (có thể là blob:)
   sortField: 'title' | 'published' | 'author';
   sortOrder: 'asc' | 'desc';
   onSortChange: (field: 'title' | 'published' | 'author') => void;
   searchText?: string;
-  pageSizeOptions?: number[];                 // giữ để tái dùng về sau (không bắt buộc)
+  pageSizeOptions?: number[]; // giữ để tái dùng về sau (không bắt buộc)
 }
 
 export default function NewsTable({
@@ -77,26 +77,22 @@ export default function NewsTable({
               Tác giả{renderSortArrow('author')}
             </th>
 
-            <th style={{ border: '1px solid var(--color-border)', padding: '8px' }}>
-              Danh mục
-            </th>
+            <th style={{ border: '1px solid var(--color-border)', padding: '8px' }}>Danh mục</th>
 
-            <th style={{ border: '1px solid var(--color-border)', padding: '8px' }}>
-              Mở bài
-            </th>
+            <th style={{ border: '1px solid var(--color-border)', padding: '8px' }}>Mở bài</th>
           </tr>
         </thead>
 
         <tbody>
-          {items.map((n) => (
+          {items.map(n => (
             <tr
               key={n.news_id}
               style={{
                 border: '1px solid var(--color-border)',
                 transition: 'background 0.2s',
               }}
-              onMouseEnter={(e) => (e.currentTarget.style.background = 'var(--color-muted)')}
-              onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
+              onMouseEnter={e => (e.currentTarget.style.background = 'var(--color-muted)')}
+              onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
             >
               {/* Ảnh */}
               <td
@@ -114,6 +110,7 @@ export default function NewsTable({
                       alt={n.title}
                       style={{ maxWidth: '150px' }}
                       loading="lazy"
+                      crossOrigin="anonymous"
                     />
                   </a>
                 ) : (
@@ -122,13 +119,25 @@ export default function NewsTable({
               </td>
 
               {/* Tiêu đề + highlight + icon sort */}
-              <td style={{ border: '1px solid var(--color-border)', padding: '8px' }} data-label="Tiêu đề">
-                <a href={n.link} target="_blank" rel="noreferrer" style={{ color: 'var(--color-link)' }}>
+              <td
+                style={{ border: '1px solid var(--color-border)', padding: '8px' }}
+                data-label="Tiêu đề"
+              >
+                <a
+                  href={n.link}
+                  target="_blank"
+                  rel="noreferrer"
+                  style={{ color: 'var(--color-link)' }}
+                >
                   {searchText
                     ? String(n.title)
                         .split(new RegExp(`(${escapeReg(searchText)})`, 'gi'))
                         .map((part, i) =>
-                          part.toLowerCase() === searchText.toLowerCase() ? <mark key={i}>{part}</mark> : part
+                          part.toLowerCase() === searchText.toLowerCase() ? (
+                            <mark key={i}>{part}</mark>
+                          ) : (
+                            part
+                          )
                         )
                     : n.title}
                 </a>
@@ -141,7 +150,10 @@ export default function NewsTable({
               </td>
 
               {/* Ngày xuất bản + icon sort */}
-              <td style={{ border: '1px solid var(--color-border)', padding: '8px' }} data-label="Ngày xuất bản">
+              <td
+                style={{ border: '1px solid var(--color-border)', padding: '8px' }}
+                data-label="Ngày xuất bản"
+              >
                 {n.published
                   ? new Date(n.published).toLocaleString()
                   : n.updated
@@ -151,18 +163,24 @@ export default function NewsTable({
               </td>
 
               {/* Tác giả + icon sort */}
-              <td style={{ border: '1px solid var(--color-border)', padding: '8px' }} data-label="Tác giả">
+              <td
+                style={{ border: '1px solid var(--color-border)', padding: '8px' }}
+                data-label="Tác giả"
+              >
                 {n.author || '-'} {renderSortSpan('author')}
               </td>
 
               {/* Danh mục */}
-              <td style={{ border: '1px solid var(--color-border)', padding: '8px' }} data-label="Danh mục">
+              <td
+                style={{ border: '1px solid var(--color-border)', padding: '8px' }}
+                data-label="Danh mục"
+              >
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
                   {n.categories?.length
-                    ? n.categories.map((c) => (
+                    ? n.categories.map(c => (
                         <span
                           key={c}
-                          style={{ background: '#f3f3f3', padding: '2px 6px', borderRadius: 6  }}
+                          style={{ background: '#f3f3f3', padding: '2px 6px', borderRadius: 6 }}
                         >
                           {c}
                         </span>
@@ -172,8 +190,16 @@ export default function NewsTable({
               </td>
 
               {/* Mở */}
-              <td style={{ border: '1px solid var(--color-border)', padding: '8px' }} data-label="Mở">
-                <a href={n.link} target="_blank" rel="noreferrer" style={{ color: 'var(--color-link)' }}>
+              <td
+                style={{ border: '1px solid var(--color-border)', padding: '8px' }}
+                data-label="Mở"
+              >
+                <a
+                  href={n.link}
+                  target="_blank"
+                  rel="noreferrer"
+                  style={{ color: 'var(--color-link)' }}
+                >
                   Xem
                 </a>
               </td>
