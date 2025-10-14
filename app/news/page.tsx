@@ -4,7 +4,7 @@
 import { useEffect, useRef, useState } from 'react';
 import axios from 'axios';
 
-import ControlBar from '@app/products/ControlBar'; // tái dùng y nguyên
+import ControlBar from '@/components/BottomMenu'; // tái dùng y nguyên
 import NewsTable from '@app/news/NewsTable'; // tái dùng y nguyên
 
 import { NewsItem, loadNewsFromDB, syncNews } from '@/lib/news';
@@ -195,6 +195,9 @@ export default function NewsListPage() {
         currentPage={currentPage}
         setCurrentPage={setCurrentPage}
         totalPages={totalPages}
+       // 👇 Tuỳ biến cho News
+        searchPlaceholder="🔎 Tìm bài viết..."
+        unitLabel="bài/trang"
       />
 
       {/* Table */}
@@ -222,6 +225,9 @@ export default function NewsListPage() {
         currentPage={currentPage}
         setCurrentPage={setCurrentPage}
         totalPages={totalPages}
+       // 👇 Tuỳ biến cho News
+        searchPlaceholder="🔎 Tìm bài viết..."
+        unitLabel="bài/trang"
       />
     </div>
   );

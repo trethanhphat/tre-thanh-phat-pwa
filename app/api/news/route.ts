@@ -29,36 +29,36 @@ function getFeedUrl(): URL {
   return url;
 }
 
-type RawEntry = {
-  id?: string;
-  title?: { '#text'?: string } | string;
-  link?: { '@_rel'?: string; '@_href'?: string }[] | any[];
-  author?: { name?: string } | Array<{ name?: string }>;
-  category?: { '@_term'?: string }[] | any[];
-  published?: string;
-  updated?: string;
-  summary?: { '#text'?: string } | string;
-  content?: { '#text'?: string } | string;
-  'media:thumbnail'?: { '@_url'?: string } | Array<{ '@_url'?: string }>;
-};
-
+/* -------------------------- Helpers an toàn -------------------------- */
 function getText(n: any): string {
   if (!n) return '';
   if (typeof n === 'string') return n;
   if (typeof n['#text'] === 'string') return n['#text'];
   return '';
 }
-
-function first<T>(x: T | T[] | undefined | null): T | undefined {
-  if (!x) return undefined;
-  return Array.isArray(x) ? x[0] : x;
+function toArray<T = any>(x: T | T[] | null | undefined): T[] {
+  if (x == null) return [];
+  return Array.isArray(x) ? x : [x];
 }
-
 function extractFirstImageFromHtml(html: string): string | undefined {
   if (!html) return;
   const m = html.match(/<img[^>]+src="'["']/i);
   return m?.[1];
 }
+
+/* -------------------------- Types thô từ XML -------------------------- */
+type RawEntry = {
+  id?: string;
+  title?: { '#text'?: string } | string;
+  link?: { '@_rel'?: string; '@_href'?: string }[] | any[];
+  author?: { name?: string } | Array<{ name?: string }>;
+  category?: { '@_term'?: string } | { '@_term'?: string }[] | string;
+  published?: string;
+  updated?: string;
+  summary?: { '#text'?: string } | string;
+  content?: { '#text'?: string } | string;
+  'media:thumbnail'?: { '@_url'?: string } | Array<{ '@_url'?: string }>;
+};
 
 export async function GET() {
   try {
@@ -83,35 +83,43 @@ export async function GET() {
       trimValues: true,
     });
     const data = parser.parse(xml);
-    const entries: RawEntry[] = data?.feed?.entry ?? [];
+    const entries: RawEntry[] = toArray<RawEntry>(data?.feed?.entry);
 
     const items = entries.map((e) => {
-      // link ưu tiên rel="alternate"
-      const linkArr = Array.isArray(e.link) ? e.link : e.link ? [e.link] : [];
-      const alt = linkArr.find((l: any) => l?.['@_rel'] === 'alternate');
+      /* link ưu tiên rel="alternate" */
+      const linkArr = toArray<any>(e.link);
+      const alt = linkArr.find((l) => l?.['@_rel'] === 'alternate');
       const link = alt?.['@_href'] || linkArr[0]?.['@_href'] || '';
 
-      // author
-      const auth = first(e.author);
-      const author = auth && typeof auth === 'object' && auth.name ? auth.name : '';
+      /* author (coerce về mảng rồi lấy phần tử đầu) */
+      const authArr = toArray<any>(e.author);
+      const author =
+        (authArr[0] && typeof authArr[0] === 'object' && authArr[0].name) || '';
 
-      // categories
-      const categories: string[] = (e.category || [])
-        .map((c: any) => c?.['@_term'])
+      /* categories (coerce về mảng, hỗ trợ object/string) */
+      const catArr = toArray<any>(e.category);
+      const categories: string[] = catArr
+        .map((c) => {
+          if (!c) return '';
+          if (typeof c === 'string') return c;
+          return c?.['@_term'] || '';
+        })
         .filter(Boolean);
 
+      /* text fields */
       const title = getText(e.title);
       const summary = getText(e.summary);
       const content = getText(e.content);
 
-      // thumbnail: ưu tiên media:thumbnail, fallback ảnh đầu trong HTML
+      /* thumbnail: ưu tiên media:thumbnail, fallback ảnh đầu trong HTML */
+      const thumbArr = toArray<any>(e['media:thumbnail']);
       let image_url: string | undefined =
-        first(e['media:thumbnail'])?.['@_url'] ||
+        thumbArr[0]?.['@_url'] ||
         extractFirstImageFromHtml(content) ||
         extractFirstImageFromHtml(summary);
 
       return {
-        news_id: e.id || link || title, // key
+        news_id: e.id || link || title,
         title,
         link,
         author,
@@ -123,7 +131,7 @@ export async function GET() {
       };
     });
 
-    // Sort mới → cũ
+    /* Sort mới → cũ (published/updated) */
     items.sort((a, b) => {
       const ad = a.published || a.updated || '';
       const bd = b.published || b.updated || '';

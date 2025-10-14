@@ -4,7 +4,7 @@
 import { useEffect, useRef, useState } from 'react';
 import axios from 'axios';
 import ProductsTable from './ProductsTable'; // ✅ chỉ lo HIỂN THỊ bảng + sort icon
-import ControlBar from './ControlBar';
+import ControlBar from '@/components/ControlBar';
 import { Product, loadProductsFromDB, syncProducts } from '@/lib/products'; // ✅ IndexedDB helpers + type
 import { getImageURL } from '@/lib/images'; // ✅ Lấy URL ảnh (online hoặc blob offline)
 
