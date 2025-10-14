@@ -2,6 +2,17 @@
 import { initDB, STORE_NEWS_IMAGES } from './db';
 import { waitForImageLoadThenFetchBlob } from './image_helpers';
 
+/** TTL cache (ms) – ví dụ 30 ngày */
+const CACHE_TTL = 30 * 24 * 60 * 60 * 1000;
+
+/** ✅ Helper thêm proxy */
+function withProxy(url: string): string {
+  if (!url) return '';
+  if (url.startsWith('blob:') || url.startsWith('data:')) return url;
+  if (url.includes('/api/news/image-proxy')) return url;
+  return `/api/news/image-proxy?url=${encodeURIComponent(url)}`;
+}
+
 /** Tính SHA-256 cho chuỗi, trả về hex (64 ký tự). */
 export async function sha256Hex(input: string): Promise<string> {
   const enc = new TextEncoder().encode(input);
@@ -10,18 +21,35 @@ export async function sha256Hex(input: string): Promise<string> {
   return bytes.map(b => b.toString(16).padStart(2, '0')).join('');
 }
 
-/** Tải ảnh từ URL và lưu blob vào IDB với key = sha256(url). */
+/** Xóa các ảnh quá hạn trong cache */
+async function cleanupOldImages(db: IDBDatabase) {
+  const tx = (db as any).transaction(STORE_NEWS_IMAGES, 'readwrite');
+  const store = tx.objectStore(STORE_NEWS_IMAGES);
+  const now = Date.now();
+  const index = store.index('updated_at');
+  const req = index.openCursor();
+  req.onsuccess = () => {
+    const cursor = req.result;
+    if (!cursor) return;
+    const rec = cursor.value;
+    if (now - rec.updated_at > CACHE_TTL) {
+      store.delete(rec.key);
+    }
+    cursor.continue();
+  };
+}
+
+/** Tải ảnh (qua proxy) và lưu blob vào IDB với key = sha256(url). */
 export async function saveNewsImageByUrl(url: string): Promise<string | null> {
   if (!url) return null;
   const key = await sha256Hex(url);
   const db = await initDB();
 
-  // Nếu đã có rồi thì bỏ qua (tránh tải lại)
   const exists = await db.get(STORE_NEWS_IMAGES, key);
-  if (exists?.blob instanceof Blob) return key;
+  if (exists?.blob instanceof Blob && Date.now() - exists.updated_at < CACHE_TTL) return key;
 
   try {
-    const blob = await waitForImageLoadThenFetchBlob(url);
+    const blob = await waitForImageLoadThenFetchBlob(withProxy(url));
     if (!blob) return null;
     await db.put(STORE_NEWS_IMAGES, {
       key,
@@ -29,14 +57,14 @@ export async function saveNewsImageByUrl(url: string): Promise<string | null> {
       blob,
       updated_at: Date.now(),
     });
+    cleanupOldImages(db as any);
     return key;
   } catch {
-    // offline hoặc lỗi → bỏ qua, lần sau thử lại
     return null;
   }
 }
 
-/** Trả về URL hiển thị cho ảnh: blob: nếu đã cache; nếu chưa có → trả về URL gốc. */
+/** Trả URL hiển thị: blob: nếu cache, nếu chưa thì qua proxy. */
 export async function getNewsImageURLByUrl(url?: string): Promise<string> {
   if (!url) return '';
   const key = await sha256Hex(url);
@@ -45,10 +73,10 @@ export async function getNewsImageURLByUrl(url?: string): Promise<string> {
   if (rec?.blob instanceof Blob) {
     return URL.createObjectURL(rec.blob);
   }
-  return url; // fallback online
+  return withProxy(url);
 }
 
-/** Đảm bảo có cache ảnh theo URL (không chặn UI). */
+/** Đảm bảo có cache ảnh (không chặn UI). */
 export async function ensureNewsImageCachedByUrl(url?: string): Promise<void> {
   if (!url) return;
   try {

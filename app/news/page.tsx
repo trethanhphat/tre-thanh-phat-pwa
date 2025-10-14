@@ -126,7 +126,10 @@ export default function NewsListPage() {
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [imageCache]);
+  // ---------------------- MOUNT END ----------------------
+  // Còn nữa...
 
+  // Phần tiếp theo của File: app/news/page.tsx
   // ---------------------- SORT / FILTER / PAGINATION ----------------------
   const handleSortChange = (field: SortField) => {
     if (field === sortField) setSortOrder(o => (o === 'asc' ? 'desc' : 'asc'));
