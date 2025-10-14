@@ -36,15 +36,11 @@ export default function NewsListPage() {
     itemsRef.current = items;
   }, [items]);
 
-  
-
-
   // ---------------------- OFFLINE FIRST ----------------------
   const loadOfflineFirst = async () => {
     const cached = await loadNewsFromDB();
     if (cached.length > 0) {
       setItems(cached);
-      replaceImageCache(await loadImages(cached));
       setUsingCache(true);
     }
     setLoading(false);
@@ -79,7 +75,7 @@ export default function NewsListPage() {
         setJustUpdated(true); // Có cập nhật mới
       } else {
         setJustUpdated(false); // Dữ liệu giống hệt
-        setUsingCache(false);  // Xác nhận bản mới nhất
+        setUsingCache(false); // Xác nhận bản mới nhất
       }
 
       setUsingCache(false);
@@ -119,7 +115,7 @@ export default function NewsListPage() {
 
   // ---------------------- SORT / FILTER / PAGINATION ----------------------
   const handleSortChange = (field: SortField) => {
-    if (field === sortField) setSortOrder((o) => (o === 'asc' ? 'desc' : 'asc'));
+    if (field === sortField) setSortOrder(o => (o === 'asc' ? 'desc' : 'asc'));
     else {
       setSortField(field);
       setSortOrder('asc');
@@ -151,9 +147,7 @@ export default function NewsListPage() {
         </div>
       )}
       {errorMessage && !loading && (
-        <div className="p-3 bg-rose-50 border border-rose-200 rounded">
-          ⚠️ {errorMessage}
-        </div>
+        <div className="p-3 bg-rose-50 border border-rose-200 rounded">⚠️ {errorMessage}</div>
       )}
 
       {/* Control Bar (Trên) — tái dùng nguyên bản */}
@@ -171,7 +165,7 @@ export default function NewsListPage() {
         currentPage={currentPage}
         setCurrentPage={setCurrentPage}
         totalPages={totalPages}
-       // 👇 Tuỳ biến cho News
+        // 👇 Tuỳ biến cho News
         searchPlaceholder="🔎 Tìm bài viết..."
         unitLabel="bài/trang"
       />
@@ -201,7 +195,7 @@ export default function NewsListPage() {
         currentPage={currentPage}
         setCurrentPage={setCurrentPage}
         totalPages={totalPages}
-       // 👇 Tuỳ biến cho News
+        // 👇 Tuỳ biến cho News
         searchPlaceholder="🔎 Tìm bài viết..."
         unitLabel="bài/trang"
       />
@@ -219,9 +213,10 @@ function sortedAndFiltered(
   const q = (searchText || '').toLowerCase().trim();
 
   const filtered = q
-    ? items.filter((n) => {
-        const hay = `${n.title} ${n.summary || ''} ${n.author || ''} ${(n.categories || []).join(' ')}`
-          .toLowerCase();
+    ? items.filter(n => {
+        const hay = `${n.title} ${n.summary || ''} ${n.author || ''} ${(n.categories || []).join(
+          ' '
+        )}`.toLowerCase();
         return hay.includes(q);
       })
     : items;
