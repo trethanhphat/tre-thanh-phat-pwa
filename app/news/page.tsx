@@ -30,16 +30,18 @@ export default function NewsListPage() {
 
   // Ref để biết đã có data khi lỗi online
   const itemsRef = useRef<NewsItem[]>([]);
+  const [imageUrlsToTrack, setImageUrlsToTrack] = useState<string[]>([]);
   useEffect(() => {
     itemsRef.current = items;
   }, [items]);
 
   // ---------------------- OFFLINE FIRST ----------------------
+  useImageLoadTracker(imageUrlsToTrack);
   const loadOfflineFirst = async () => {
     const cached = await loadNewsFromDB();
     if (cached.length > 0) {
       setItems(cached);
-      useImageLoadTracker(
+      setImageUrlsToTrack(
         cached.map(i => i.image_url).filter((url): url is string => typeof url === 'string')
       );
       setUsingCache(true);
@@ -73,7 +75,7 @@ export default function NewsListPage() {
 
       if (hasChange) {
         setItems(fresh);
-        useImageLoadTracker(
+        setImageUrlsToTrack(
           fresh.map(i => i.image_url).filter((url): url is string => typeof url === 'string')
         );
         setJustUpdated(true); // Có cập nhật mới
@@ -95,6 +97,7 @@ export default function NewsListPage() {
 
   // ---------------------- MOUNT ----------------------
   useEffect(() => {
+    useImageLoadTracker(imageUrlsToTrack);
     const init = async () => {
       await loadOfflineFirst();
 
