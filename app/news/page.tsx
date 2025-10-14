@@ -97,7 +97,14 @@ export default function NewsListPage() {
 
   // ---------------------- MOUNT ----------------------
   useEffect(() => {
-    useImageLoadTracker(imageUrlsToTrack);
+    // Chạy load offline trước khi fetch online
+    // Để giảm thiểu thời gian chờ đợi
+    // Nếu online fetch xong thì ghi đè lên
+    // Nếu offline thì vẫn có dữ liệu để xem
+    // (và có thể hiện banner đang dùng offline)
+    // Nếu online mà fetch lỗi thì vẫn giữ nguyên dữ liệu offline
+    // (và có thể hiện banner đang dùng offline + lỗi)
+    // Nếu online mà fetch thành công thì ghi đè và hiện banner đã cập nhật
     const init = async () => {
       await loadOfflineFirst();
 
