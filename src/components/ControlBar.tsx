@@ -3,7 +3,7 @@
 
 import React from 'react';
 
-type Props = {
+export type ControlBarProps = {
   searchText: string;
   setSearchText: (v: string) => void;
   pageSize: number;
@@ -12,9 +12,9 @@ type Props = {
   setCurrentPage: (n: number) => void;
   totalPages: number;
 
-  /** Tuỳ biến text hiển thị (optional) */
-  searchPlaceholder?: string;     // default: "🔎 Tìm kiếm..."
-  unitLabel?: string;             // default: "mục/trang"
+  // Tuỳ biến hiển thị (optional)
+  searchPlaceholder?: string; // default: "🔎 Tìm kiếm..."
+  unitLabel?: string;         // default: "mục/trang"
 };
 
 export default function ControlBar({
@@ -27,7 +27,7 @@ export default function ControlBar({
   totalPages,
   searchPlaceholder = '🔎 Tìm kiếm...',
   unitLabel = 'mục/trang',
-}: Props) {
+}: ControlBarProps) {
   const handlePageInput = (e: React.ChangeEvent<HTMLInputElement>) => {
     let val = Number(e.target.value);
     if (isNaN(val) || val < 1) val = 1;
@@ -38,13 +38,12 @@ export default function ControlBar({
   return (
     <>
       <div className="control-bar">
-        {/* Nhóm 1: Ô tìm kiếm */}
         <div className="ctrl-group">
           <input
             type="text"
             placeholder={searchPlaceholder}
             value={searchText}
-            onChange={e => {
+            onChange={(e) => {
               setSearchText(e.target.value);
               setCurrentPage(1);
             }}
@@ -52,19 +51,18 @@ export default function ControlBar({
           />
         </div>
 
-        {/* Nhóm 2: Số item/trang */}
         <div className="ctrl-group">
           <label>
             Hiển thị:&nbsp;
             <select
               value={pageSize}
-              onChange={e => {
+              onChange={(e) => {
                 setPageSize(Number(e.target.value));
                 setCurrentPage(1);
               }}
               className="select"
             >
-              {[5, 10, 20, 50].map(n => (
+              {[5, 10, 20, 50].map((n) => (
                 <option key={n} value={n}>
                   {n}
                 </option>
@@ -74,7 +72,6 @@ export default function ControlBar({
           </label>
         </div>
 
-        {/* Nhóm 3: Pagination */}
         <div className="ctrl-group pagination">
           <button onClick={() => setCurrentPage(1)} disabled={currentPage === 1}>
             «
@@ -111,7 +108,6 @@ export default function ControlBar({
         </div>
       </div>
 
-      {/* CSS slot nếu bạn muốn thêm local style */}
       <style jsx>{``}</style>
     </>
   );

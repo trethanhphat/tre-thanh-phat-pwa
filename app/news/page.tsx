@@ -4,7 +4,7 @@
 import { useEffect, useRef, useState } from 'react';
 import axios from 'axios';
 
-import ControlBar from '@/components/BottomMenu'; // tái dùng y nguyên
+import ControlBar from '@/components/ControlBar'; // tái dùng y nguyên
 import NewsTable from '@app/news/NewsTable'; // tái dùng y nguyên
 
 import { NewsItem, loadNewsFromDB, syncNews } from '@/lib/news';
