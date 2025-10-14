@@ -39,7 +39,9 @@ export default function NewsListPage() {
     const cached = await loadNewsFromDB();
     if (cached.length > 0) {
       setItems(cached);
-      useImageLoadTracker(cached.map(i => i.image_url).filter(Boolean));
+      useImageLoadTracker(
+        cached.map(i => i.image_url).filter((url): url is string => typeof url === 'string')
+      );
       setUsingCache(true);
     }
     setLoading(false);
@@ -71,7 +73,9 @@ export default function NewsListPage() {
 
       if (hasChange) {
         setItems(fresh);
-        useImageLoadTracker(fresh.map(i => i.image_url).filter(Boolean));
+        useImageLoadTracker(
+          fresh.map(i => i.image_url).filter((url): url is string => typeof url === 'string')
+        );
         setJustUpdated(true); // Có cập nhật mới
       } else {
         setJustUpdated(false); // Dữ liệu giống hệt
