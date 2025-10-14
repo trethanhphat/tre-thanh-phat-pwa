@@ -1,13 +1,4 @@
 // 📄 File: app/products/page.tsx
-'use client';
-
-import { useEffect, useRef, useState } from 'react';
-import axios from 'axios';
-import ProductsTable from './ProductsTable'; // ✅ chỉ lo HIỂN THỊ bảng + sort icon
-import ControlBar from '@/components/ControlBar';
-import { Product, loadProductsFromDB, syncProducts } from '@/lib/products'; // ✅ IndexedDB helpers + type
-import { getImageURL } from '@/lib/images'; // ✅ Lấy URL ảnh (online hoặc blob offline)
-
 /**
  * Trang /products
  * - ✅ OFFLINE FIRST:
@@ -34,6 +25,16 @@ import { getImageURL } from '@/lib/images'; // ✅ Lấy URL ảnh (online hoặ
  *    + Mobile: control bar hiển thị 3 hàng
  *    + Control bar đặt ở cả TRÊN & DƯỚI bảng sản phẩm
  */
+// ✅ File: app/products/page.tsx
+'use client';
+
+import { useEffect, useRef, useState } from 'react';
+import axios from 'axios';
+import ProductsTable from './ProductsTable';
+import ControlBar from '@/components/ControlBar';
+import { Product, loadProductsFromDB, syncProducts } from '@/lib/products';
+import { useImageCacheTracker } from '@/hooks/useImageCacheTracker';
+import { getImageURL, prefetchImages } from '@/lib/images'; // ✅ gộp chung dùng được cho news/products
 
 type SortField = 'stock_status' | 'price' | 'stock_quantity' | 'name';
 type SortOrder = 'asc' | 'desc';
@@ -41,6 +42,8 @@ type SortOrder = 'asc' | 'desc';
 export default function ProductsListPage() {
   // ---------------------- STATE ----------------------
   const [products, setProducts] = useState<Product[]>([]);
+  // ✅ Prefetch và cache ảnh sản phẩm (dùng chung hook mới)
+  useImageCacheTracker(products.map(p => p.image_url).filter(Boolean), { type: 'product' });
   const [imageCache, setImageCache] = useState<Record<number, string>>({});
   const [loading, setLoading] = useState(true);
   const [usingCache, setUsingCache] = useState(false);
@@ -54,7 +57,6 @@ export default function ProductsListPage() {
   const [pageSize, setPageSize] = useState(10);
   const [searchText, setSearchText] = useState('');
 
-  // Ref để so sánh
   const productsRef = useRef<Product[]>([]);
   useEffect(() => {
     productsRef.current = products;
@@ -64,7 +66,10 @@ export default function ProductsListPage() {
   const loadImages = async (list: Product[]) => {
     const entries = await Promise.all(
       list.map(async p => {
-        if ((p as any).image_url) return [p.id, await getImageURL((p as any).image_url)] as const;
+        if (p.image_url) {
+          const blobUrl = await getImageURL(p.image_url);
+          return [p.id, blobUrl] as const;
+        }
         return [p.id, ''] as const;
       })
     );
@@ -72,6 +77,7 @@ export default function ProductsListPage() {
   };
 
   const replaceImageCache = (next: Record<number, string>) => {
+    // cleanup blob cũ
     Object.values(imageCache).forEach(url => {
       if (url && url.startsWith('blob:')) URL.revokeObjectURL(url);
     });
@@ -96,10 +102,7 @@ export default function ProductsListPage() {
         headers: { 'Cache-Control': 'no-store' },
         validateStatus: () => true,
       });
-
-      if (res.status < 200 || res.status >= 300) {
-        throw new Error(`HTTP ${res.status}`);
-      }
+      if (res.status < 200 || res.status >= 300) throw new Error(`HTTP ${res.status}`);
 
       const payload = res.data;
       const fresh: Product[] = Array.isArray(payload)
@@ -107,7 +110,6 @@ export default function ProductsListPage() {
         : payload?.products ?? payload?.data ?? [];
 
       if (!Array.isArray(fresh)) throw new Error('API không trả về mảng hợp lệ');
-
       if (fresh.length === 0) {
         setLoading(false);
         return;
@@ -119,12 +121,12 @@ export default function ProductsListPage() {
       if (hasChange) {
         setProducts(fresh);
         replaceImageCache(await loadImages(fresh));
-        setJustUpdated(true); // Có cập nhật mới
+        setJustUpdated(true);
       } else {
-        setJustUpdated(false); // Dữ liệu giống hệt
-        setUsingCache(false); // Nhưng confirm là dữ liệu đang hiển thị là bản mới nhất
+        setJustUpdated(false);
+        setUsingCache(false);
       }
-
+      // (Đã thay bằng useImageCacheTracker)
       setUsingCache(false);
       setLoading(false);
     } catch (err: any) {
@@ -140,7 +142,6 @@ export default function ProductsListPage() {
   useEffect(() => {
     const init = async () => {
       await loadOfflineFirst();
-
       if (navigator.onLine) {
         await fetchOnlineAndUpdate();
       } else {
@@ -152,7 +153,6 @@ export default function ProductsListPage() {
 
     const handleOnline = () => fetchOnlineAndUpdate();
     window.addEventListener('online', handleOnline);
-
     return () => {
       window.removeEventListener('online', handleOnline);
       Object.values(imageCache).forEach(url => {
@@ -178,13 +178,6 @@ export default function ProductsListPage() {
     (currentPage - 1) * pageSize,
     currentPage * pageSize
   );
-
-  const handlePageInput = (e: React.ChangeEvent<HTMLInputElement>) => {
-    let val = Number(e.target.value);
-    if (isNaN(val) || val < 1) val = 1;
-    if (val > totalPages) val = totalPages;
-    setCurrentPage(val);
-  };
 
   // ---------------------- RENDER ----------------------
   return (
@@ -243,9 +236,7 @@ export default function ProductsListPage() {
   );
 }
 
-/**
- * Lọc + Sắp xếp theo yêu cầu
- */
+// ---------------------- Helper: Lọc & Sắp xếp ----------------------
 function sortedAndFiltered(
   products: Product[],
   sortField: SortField,

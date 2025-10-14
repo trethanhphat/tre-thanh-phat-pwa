@@ -1,6 +1,6 @@
 // ✅ File: src/lib/products.ts
 import { initDB, STORE_PRODUCTS } from './db';
-import { saveImageIfNotExists } from './images';
+import { saveImageIfNotExists, prefetchImages } from './images';
 
 export interface Product {
   id: number;
@@ -11,11 +11,14 @@ export interface Product {
   image_url?: string;
 }
 
+/** 🔹 Load toàn bộ sản phẩm từ IndexedDB */
 export const loadProductsFromDB = async (): Promise<Product[]> => {
   const db = await initDB();
-  return await db.getAll(STORE_PRODUCTS);
+  const all = await db.getAll(STORE_PRODUCTS);
+  return all;
 };
 
+/** 🔹 Đồng bộ dữ liệu sản phẩm + cache ảnh */
 export const syncProducts = async (products: Product[]): Promise<boolean> => {
   const db = await initDB();
   const newIds = new Set(products.map(p => p.id));
@@ -25,7 +28,7 @@ export const syncProducts = async (products: Product[]): Promise<boolean> => {
 
   let hasChange = false;
 
-  // Xóa record cũ
+  // Xóa sản phẩm cũ không còn
   let cursor = await store.openCursor();
   while (cursor) {
     if (!newIds.has(cursor.key as number)) {
@@ -35,18 +38,32 @@ export const syncProducts = async (products: Product[]): Promise<boolean> => {
     cursor = await cursor.continue();
   }
 
-  // Thêm / cập nhật
+  // Thêm / cập nhật sản phẩm mới
   for (const p of products) {
     const existing = await store.get(p.id);
     if (!existing || JSON.stringify(existing) !== JSON.stringify(p)) {
       await store.put(p);
       hasChange = true;
     }
+
+    // ✅ Lưu ảnh offline trong nền
     if (p.image_url) {
       saveImageIfNotExists(p.image_url);
     }
   }
 
   await tx.done;
-  return hasChange; // ✅ trả về true/false để component biết có cần setState không
+
+  // 🔹 Prefetch ảnh cho top 5 sản phẩm (nếu không bật tiết kiệm dữ liệu)
+  if ('connection' in navigator && (navigator as any).connection?.saveData) {
+    console.log('⚡ Bỏ qua prefetch ảnh sản phẩm vì bật tiết kiệm dữ liệu');
+  } else {
+    const top5 = products
+      .slice(0, 5)
+      .map(p => p.image_url)
+      .filter(Boolean) as string[];
+    if (top5.length) prefetchImages(top5);
+  }
+
+  return hasChange;
 };

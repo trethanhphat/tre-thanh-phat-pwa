@@ -3,10 +3,10 @@
 
 import { useEffect, useRef, useState } from 'react';
 import axios from 'axios';
-import ControlBar from '@/components/ControlBar'; // tái dùng y nguyên
-import NewsTable from '@app/news/NewsTable'; // tái dùng y nguyên
+import ControlBar from '@/components/ControlBar';
+import NewsTable from '@app/news/NewsTable';
 import { NewsItem, loadNewsFromDB, syncNews } from '@/lib/news';
-import { useNewsImageCache } from '@/hooks/useNewsImageCache';
+import { useImageCache } from '@/hooks/useImageCache';
 import { useImageLoadTracker } from '@/hooks/useImageLoadTracker';
 
 type SortField = 'published' | 'title' | 'author';
@@ -15,11 +15,12 @@ type SortOrder = 'asc' | 'desc';
 export default function NewsListPage() {
   // ---------------------- STATE ----------------------
   const [items, setItems] = useState<NewsItem[]>([]);
-  const imageCache = useNewsImageCache(items);
   const [loading, setLoading] = useState(true);
   const [usingCache, setUsingCache] = useState(false);
   const [justUpdated, setJustUpdated] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  useImageLoadTracker(items.map(n => n.image_url).filter(Boolean) as string[]);
+  const imageMap = useImageCache(items);
 
   // Sort / Filter / Pagination
   const [sortField, setSortField] = useState<SortField>('published');
@@ -28,22 +29,17 @@ export default function NewsListPage() {
   const [pageSize, setPageSize] = useState(10);
   const [searchText, setSearchText] = useState('');
 
-  // Ref để biết đã có data khi lỗi online
   const itemsRef = useRef<NewsItem[]>([]);
-  const [imageUrlsToTrack, setImageUrlsToTrack] = useState<string[]>([]);
   useEffect(() => {
     itemsRef.current = items;
   }, [items]);
 
   // ---------------------- OFFLINE FIRST ----------------------
-  useImageLoadTracker(imageUrlsToTrack);
   const loadOfflineFirst = async () => {
     const cached = await loadNewsFromDB();
     if (cached.length > 0) {
       setItems(cached);
-      setImageUrlsToTrack(
-        cached.map(i => i.image_url).filter((url): url is string => typeof url === 'string')
-      );
+
       setUsingCache(true);
     }
     setLoading(false);
@@ -64,8 +60,7 @@ export default function NewsListPage() {
       const payload = res.data;
       const fresh: NewsItem[] = Array.isArray(payload) ? payload : payload?.data ?? [];
 
-      if (!Array.isArray(fresh)) throw new Error('API không trả về mảng hợp lệ');
-      if (fresh.length === 0) {
+      if (!Array.isArray(fresh) || fresh.length === 0) {
         setLoading(false);
         return;
       }
@@ -75,13 +70,9 @@ export default function NewsListPage() {
 
       if (hasChange) {
         setItems(fresh);
-        setImageUrlsToTrack(
-          fresh.map(i => i.image_url).filter((url): url is string => typeof url === 'string')
-        );
-        setJustUpdated(true); // Có cập nhật mới
+        setJustUpdated(true);
       } else {
-        setJustUpdated(false); // Dữ liệu giống hệt
-        setUsingCache(false); // Xác nhận bản mới nhất
+        setJustUpdated(false);
       }
 
       setUsingCache(false);
@@ -97,17 +88,8 @@ export default function NewsListPage() {
 
   // ---------------------- MOUNT ----------------------
   useEffect(() => {
-    // Chạy load offline trước khi fetch online
-    // Để giảm thiểu thời gian chờ đợi
-    // Nếu online fetch xong thì ghi đè lên
-    // Nếu offline thì vẫn có dữ liệu để xem
-    // (và có thể hiện banner đang dùng offline)
-    // Nếu online mà fetch lỗi thì vẫn giữ nguyên dữ liệu offline
-    // (và có thể hiện banner đang dùng offline + lỗi)
-    // Nếu online mà fetch thành công thì ghi đè và hiện banner đã cập nhật
     const init = async () => {
       await loadOfflineFirst();
-
       if (typeof navigator !== 'undefined' && navigator.onLine) {
         await fetchOnlineAndUpdate();
       } else {
@@ -120,16 +102,9 @@ export default function NewsListPage() {
     const handleOnline = () => fetchOnlineAndUpdate();
     window.addEventListener('online', handleOnline);
 
-    return () => {
-      window.removeEventListener('online', handleOnline);
-      // Revoke blob khi unmount
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [imageCache]);
-  // ---------------------- MOUNT END ----------------------
-  // Còn nữa...
+    return () => window.removeEventListener('online', handleOnline);
+  }, []);
 
-  // Phần tiếp theo của File: app/news/page.tsx
   // ---------------------- SORT / FILTER / PAGINATION ----------------------
   const handleSortChange = (field: SortField) => {
     if (field === sortField) setSortOrder(o => (o === 'asc' ? 'desc' : 'asc'));
@@ -147,11 +122,11 @@ export default function NewsListPage() {
     currentPage * pageSize
   );
 
+  // ---------------------- RENDER ----------------------
   return (
     <div className="p-4 space-y-4">
       <h1 className="text-xl font-semibold">📰 News</h1>
 
-      {/* Banners */}
       {loading && <div className="p-3 bg-gray-50 border rounded">Đang tải...</div>}
       {usingCache && !loading && (
         <div className="p-3 bg-amber-50 border border-amber-200 rounded">
@@ -167,52 +142,47 @@ export default function NewsListPage() {
         <div className="p-3 bg-rose-50 border border-rose-200 rounded">⚠️ {errorMessage}</div>
       )}
 
-      {/* Control Bar (Trên) — tái dùng nguyên bản */}
       <ControlBar
         searchText={searchText}
-        setSearchText={(v: string) => {
+        setSearchText={v => {
           setSearchText(v);
           setCurrentPage(1);
         }}
         pageSize={pageSize}
-        setPageSize={(n: number) => {
+        setPageSize={n => {
           setPageSize(n);
           setCurrentPage(1);
         }}
         currentPage={currentPage}
         setCurrentPage={setCurrentPage}
         totalPages={totalPages}
-        // 👇 Tuỳ biến cho News
         searchPlaceholder="🔎 Tìm bài viết..."
         unitLabel="bài/trang"
       />
 
-      {/* Table */}
       <NewsTable
         items={paginatedItems}
-        imageCache={imageCache}
-        sortField={sortField === 'published' ? 'published' : (sortField as any)}
+        imageCache={imageMap} // ✅ thay hook riêng bằng map blob đã cache
+        sortField={sortField}
         sortOrder={sortOrder}
         onSortChange={handleSortChange}
         searchText={searchText}
       />
 
-      {/* Control Bar (Dưới) — tái dùng nguyên bản */}
       <ControlBar
         searchText={searchText}
-        setSearchText={(v: string) => {
+        setSearchText={v => {
           setSearchText(v);
           setCurrentPage(1);
         }}
         pageSize={pageSize}
-        setPageSize={(n: number) => {
+        setPageSize={n => {
           setPageSize(n);
           setCurrentPage(1);
         }}
         currentPage={currentPage}
         setCurrentPage={setCurrentPage}
         totalPages={totalPages}
-        // 👇 Tuỳ biến cho News
         searchPlaceholder="🔎 Tìm bài viết..."
         unitLabel="bài/trang"
       />

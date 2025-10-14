@@ -1,19 +1,20 @@
 // ✅ File: src/lib/news.ts
 import { initDB, STORE_NEWS } from './db';
-import { ensureNewsImageCachedByUrl } from './news_images';
+import { saveImageIfNotExists, prefetchImages } from './images';
 
 export interface NewsItem {
-  news_id: string;         // keyPath
+  news_id: string; // keyPath
   title: string;
   link: string;
   author?: string;
   categories: string[];
-  published?: string;      // ISO
-  updated?: string;        // ISO
+  published?: string; // ISO
+  updated?: string; // ISO
   summary?: string;
   image_url?: string;
 }
 
+/** 🔹 Load tin từ IndexedDB, mới nhất lên đầu */
 export const loadNewsFromDB = async (): Promise<NewsItem[]> => {
   const db = await initDB();
   const all = await db.getAll(STORE_NEWS);
@@ -24,6 +25,7 @@ export const loadNewsFromDB = async (): Promise<NewsItem[]> => {
   });
 };
 
+/** 🔹 Sync tin + cache ảnh trong nền */
 export const syncNews = async (items: NewsItem[]): Promise<boolean> => {
   const db = await initDB();
   const newIds = new Set(items.map(n => n.news_id));
@@ -33,7 +35,7 @@ export const syncNews = async (items: NewsItem[]): Promise<boolean> => {
 
   let hasChange = false;
 
-  // Xóa record cũ
+  // Xóa tin cũ không còn
   let cursor = await store.openCursor();
   while (cursor) {
     if (!newIds.has(cursor.key as string)) {
@@ -43,19 +45,32 @@ export const syncNews = async (items: NewsItem[]): Promise<boolean> => {
     cursor = await cursor.continue();
   }
 
-  // Thêm / cập nhật + cache ảnh nền theo URL (hash)
+  // Thêm / cập nhật tin mới
   for (const n of items) {
     const existing = await store.get(n.news_id);
     if (!existing || JSON.stringify(existing) !== JSON.stringify(n)) {
       await store.put(n);
       hasChange = true;
     }
+
+    // Tải nền ảnh (ưu tiên trực tiếp, fallback qua proxy)
     if (n.image_url) {
-      // Tải nền, lưu blob vào news_images bằng key sha256(url)
-      ensureNewsImageCachedByUrl(n.image_url);
+      saveImageIfNotExists(n.image_url);
     }
   }
 
   await tx.done;
+
+  // 🔹 Prefetch ảnh cho top 5 tin mới nhất (nếu không bật tiết kiệm dữ liệu)
+  if ('connection' in navigator && (navigator as any).connection?.saveData) {
+    console.log('⚡ Bỏ qua prefetch ảnh vì đang bật tiết kiệm dữ liệu');
+  } else {
+    const top5 = items
+      .slice(0, 5)
+      .map(n => n.image_url)
+      .filter(Boolean) as string[];
+    if (top5.length) prefetchImages(top5);
+  }
+
   return hasChange;
 };

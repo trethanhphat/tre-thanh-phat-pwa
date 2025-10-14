@@ -49,8 +49,14 @@ export async function saveNewsImageByUrl(url: string): Promise<string | null> {
   if (exists?.blob instanceof Blob && Date.now() - exists.updated_at < CACHE_TTL) return key;
 
   try {
-    const blob = await waitForImageLoadThenFetchBlob(withProxy(url));
+    // ✅ Ưu tiên tải trực tiếp
+    let blob = await waitForImageLoadThenFetchBlob(url);
+
+    // 🔁 Nếu lỗi do CORS hoặc fetch fail → fallback sang proxy
+    if (!blob) blob = await waitForImageLoadThenFetchBlob(withProxy(url));
+
     if (!blob) return null;
+
     await db.put(STORE_NEWS_IMAGES, {
       key,
       source_url: url,
