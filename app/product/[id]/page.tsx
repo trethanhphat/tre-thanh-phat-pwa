@@ -4,7 +4,7 @@
 import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
 
-import { initDB } from '@/lib/db';
+import { saveProductOffline, getProductOffline } from '@/lib/products';
 import { saveImageIfNotExists, getImageURL } from '@/lib/images';
 import { formatPrice, formatStockStatus } from '@/utils/format';
 
@@ -20,39 +20,35 @@ export default function ProductDetailPage() {
     let isMounted = true;
     let objectUrlToRevoke: string | null = null;
 
-    const fetchProduct = async () => {
+    const loadProduct = async () => {
       try {
-        // Lấy sản phẩm từ API backend
-        const res = await fetch(`/api/product?id=${id}`);
+        // --- ƯU TIÊN ONLINE ---
+        const res = await fetch(`/api/product?id=${id}`, { cache: 'no-store' });
         if (!res.ok) throw new Error('Không thể tải sản phẩm từ API');
         const data = await res.json();
 
-        // Lưu sản phẩm vào IndexedDB offline
-        const db = await initDB();
-        await db.put('products', data);
+        await saveProductOffline(data); // ✅ đồng bộ offline
 
-        // Lưu ảnh vào IndexedDB
         if (data.image_url) {
           await saveImageIfNotExists(data.image_url);
           const localUrl = await getImageURL(data.image_url);
           objectUrlToRevoke = localUrl;
           if (isMounted) {
-            setLocalImageUrl(localUrl);
             data.image_url = localUrl;
+            setLocalImageUrl(localUrl);
           }
         }
 
         if (isMounted) setProduct(data);
       } catch (err) {
-        console.warn('⚠️ Không có mạng, tải sản phẩm từ offline DB');
-        const db = await initDB();
-        const offlineData = await db.get('products', Number(id));
+        console.warn('⚠️ Offline hoặc lỗi API, fallback IndexedDB');
+        const offlineData = await getProductOffline(Number(id));
         if (offlineData) {
           const localUrl = await getImageURL(offlineData.image_url);
           objectUrlToRevoke = localUrl;
           if (isMounted) {
-            setLocalImageUrl(localUrl);
             offlineData.image_url = localUrl;
+            setLocalImageUrl(localUrl);
             setProduct(offlineData);
           }
         }
@@ -61,13 +57,11 @@ export default function ProductDetailPage() {
       }
     };
 
-    fetchProduct();
+    loadProduct();
 
     return () => {
       isMounted = false;
-      if (objectUrlToRevoke) {
-        URL.revokeObjectURL(objectUrlToRevoke);
-      }
+      if (objectUrlToRevoke) URL.revokeObjectURL(objectUrlToRevoke);
     };
   }, [id]);
 

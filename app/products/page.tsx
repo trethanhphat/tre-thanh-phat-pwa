@@ -34,7 +34,7 @@ import ProductsTable from './ProductsTable';
 import ControlBar from '@/components/ControlBar';
 import { Product, loadProductsFromDB, syncProducts } from '@/lib/products';
 import { useImageCacheTracker } from '@/hooks/useImageCacheTracker';
-import { getImageURL, prefetchImages } from '@/lib/images'; // ✅ gộp chung dùng được cho news/products
+import { getImageURL } from '@/lib/images'; // ✅ gộp chung dùng được cho news/products
 
 type SortField = 'stock_status' | 'price' | 'stock_quantity' | 'name';
 type SortOrder = 'asc' | 'desc';
@@ -124,9 +124,7 @@ export default function ProductsListPage() {
         setJustUpdated(true);
       } else {
         setJustUpdated(false);
-        setUsingCache(false);
       }
-      // (Đã thay bằng useImageCacheTracker)
       setUsingCache(false);
       setLoading(false);
     } catch (err: any) {

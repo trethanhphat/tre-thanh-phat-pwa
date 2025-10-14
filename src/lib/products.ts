@@ -67,3 +67,19 @@ export const syncProducts = async (products: Product[]): Promise<boolean> => {
 
   return hasChange;
 };
+
+/** 🔹 Lưu 1 sản phẩm offline */
+export const saveProductOffline = async (product: Product) => {
+  const db = await initDB();
+  await db.put(STORE_PRODUCTS, product);
+
+  if (product.image_url) {
+    saveImageIfNotExists(product.image_url);
+  }
+};
+
+/** 🔹 Lấy 1 sản phẩm offline theo id */
+export const getProductOffline = async (id: number): Promise<Product | undefined> => {
+  const db = await initDB();
+  return db.get(STORE_PRODUCTS, id);
+};
