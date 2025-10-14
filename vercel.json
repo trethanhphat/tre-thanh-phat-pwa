@@ -2,8 +2,10 @@
   "version": 2,
   "functions": {
     "api/image-proxy/route.ts": {
-      "runtime": "edge",
-      "maxDuration": 10
+      "runtime": "nodejs18.x",
+      "maxDuration": 10,
+      "memory": 256,
+      "regions": ["hkg1", "sin1"]
     }
   },
   "routes": [
