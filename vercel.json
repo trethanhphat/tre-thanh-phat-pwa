@@ -3,17 +3,16 @@
   "functions": {
     "api/image-proxy/route.ts": {
       "runtime": "edge",
-      "maxDuration": 10,
-      "cache": {
-        "maxAge": 604800,
-        "staleWhileRevalidate": 86400
-      }
+      "maxDuration": 10
     }
   },
   "routes": [
     {
       "src": "/api/image-proxy",
-      "dest": "/api/image-proxy/route.ts"
+      "dest": "/api/image-proxy/route.ts",
+      "headers": {
+        "Cache-Control": "public, s-maxage=604800, stale-while-revalidate=86400"
+      }
     }
   ]
 }
