@@ -22,7 +22,6 @@ export default function NewsListPage() {
   useImageLoadTracker(items.map(n => n.image_url).filter(Boolean) as string[]);
   const imageURLs = items.map(n => n.image_url).filter(Boolean) as string[];
   useImageLoadTracker(imageURLs);
-  const imageMap = useImageCacheTracker(imageURLs);
 
   // Sort / Filter / Pagination
   const [sortField, setSortField] = useState<SortField>('published');
@@ -164,7 +163,7 @@ export default function NewsListPage() {
 
       <NewsTable
         items={paginatedItems}
-        imageCache={imageMap} // ✅ thay hook riêng bằng map blob đã cache
+        imageCache={{}} // chưa dùng blob map ở đây
         sortField={sortField}
         sortOrder={sortOrder}
         onSortChange={handleSortChange}
