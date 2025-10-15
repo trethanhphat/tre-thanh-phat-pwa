@@ -44,11 +44,14 @@ export default function ProductDetailPage() {
         console.warn('⚠️ Offline hoặc lỗi API, fallback IndexedDB');
         const offlineData = await getProductOffline(Number(id));
         if (offlineData) {
-          const localUrl = await getImageURL(offlineData.image_url);
-          objectUrlToRevoke = localUrl;
+          if (offlineData.image_url) {
+            const localUrl = await getImageURL(offlineData.image_url);
+            objectUrlToRevoke = localUrl;
+            if (isMounted) {
+              offlineData.image_url = localUrl;
+            }
+          }
           if (isMounted) {
-            offlineData.image_url = localUrl;
-            setLocalImageUrl(localUrl);
             setProduct(offlineData);
           }
         }
