@@ -1,19 +1,14 @@
 {
   "version": 2,
   "functions": {
-    "api/image-proxy/route.ts": {
-      "runtime": "edge",
-      "maxDuration": 10,
-      "memory": 256
+    "app/api/**/*.ts": {
+      "runtime": "edge"
     }
   },
   "routes": [
     {
-      "src": "/api/image-proxy",
-      "dest": "/api/image-proxy/route.ts",
-      "headers": {
-        "Cache-Control": "public, s-maxage=604800, stale-while-revalidate=86400"
-      }
+      "src": "/api/(.*)",
+      "dest": "/app/api/$1"
     }
   ]
 }
