@@ -6,7 +6,7 @@ import axios from 'axios';
 import ControlBar from '@/components/ControlBar';
 import NewsTable from '@app/news/NewsTable';
 import { NewsItem, loadNewsFromDB, syncNews } from '@/lib/news';
-import { useImageCache } from '@/hooks/useImageCache';
+import { useImageCacheTracker } from '@/hooks/useImageCacheTracker';
 import { useImageLoadTracker } from '@/hooks/useImageLoadTracker';
 
 type SortField = 'published' | 'title' | 'author';
@@ -20,7 +20,7 @@ export default function NewsListPage() {
   const [justUpdated, setJustUpdated] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   useImageLoadTracker(items.map(n => n.image_url).filter(Boolean) as string[]);
-  const imageMap = useImageCache(items);
+  const imageMap = useImageCacheTracker(items);
 
   // Sort / Filter / Pagination
   const [sortField, setSortField] = useState<SortField>('published');
