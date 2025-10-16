@@ -29,7 +29,7 @@ export default function ProductsListPage() {
 
   // ✅ Hook theo dõi và cache ảnh, tự revoke khi thay đổi hoặc unmount
   const { imageCache, replaceImageCache } = useImageCacheTracker(
-    products.map(p => ({ id: p.id, url: p.image_url })),
+    products.map(p => p.image_url).filter(Boolean) as string[],
     { type: 'product' }
   );
 
