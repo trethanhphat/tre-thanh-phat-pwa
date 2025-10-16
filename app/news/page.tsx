@@ -1,4 +1,4 @@
-// app/news/page.tsx
+// ✅ File: app/news/page.tsx
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
@@ -6,8 +6,7 @@ import axios from 'axios';
 import ControlBar from '@/components/ControlBar';
 import NewsTable from '@app/news/NewsTable';
 import { NewsItem, loadNewsFromDB, syncNews } from '@/lib/news';
-import { useImageCacheTracker } from '@/hooks/useImageCacheTracker';
-import { useImageLoadTracker } from '@/hooks/useImageLoadTracker';
+import { useImageCacheTracker } from '@/hooks/useImageCacheTracker'; // ✅ dùng hook mới theo dõi cache ảnh
 
 type SortField = 'published' | 'title' | 'author';
 type SortOrder = 'asc' | 'desc';
@@ -19,9 +18,9 @@ export default function NewsListPage() {
   const [usingCache, setUsingCache] = useState(false);
   const [justUpdated, setJustUpdated] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  useImageLoadTracker(items.map(n => n.image_url).filter(Boolean) as string[]);
+
   const imageURLs = items.map(n => n.image_url).filter(Boolean) as string[];
-  useImageLoadTracker(imageURLs);
+  const { imageCache, replaceImageCache } = useImageCacheTracker(imageURLs); // ✅ thay cho useImageLoadTracker
 
   // Sort / Filter / Pagination
   const [sortField, setSortField] = useState<SortField>('published');
@@ -40,7 +39,6 @@ export default function NewsListPage() {
     const cached = await loadNewsFromDB();
     if (cached.length > 0) {
       setItems(cached);
-
       setUsingCache(true);
     }
     setLoading(false);
@@ -72,6 +70,7 @@ export default function NewsListPage() {
       if (hasChange) {
         setItems(fresh);
         setJustUpdated(true);
+        setTimeout(() => setJustUpdated(false), 2500); // ✅ tự ẩn banner sau 2.5s
       } else {
         setJustUpdated(false);
       }
@@ -125,22 +124,20 @@ export default function NewsListPage() {
 
   // ---------------------- RENDER ----------------------
   return (
-    <div className="p-4 space-y-4">
-      <h1 className="text-xl font-semibold">📰 News</h1>
+    <div style={{ padding: '1rem' }}>
+      <h1>📰 News</h1>
 
-      {loading && <div className="p-3 bg-gray-50 border rounded">Đang tải...</div>}
+      {loading && <p>Đang tải dữ liệu...</p>}
       {usingCache && !loading && (
-        <div className="p-3 bg-amber-50 border border-amber-200 rounded">
-          ⚠️ Đang hiển thị dữ liệu <b>offline</b> từ cache
-        </div>
+        <p style={{ color: 'orange', marginBottom: 8 }}>
+          ⚠️ Đang hiển thị dữ liệu offline và đang chờ cập nhật...
+        </p>
       )}
-      {justUpdated && !loading && (
-        <div className="p-3 bg-green-50 border border-green-200 rounded">
-          ✅ Đã cập nhật dữ liệu mới
-        </div>
+      {justUpdated && !usingCache && (
+        <p style={{ color: 'green', marginBottom: 8 }}>✅ Đã cập nhật dữ liệu mới</p>
       )}
       {errorMessage && !loading && (
-        <div className="p-3 bg-rose-50 border border-rose-200 rounded">⚠️ {errorMessage}</div>
+        <p style={{ color: 'red', marginBottom: 8 }}>⚠️ {errorMessage}</p>
       )}
 
       <ControlBar
@@ -163,7 +160,7 @@ export default function NewsListPage() {
 
       <NewsTable
         items={paginatedItems}
-        imageCache={{}} // chưa dùng blob map ở đây
+        imageCache={imageCache} // ✅ truyền cache blob thực tế
         sortField={sortField}
         sortOrder={sortOrder}
         onSortChange={handleSortChange}
@@ -218,9 +215,9 @@ function sortedAndFiltered(
         return (a.author || '').localeCompare(b.author || '') * dir;
       case 'published':
       default: {
-        const ad = a.published || a.updated || '';
-        const bd = b.published || b.updated || '';
-        return ad.localeCompare(bd) * dir;
+        const ad = new Date(a.published || a.updated || '').getTime();
+        const bd = new Date(b.published || b.updated || '').getTime();
+        return (ad - bd) * dir;
       }
     }
   });

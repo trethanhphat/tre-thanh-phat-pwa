@@ -1,5 +1,4 @@
-// File: src/hooks/useImageCacheTracker.ts
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { ensureNewsImageCachedByUrl } from '@/lib/news_images';
 import { ensureProductImageCachedByUrl } from '@/lib/products_images';
 
@@ -16,6 +15,29 @@ export function useImageCacheTracker(
 ) {
   const loadedRef = useRef<Set<string>>(new Set());
   const { type = 'generic', skipPrefetch = false } = options || {};
+
+  // ✅ Lưu cache URL (dạng blob hoặc URL gốc)
+  const [imageCache, setImageCache] = useState<Record<string, string>>({});
+
+  /**
+   * 🔁 Hàm thay toàn bộ cache ảnh (có thể truyền Record hoặc mảng {id,url})
+   */
+  const replaceImageCache = (next: Record<string, string> | { id: string; url: string }[]) => {
+    // ⚙️ Dọn blob cũ để tránh memory leak
+    Object.values(imageCache).forEach(url => {
+      if (typeof url === 'string' && url.startsWith('blob:')) {
+        URL.revokeObjectURL(url);
+      }
+    });
+
+    // 🔹 Cho phép cả 2 kiểu input
+    if (Array.isArray(next)) {
+      const map = Object.fromEntries(next.map(n => [n.id, n.url]));
+      setImageCache(map);
+    } else {
+      setImageCache(next);
+    }
+  };
 
   useEffect(() => {
     if (!imageUrls?.length || skipPrefetch) return;
@@ -61,4 +83,6 @@ export function useImageCacheTracker(
       });
     };
   }, [imageUrls, type, skipPrefetch]);
+
+  return { imageCache, replaceImageCache };
 }

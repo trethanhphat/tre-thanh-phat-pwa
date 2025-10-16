@@ -1,4 +1,3 @@
-// 📄 File: app/products/page.tsx
 /**
  * Trang /products
  * - ✅ OFFLINE FIRST:
@@ -12,8 +11,7 @@
  *    + Nếu offline/lỗi API → fallback về cache, hiển thị banner cam
  *
  * - ✅ Image cache:
- *    + Tạo map id → URL (có thể là blob:)
- *    + Tự revoke khi thay đổi hoặc unmount để tránh memory leak
+ *    + Dùng hook useImageCacheTracker để prefetch và auto cleanup blob
  *
  * - ✅ Control bar:
  *    + Search theo tên
@@ -34,7 +32,6 @@ import ProductsTable from './ProductsTable';
 import ControlBar from '@/components/ControlBar';
 import { Product, loadProductsFromDB, syncProducts } from '@/lib/products';
 import { useImageCacheTracker } from '@/hooks/useImageCacheTracker';
-import { getImageURL } from '@/lib/images'; // ✅ gộp chung dùng được cho news/products
 
 type SortField = 'stock_status' | 'price' | 'stock_quantity' | 'name';
 type SortOrder = 'asc' | 'desc';
@@ -42,13 +39,6 @@ type SortOrder = 'asc' | 'desc';
 export default function ProductsListPage() {
   // ---------------------- STATE ----------------------
   const [products, setProducts] = useState<Product[]>([]);
-  // ✅ Prefetch và cache ảnh sản phẩm (dùng chung hook mới)
-  useImageCacheTracker(
-    products.map(p => p.image_url).filter((url): url is string => Boolean(url)),
-    { type: 'product' }
-  );
-
-  const [imageCache, setImageCache] = useState<Record<number, string>>({});
   const [loading, setLoading] = useState(true);
   const [usingCache, setUsingCache] = useState(false);
   const [justUpdated, setJustUpdated] = useState(false);
@@ -67,33 +57,17 @@ export default function ProductsListPage() {
   }, [products]);
 
   // ---------------------- IMAGE CACHE ----------------------
-  const loadImages = async (list: Product[]) => {
-    const entries = await Promise.all(
-      list.map(async p => {
-        if (p.image_url) {
-          const blobUrl = await getImageURL(p.image_url);
-          return [p.id, blobUrl] as const;
-        }
-        return [p.id, ''] as const;
-      })
-    );
-    return Object.fromEntries(entries);
-  };
-
-  const replaceImageCache = (next: Record<number, string>) => {
-    // cleanup blob cũ
-    Object.values(imageCache).forEach(url => {
-      if (url && url.startsWith('blob:')) URL.revokeObjectURL(url);
-    });
-    setImageCache(next);
-  };
+  // ✅ Dùng custom hook thay vì tự load blob và revoke
+  const { imageCache, replaceImageCache } = useImageCacheTracker(
+    products.map(p => ({ id: p.id, url: p.image_url })),
+    { type: 'product' }
+  );
 
   // ---------------------- OFFLINE FIRST ----------------------
   const loadOfflineFirst = async () => {
     const cached = await loadProductsFromDB();
     if (cached.length > 0) {
       setProducts(cached);
-      replaceImageCache(await loadImages(cached));
       setUsingCache(true);
     }
     setLoading(false);
@@ -124,7 +98,25 @@ export default function ProductsListPage() {
 
       if (hasChange) {
         setProducts(fresh);
-        replaceImageCache(await loadImages(fresh));
+        // 🔹 Cho phép truyền Record<string,string> hoặc mảng {id,url}
+        const replaceImageCache = (
+          next: Record<string, string> | { id: string; url: string }[]
+        ) => {
+          // Dọn blob cũ
+          Object.values(imageCache).forEach(url => {
+            if (typeof url === 'string' && url.startsWith('blob:')) {
+              URL.revokeObjectURL(url);
+            }
+          });
+
+          if (Array.isArray(next)) {
+            const map = Object.fromEntries(next.map(n => [n.id, n.url]));
+            setImageCache(map);
+          } else {
+            setImageCache(next);
+          }
+        };
+
         setJustUpdated(true);
       } else {
         setJustUpdated(false);
@@ -157,9 +149,6 @@ export default function ProductsListPage() {
     window.addEventListener('online', handleOnline);
     return () => {
       window.removeEventListener('online', handleOnline);
-      Object.values(imageCache).forEach(url => {
-        if (url && url.startsWith('blob:')) URL.revokeObjectURL(url);
-      });
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);

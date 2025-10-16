@@ -1,11 +1,12 @@
-// File: app/product/[id]/page.tsx
+// 📄 File: app/product/[id]/page.tsx
 'use client';
 
 import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
 
 import { saveProductOffline, getProductOffline } from '@/lib/products';
-import { saveImageIfNotExists, getImageURL } from '@/lib/images';
+import { getProductImageURL, ensureProductImageCachedByUrl } from '@/lib/products_images';
+import { useImageCacheTracker } from '@/hooks/useImageCacheTracker';
 import { formatPrice, formatStockStatus } from '@/utils/format';
 
 export default function ProductDetailPage() {
@@ -13,6 +14,11 @@ export default function ProductDetailPage() {
   const [product, setProduct] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [localImageUrl, setLocalImageUrl] = useState<string | null>(null);
+
+  // ✅ Hook theo dõi cache ảnh (tự động hoá theo type)
+  useImageCacheTracker(product?.image_url ? [product.image_url] : [], {
+    type: 'product',
+  });
 
   useEffect(() => {
     if (!id) return;
@@ -29,9 +35,10 @@ export default function ProductDetailPage() {
 
         await saveProductOffline(data); // ✅ đồng bộ offline
 
+        // ✅ Cache ảnh sản phẩm
         if (data.image_url) {
-          await saveImageIfNotExists(data.image_url);
-          const localUrl = await getImageURL(data.image_url);
+          await ensureProductImageCachedByUrl(data.image_url);
+          const localUrl = await getProductImageURL(data.image_url);
           objectUrlToRevoke = localUrl;
           if (isMounted) {
             data.image_url = localUrl;
@@ -45,15 +52,11 @@ export default function ProductDetailPage() {
         const offlineData = await getProductOffline(Number(id));
         if (offlineData) {
           if (offlineData.image_url) {
-            const localUrl = await getImageURL(offlineData.image_url);
+            const localUrl = await getProductImageURL(offlineData.image_url);
             objectUrlToRevoke = localUrl;
-            if (isMounted) {
-              offlineData.image_url = localUrl;
-            }
+            if (isMounted) offlineData.image_url = localUrl;
           }
-          if (isMounted) {
-            setProduct(offlineData);
-          }
+          if (isMounted) setProduct(offlineData);
         }
       } finally {
         if (isMounted) setLoading(false);
@@ -78,6 +81,7 @@ export default function ProductDetailPage() {
           <strong>Quay trở về danh sách sản phẩm</strong>
         </a>
       </p>
+
       <h1>{product.name}</h1>
 
       {(localImageUrl || product.image_url) && (
@@ -87,6 +91,7 @@ export default function ProductDetailPage() {
           style={{ maxWidth: 300, borderRadius: 8 }}
         />
       )}
+
       <p>💰 Giá: {formatPrice(product.price)}</p>
       <p>
         📦 Tồn kho: {product.stock_quantity ?? '-'} (
@@ -96,7 +101,9 @@ export default function ProductDetailPage() {
         })()}
         )
       </p>
+
       <div dangerouslySetInnerHTML={{ __html: product.description || '' }} />
+
       <p>
         <a className="button" href="/products">
           <strong>Quay trở về danh sách sản phẩm</strong>

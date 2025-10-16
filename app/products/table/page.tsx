@@ -4,14 +4,13 @@
 import { useEffect, useRef, useState } from 'react';
 import ProductsTable from '../all/ProductsTable';
 import { Product, loadProductsFromDB, syncProducts } from '@/lib/products';
-import { getImageURL } from '@/lib/images';
+import { useImageCacheTracker } from '@/hooks/useImageCacheTracker'; // ✅ dùng hook thay thế cho tự quản lý blob
 
 type SortField = 'name' | 'price' | 'stock_quantity';
 type SortOrder = 'asc' | 'desc';
 
 export default function ProductsListPage() {
   const [products, setProducts] = useState<Product[]>([]);
-  const [imageCache, setImageCache] = useState<Record<number, string>>({});
   const [loading, setLoading] = useState(true); // chỉ true khi chưa có offline và đang đợi online
   const [offline, setOffline] = useState(false); // đang hiển thị dữ liệu offline
   const [justUpdated, setJustUpdated] = useState(false); // banner "Đã cập nhật"
@@ -28,31 +27,17 @@ export default function ProductsListPage() {
     offlineRef.current = offline;
   }, [offline]);
 
-  // Tải ảnh song song -> trả về map { id: objectURLOrDirectUrl }
-  const loadImages = async (list: Product[]) => {
-    const entries = await Promise.all(
-      list.map(async p => {
-        if (p.image_url) return [p.id, await getImageURL(p.image_url)] as const;
-        return [p.id, ''] as const;
-      })
-    );
-    return Object.fromEntries(entries);
-  };
-
-  // Thay thế imageCache và revoke blob cũ để tránh memory leak
-  const replaceImageCache = (next: Record<number, string>) => {
-    Object.values(imageCache).forEach(url => {
-      if (url && url.startsWith('blob:')) URL.revokeObjectURL(url);
-    });
-    setImageCache(next);
-  };
+  // ✅ Hook theo dõi và cache ảnh, tự revoke khi thay đổi hoặc unmount
+  const { imageCache, replaceImageCache } = useImageCacheTracker(
+    products.map(p => ({ id: p.id, url: p.image_url })),
+    { type: 'product' }
+  );
 
   // 1) Load offline trước: nếu có thì hiển thị ngay & bật cờ offline
   const loadOfflineFirst = async () => {
     const cached = await loadProductsFromDB();
     if (cached.length > 0) {
       setProducts(cached);
-      replaceImageCache(await loadImages(cached));
       setOffline(true);
       setLoading(false); // đã có offline để hiển thị, không cần spinner
     } else {
@@ -86,7 +71,8 @@ export default function ProductsListPage() {
 
       if (isDifferent) {
         setProducts(fresh);
-        replaceImageCache(await loadImages(fresh));
+        replaceImageCache(Object.fromEntries(fresh.map(p => [p.image_url, p.image_url])));
+        // ✅ cập nhật cache ảnh
       }
 
       // Nếu trước đó đang hiển thị offline -> show banner "Đã cập nhật"
@@ -113,10 +99,6 @@ export default function ProductsListPage() {
 
     return () => {
       window.removeEventListener('online', handleOnline);
-      // Revoke mọi blob khi unmount
-      Object.values(imageCache).forEach(url => {
-        if (url && url.startsWith('blob:')) URL.revokeObjectURL(url);
-      });
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);

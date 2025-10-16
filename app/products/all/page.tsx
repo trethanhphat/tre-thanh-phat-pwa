@@ -2,27 +2,27 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import ProductsTable from './ProductsTable'; // View hiển thị bảng sản phẩm
-import { Product, loadProductsFromDB, syncProducts } from '@/lib/products'; // Nguồn dữ liệu sản phẩm
-import { getImageURL } from '@/lib/images'; // Nguồn dữ liệu ảnh sản phẩm
+import ProductsTable from './ProductsTable';
+import { Product, loadProductsFromDB, syncProducts } from '@/lib/products';
+import { getProductImageURL, ensureProductImageCachedByUrl } from '@/lib/products_images';
+import { useImageCacheTracker } from '@/hooks/useImageCacheTracker';
 
-type SortField = 'stock_status' | 'price' | 'stock_quantity' | 'name'; // Các trường có thể sắp xếp
-type SortOrder = 'asc' | 'desc'; // Chiều có thể sắp xếp
+type SortField = 'stock_status' | 'price' | 'stock_quantity' | 'name';
+type SortOrder = 'asc' | 'desc';
 
 export default function ProductsListPage() {
   const [products, setProducts] = useState<Product[]>([]);
   const [imageCache, setImageCache] = useState<Record<number, string>>({});
-  const [loading, setLoading] = useState(true); // lần đầu: DB trống -> spinner
-  const [offline, setOffline] = useState(false); // đang hiển thị offline
-  const [justUpdated, setJustUpdated] = useState(false); // banner "Đã cập nhật"
-  const [errorMessage, setErrorMessage] = useState<string | null>(null); // ✅ thêm state lỗi
-  const [sortField, setSortField] = useState<SortField>('stock_status'); // Tiêu chí sắp xếp mặc định
-  const [sortOrder, setSortOrder] = useState<SortOrder>('asc'); // Chiều sắp xếp mặc định
-  const [currentPage, setCurrentPage] = useState(1); // Đặt trang hiển thị đầu tiên là 1
-  const [pageSize, setPageSize] = useState(10); // số sản phẩm / trang
+  const [loading, setLoading] = useState(true);
+  const [offline, setOffline] = useState(false);
+  const [justUpdated, setJustUpdated] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [sortField, setSortField] = useState<SortField>('stock_status');
+  const [sortOrder, setSortOrder] = useState<SortOrder>('asc');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
   const [searchText, setSearchText] = useState('');
 
-  // giữ tham chiếu để so sánh & biết trạng thái trước đó
   const productsRef = useRef<Product[]>([]);
   const offlineRef = useRef<boolean>(false);
 
@@ -33,53 +33,59 @@ export default function ProductsListPage() {
     offlineRef.current = offline;
   }, [offline]);
 
-  // tải ảnh song song và trả map id -> url (online hoặc blob offline)
+  // ✅ Prefetch & cache toàn bộ ảnh hiển thị
+  useImageCacheTracker(products.map(p => p.image_url).filter(Boolean) as string[], {
+    type: 'product',
+    skipPrefetch: false,
+  });
+
+  // ✅ tải ảnh (local blob nếu có cache)
   const loadImages = async (list: Product[]) => {
     const entries = await Promise.all(
       list.map(async p => {
-        if (p.image_url) return [p.id, await getImageURL(p.image_url)] as const;
+        if (p.image_url) {
+          await ensureProductImageCachedByUrl(p.image_url);
+          const url = await getProductImageURL(p.image_url);
+          return [p.id, url] as const;
+        }
         return [p.id, ''] as const;
       })
     );
     return Object.fromEntries(entries);
   };
 
-  // thay image cache và revoke blob cũ để tránh leak
   const replaceImageCache = (next: Record<number, string>) => {
-    Object.values(imageCache).forEach(url => {
-      if (url && url.startsWith('blob:')) URL.revokeObjectURL(url);
+    Object.entries(imageCache).forEach(([id, url]) => {
+      if (typeof url === 'string' && url.startsWith('blob:') && url !== next[Number(id)]) {
+        URL.revokeObjectURL(url);
+      }
     });
     setImageCache(next);
   };
 
-  // 1) load offline trước
   const loadOfflineFirst = async () => {
     const cached = await loadProductsFromDB();
     if (cached.length > 0) {
       setProducts(cached);
       replaceImageCache(await loadImages(cached));
       setOffline(true);
-      setLoading(false); // đã có offline để hiển thị
+      setLoading(false);
     } else {
-      setLoading(true); // chưa có gì -> spinner
+      setLoading(true);
     }
   };
 
-  // 2) fetch online và cập nhật
   const fetchOnlineAndUpdate = async () => {
     try {
       const res = await fetch('/api/products', { cache: 'no-store' });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const payload = await res.json();
 
-      // ✅ PARSE ĐÚNG: API của bạn là { products: [...] }
       const fresh: Product[] = Array.isArray(payload)
         ? payload
         : payload?.products ?? payload?.data ?? [];
 
       if (!Array.isArray(fresh)) throw new Error('⚠️ API không trả về mảng sản phẩm hợp lệ');
-
-      // 🎯 Tránh xoá DB khi API tạm thời trả rỗng
       if (fresh.length === 0) {
         setLoading(false);
         return;
@@ -88,7 +94,6 @@ export default function ProductsListPage() {
       await syncProducts(fresh);
       setErrorMessage(null);
 
-      // chỉ setState khi khác
       const prev = productsRef.current;
       const isDifferent =
         prev.length !== fresh.length || JSON.stringify(prev) !== JSON.stringify(fresh);
@@ -101,35 +106,39 @@ export default function ProductsListPage() {
       const wasOffline = offlineRef.current;
       setOffline(false);
       setLoading(false);
-      if (wasOffline) {
-        setJustUpdated(true);
-        // setTimeout(() => setJustUpdated(false), 2500); // Thời gian ẩn thông báo đã cập nhật
-      }
-    } catch (err) {
+      if (wasOffline) setJustUpdated(true);
+    } catch (err: any) {
       console.warn('⚠️ Không thể tải online:', err);
-      setErrorMessage(err.message || '⚠️ Có lỗi khi tải dữ liệu'); // ✅ thêm dòng này
+      setErrorMessage(err.message || '⚠️ Có lỗi khi tải dữ liệu');
       if (productsRef.current.length === 0) setLoading(false);
-      setOffline(true); // Nếu lỗi thì hiển thị offline
+      setOffline(true);
     }
   };
 
+  // ✅ Thêm lại đoạn này trước useEffect
+  const revokeBlobUrls = (cache: Record<number, string>) => {
+    Object.values(cache).forEach(url => {
+      if (typeof url === 'string' && url.startsWith('blob:')) {
+        URL.revokeObjectURL(url);
+      }
+    });
+  };
+
+  // ✅ useEffect chạy khi load trang
   useEffect(() => {
     loadOfflineFirst();
     fetchOnlineAndUpdate();
 
     const handleOnline = () => fetchOnlineAndUpdate();
     window.addEventListener('online', handleOnline);
+
     return () => {
       window.removeEventListener('online', handleOnline);
-      // revoke blob khi unmount
-      Object.values(imageCache).forEach(url => {
-        if (url && url.startsWith('blob:')) URL.revokeObjectURL(url);
-      });
+      revokeBlobUrls(imageCache);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // sort client-side
   const sortedProducts = [...products].sort((a, b) => {
     const getVal = (p: Product) => {
       if (sortField === 'stock_status') return (p.stock_status || '').toLowerCase();
@@ -157,12 +166,9 @@ export default function ProductsListPage() {
     <div style={{ padding: '1rem' }}>
       <h1>Danh sách sản phẩm</h1>
 
-      {/* trạng thái hiển thị */}
-      {errorMessage && <p style={{ color: 'red', marginBottom: 8 }}>{errorMessage}</p>}
-      {offline && <p style={{ color: 'orange', marginBottom: 8 }}>⚠️ Đang chờ cập nhật...</p>}
-      {justUpdated && !offline && (
-        <p style={{ color: 'green', marginBottom: 8 }}>✅ Đã cập nhật dữ liệu mới</p>
-      )}
+      {errorMessage && <p style={{ color: 'red' }}>{errorMessage}</p>}
+      {offline && <p style={{ color: 'orange' }}>⚠️ Đang chờ cập nhật...</p>}
+      {justUpdated && !offline && <p style={{ color: 'green' }}>✅ Đã cập nhật dữ liệu mới</p>}
 
       {loading ? (
         <p>⚠️ Đang tải dữ liệu...</p>

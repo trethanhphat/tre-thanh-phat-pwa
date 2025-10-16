@@ -1,6 +1,5 @@
 // ✅ File: src/lib/news.ts
 import { initDB, STORE_NEWS } from './db';
-import { saveImageIfNotExists, prefetchImages } from './images';
 
 export interface NewsItem {
   news_id: string; // keyPath
@@ -25,7 +24,7 @@ export const loadNewsFromDB = async (): Promise<NewsItem[]> => {
   });
 };
 
-/** 🔹 Sync tin + cache ảnh trong nền */
+/** 🔹 Sync tin tức (KHÔNG cache ảnh trực tiếp nữa, giao cho useImageCacheTracker xử lý) */
 export const syncNews = async (items: NewsItem[]): Promise<boolean> => {
   const db = await initDB();
   const newIds = new Set(items.map(n => n.news_id));
@@ -35,7 +34,7 @@ export const syncNews = async (items: NewsItem[]): Promise<boolean> => {
 
   let hasChange = false;
 
-  // Xóa tin cũ không còn
+  // 🔸 Xóa tin cũ không còn trong danh sách mới
   let cursor = await store.openCursor();
   while (cursor) {
     if (!newIds.has(cursor.key as string)) {
@@ -45,32 +44,15 @@ export const syncNews = async (items: NewsItem[]): Promise<boolean> => {
     cursor = await cursor.continue();
   }
 
-  // Thêm / cập nhật tin mới
+  // 🔸 Thêm / cập nhật tin mới
   for (const n of items) {
     const existing = await store.get(n.news_id);
     if (!existing || JSON.stringify(existing) !== JSON.stringify(n)) {
       await store.put(n);
       hasChange = true;
     }
-
-    // Tải nền ảnh (ưu tiên trực tiếp, fallback qua proxy)
-    if (n.image_url) {
-      saveImageIfNotExists(n.image_url);
-    }
   }
 
   await tx.done;
-
-  // 🔹 Prefetch ảnh cho top 5 tin mới nhất (nếu không bật tiết kiệm dữ liệu)
-  if ('connection' in navigator && (navigator as any).connection?.saveData) {
-    console.log('⚡ Bỏ qua prefetch ảnh vì đang bật tiết kiệm dữ liệu');
-  } else {
-    const top5 = items
-      .slice(0, 5)
-      .map(n => n.image_url)
-      .filter(Boolean) as string[];
-    if (top5.length) prefetchImages(top5);
-  }
-
   return hasChange;
 };
