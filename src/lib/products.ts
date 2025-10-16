@@ -1,7 +1,6 @@
 // ✅ File: src/lib/products.ts
 import { initDB, STORE_PRODUCTS } from './db';
-import { prefetchImages } from './images';
-import { ensureProductImageCachedByUrl } from './products_images'; // ✅ Dùng module riêng cho ảnh sản phẩm
+import { prefetchProductImages, ensureProductImageCachedByUrl } from './products_images'; // ✅ Chuyển hoàn toàn sang module riêng
 
 export interface Product {
   id: number;
@@ -63,7 +62,7 @@ export const syncProducts = async (products: Product[]): Promise<boolean> => {
       .slice(0, 5)
       .map(p => p.image_url)
       .filter(Boolean) as string[];
-    if (top5.length) prefetchImages(top5);
+    if (top5.length) prefetchProductImages(top5); // ✅ Dùng hàm mới riêng cho product
   }
 
   return hasChange;
