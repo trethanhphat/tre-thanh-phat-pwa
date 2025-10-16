@@ -43,7 +43,11 @@ export default function ProductsListPage() {
   // ---------------------- STATE ----------------------
   const [products, setProducts] = useState<Product[]>([]);
   // ✅ Prefetch và cache ảnh sản phẩm (dùng chung hook mới)
-  useImageCacheTracker(products.map(p => p.image_url).filter(Boolean), { type: 'product' });
+  useImageCacheTracker(
+    products.map(p => p.image_url).filter((url): url is string => Boolean(url)),
+    { type: 'product' }
+  );
+
   const [imageCache, setImageCache] = useState<Record<number, string>>({});
   const [loading, setLoading] = useState(true);
   const [usingCache, setUsingCache] = useState(false);
