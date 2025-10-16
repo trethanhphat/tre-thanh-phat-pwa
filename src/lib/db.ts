@@ -3,10 +3,11 @@ import { openDB } from 'idb';
 
 export const DB_NAME = 'TPBC_DB';
 export const STORE_PRODUCTS = 'products'; // Store thông tin sản phẩm
-export const STORE_IMAGES = 'images'; // Store ảnh sản phẩm
+export const STORE_PRODUCTS_IMAGES = 'products_images'; // Store ảnh sản phẩm
+export const STORE_IMAGES = 'images'; // Store ảnh thông thường
 export const STORE_BATCHES = 'batches'; // Store lô trồng
 export const STORE_NEWS = 'news'; // Store tin tức
-export const STORE_NEWS_IMAGES = 'news_images';  // Store ảnh tin tức
+export const STORE_NEWS_IMAGES = 'news_images'; // Store ảnh tin tức
 
 export const initDB = async () => {
   return openDB(DB_NAME, 1, {
@@ -16,6 +17,10 @@ export const initDB = async () => {
         db.createObjectStore(STORE_PRODUCTS, { keyPath: 'id' });
       }
 
+      // 🔹 Store ảnh sản phẩm
+      if (!db.objectStoreNames.contains(STORE_PRODUCTS_IMAGES)) {
+        db.createObjectStore(STORE_PRODUCTS_IMAGES, { keyPath: 'url' });
+      }
       // 🔹 Store ảnh sản phẩm
       if (!db.objectStoreNames.contains(STORE_IMAGES)) {
         db.createObjectStore(STORE_IMAGES, { keyPath: 'url' });

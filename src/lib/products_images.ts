@@ -1,4 +1,4 @@
-import { initDB, STORE_IMAGES } from '@/lib/db';
+import { initDB, STORE_PRODUCTS_IMAGES } from '@/lib/db';
 
 /** ⏱ TTL cache tối đa (7 ngày) cho ảnh sản phẩm */
 const CACHE_TTL = 7 * 24 * 60 * 60 * 1000;
@@ -33,7 +33,7 @@ export const saveProductImageIfNotExists = async (url: string) => {
   if (!url) return;
   const db = await initDB();
   const key = await sha256Hex(url);
-  const existing = await db.get(STORE_IMAGES, key);
+  const existing = await db.get(STORE_PRODUCTS_IMAGES, key);
 
   if (existing && Date.now() - existing.updated_at < CACHE_TTL) {
     console.log('✅ Ảnh sản phẩm đã có cache:', url);
@@ -47,7 +47,7 @@ export const saveProductImageIfNotExists = async (url: string) => {
   }
 
   if (blob) {
-    await db.put(STORE_IMAGES, { key, url, blob, updated_at: Date.now() });
+    await db.put(STORE_PRODUCTS_IMAGES, { key, url, blob, updated_at: Date.now() });
     console.log('💾 Đã lưu ảnh sản phẩm:', url);
   }
 };
@@ -57,7 +57,7 @@ export const getProductImageURL = async (url: string) => {
   if (!url) return '';
   const db = await initDB();
   const key = await sha256Hex(url);
-  const record = await db.get(STORE_IMAGES, key);
+  const record = await db.get(STORE_PRODUCTS_IMAGES, key);
   if (record?.blob) return URL.createObjectURL(record.blob);
 
   try {
@@ -84,14 +84,14 @@ export async function prefetchProductImages(urls: string[]) {
 
   for (const url of urls.slice(0, 5)) {
     const key = await sha256Hex(url);
-    const existing = await db.get(STORE_IMAGES, key);
+    const existing = await db.get(STORE_PRODUCTS_IMAGES, key);
     if (existing) continue;
 
     fetch(withProxy(url), { mode: 'no-cors', priority: 'low' as any })
       .then(res => res.blob())
       .then(async blob => {
         if (blob) {
-          await db.put(STORE_IMAGES, {
+          await db.put(STORE_PRODUCTS_IMAGES, {
             key,
             url,
             blob,
