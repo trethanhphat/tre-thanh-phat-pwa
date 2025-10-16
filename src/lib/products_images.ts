@@ -1,4 +1,4 @@
-// File: src/lib/product_images.ts
+// File: src/lib/products_images.ts
 import { saveImageIfNotExists } from './images';
 
 /**
