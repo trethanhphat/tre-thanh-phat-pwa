@@ -2,6 +2,8 @@
 
 import Papa from 'papaparse';
 
+export const dynamic = 'force-dynamic'; // ✅ Fix build lỗi DYNAMIC_SERVER_USAGE
+
 export const revalidate = 3600; // ISR hint cho Next.js (60 phút)
 
 // API handler

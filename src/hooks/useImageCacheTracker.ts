@@ -1,14 +1,18 @@
 // File: src/hooks/useImageCacheTracker.ts
-// 📄 File: src/hooks/useImageCacheTracker.ts
 import { useEffect, useRef } from 'react';
-import { saveImageIfNotExists } from '@/lib/images';
+import { ensureNewsImageCachedByUrl } from '@/lib/news_images';
+import { ensureProductImageCachedByUrl } from '@/lib/products_images';
 
 /**
- * Hook tải và cache ảnh cho bất kỳ loại dữ liệu nào (news, product, ...).
+ * ✅ Hook tải và cache ảnh (tự động phân luồng theo loại).
+ *
+ * @param imageUrls Danh sách URL ảnh
+ * @param options.type 'news' | 'product' | 'generic'
+ * @param options.skipPrefetch Bỏ qua prefetch
  */
 export function useImageCacheTracker(
   imageUrls: string[],
-  options?: { type?: string; skipPrefetch?: boolean }
+  options?: { type?: 'news' | 'product' | 'generic'; skipPrefetch?: boolean }
 ) {
   const loadedRef = useRef<Set<string>>(new Set());
   const { type = 'generic', skipPrefetch = false } = options || {};
@@ -29,7 +33,11 @@ export function useImageCacheTracker(
 
       img.onload = async () => {
         try {
-          await saveImageIfNotExists(url);
+          if (type === 'news') {
+            await ensureNewsImageCachedByUrl(url);
+          } else if (type === 'product') {
+            await ensureProductImageCachedByUrl(url);
+          }
           console.log(`💾 Cached ${type} image:`, url);
         } catch (err) {
           console.warn('⚠️ Cache error:', url, err);
@@ -45,6 +53,7 @@ export function useImageCacheTracker(
       imgs.push(img);
     });
 
+    // ✅ Dọn listener khi unmount
     return () => {
       imgs.forEach(img => {
         img.onload = null;
