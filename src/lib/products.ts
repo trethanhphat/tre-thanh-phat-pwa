@@ -1,6 +1,7 @@
 // ✅ File: src/lib/products.ts
 import { initDB, STORE_PRODUCTS } from './db';
-import { saveImageIfNotExists, prefetchImages } from './images';
+import { prefetchImages } from './images';
+import { ensureProductImageCachedByUrl } from './products_images'; // ✅ Dùng module riêng cho ảnh sản phẩm
 
 export interface Product {
   id: number;
@@ -46,9 +47,9 @@ export const syncProducts = async (products: Product[]): Promise<boolean> => {
       hasChange = true;
     }
 
-    // ✅ Lưu ảnh offline trong nền
+    // ✅ Lưu ảnh offline trong nền (phân luồng theo loại product)
     if (p.image_url) {
-      saveImageIfNotExists(p.image_url);
+      ensureProductImageCachedByUrl(p.image_url);
     }
   }
 
@@ -74,7 +75,7 @@ export const saveProductOffline = async (product: Product) => {
   await db.put(STORE_PRODUCTS, product);
 
   if (product.image_url) {
-    saveImageIfNotExists(product.image_url);
+    ensureProductImageCachedByUrl(product.image_url); // ✅ đồng bộ với hàm mới
   }
 };
 
