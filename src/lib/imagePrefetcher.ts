@@ -38,8 +38,11 @@ export async function prefetchImagesInBackground({
 }: PrefetchOptions): Promise<void> {
   if (!Array.isArray(urls) || urls.length === 0) return;
 
-  // 🔹 Bỏ qua khi bật tiết kiệm dữ liệu
-  if (navigator.connection?.saveData) {
+  // 🔹 Bỏ qua khi bật tiết kiệm dữ liệu (Network Information API)
+  const conn = (navigator as any).connection as
+    | { saveData?: boolean; effectiveType?: string }
+    | undefined;
+  if (conn?.saveData) {
     console.info('[prefetch] Bỏ qua do bật tiết kiệm dữ liệu.');
     return;
   }
