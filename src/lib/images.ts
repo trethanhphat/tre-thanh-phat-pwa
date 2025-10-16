@@ -75,8 +75,12 @@ export const getImageURL = async (url: string) => {
 export async function prefetchImages(urls: string[]) {
   if (!urls?.length) return;
 
-  // ⚠️ Bỏ qua nếu người dùng bật tiết kiệm dữ liệu
-  if (navigator.connection?.saveData) {
+  // ⚠️ Bỏ qua nếu người dùng bật tiết kiệm dữ liệu (Network Information API)
+  const conn = (navigator as any).connection as
+    | { saveData?: boolean; effectiveType?: string }
+    | undefined;
+
+  if (conn?.saveData) {
     console.log('⚠️ Bỏ qua prefetch (saveData bật)');
     return;
   }
@@ -93,7 +97,12 @@ export async function prefetchImages(urls: string[]) {
       .then(res => res.blob())
       .then(async blob => {
         if (blob) {
-          await db.put(STORE_IMAGES, { key, url, blob, updated_at: Date.now() });
+          await db.put(STORE_IMAGES, {
+            key,
+            url,
+            blob,
+            updated_at: Date.now(),
+          });
           console.log('🔥 Prefetched & cached:', url);
         }
       })
