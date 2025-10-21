@@ -12,8 +12,9 @@ const ALLOWED_ORIGINS = [
 
 function isAllowedOrigin(req: NextRequest): boolean {
   const origin = req.headers.get('origin');
-  if (!origin) return false;
-  return ALLOWED_ORIGINS.some(o => origin === o);
+  // ✅ Nếu không có Origin (do gọi nội bộ, SW, SSR...) → cho phép
+  if (!origin) return true;
+  return ALLOWED_ORIGINS.includes(origin);
 }
 
 export async function GET(req: NextRequest) {

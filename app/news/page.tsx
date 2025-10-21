@@ -106,6 +106,22 @@ export default function NewsListPage() {
     return () => window.removeEventListener('online', handleOnline);
   }, []);
 
+  // ✅ Mỗi khi danh sách tin thay đổi → tải blob từ IndexedDB để hiển thị ngay
+  useEffect(() => {
+    if (!items.length) return;
+    (async () => {
+      const { getNewsImageURLByUrl } = await import('@/lib/news_images');
+      const map: { id: string; url: string }[] = [];
+
+      for (const n of items) {
+        const blobUrl = await getNewsImageURLByUrl(n.image_url || '');
+        if (blobUrl) map.push({ id: n.news_id, url: blobUrl });
+      }
+
+      replaceImageCache(map); // 🔁 cập nhật cache hiển thị
+    })();
+  }, [items]);
+
   // ---------------------- SORT / FILTER / PAGINATION ----------------------
   const handleSortChange = (field: SortField) => {
     if (field === sortField) setSortOrder(o => (o === 'asc' ? 'desc' : 'asc'));
