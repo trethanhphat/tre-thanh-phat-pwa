@@ -103,8 +103,9 @@ export default function NewsTable({
                 }}
                 data-label="Ảnh bài viết"
               >
-                {imageCache[n.news_id] ? (
-                  <a href={n.link} target="_blank" rel="noreferrer">
+                <a href={n.link} target="_blank" rel="noreferrer">
+                  {imageCache[n.news_id] ? (
+                    // ✅ Ảnh từ IndexedDB (blob đã cache)
                     <img
                       src={imageCache[n.news_id]}
                       alt={n.title}
@@ -112,10 +113,26 @@ export default function NewsTable({
                       loading="lazy"
                       crossOrigin="anonymous"
                     />
-                  </a>
-                ) : (
-                  <span>...</span>
-                )}
+                  ) : n.image_url ? (
+                    // ⚙️ Ảnh online (chưa cache) → nếu lỗi thì fallback sang proxy
+                    <img
+                      src={n.image_url}
+                      alt={n.title}
+                      style={{ maxWidth: '150px' }}
+                      loading="lazy"
+                      crossOrigin="anonymous"
+                      onError={e => {
+                        if (n.image_proxy_url && e.currentTarget.src !== n.image_proxy_url) {
+                          console.warn('⚠️ Fallback sang proxy cho ảnh lỗi:', n.image_url);
+                          e.currentTarget.src = n.image_proxy_url;
+                        }
+                      }}
+                    />
+                  ) : (
+                    // ⏳ Chưa có gì (vẫn đang đồng bộ)
+                    <span>...</span>
+                  )}
+                </a>
               </td>
 
               {/* Tiêu đề + highlight + icon sort */}

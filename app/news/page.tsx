@@ -40,7 +40,7 @@ export default function NewsListPage() {
     if (cached.length > 0) {
       setItems(cached);
       setUsingCache(true);
-      console.log(`🗄 Loaded ${cached.length} news items from IndexedDB`); // Hiện số mục được cache
+      console.log(`🗄 Có ${cached.length} mục trong Local DB`); // Hiện số mục tin được lưu trong Local DB
     }
     setLoading(false);
   };

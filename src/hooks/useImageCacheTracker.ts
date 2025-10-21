@@ -1,3 +1,4 @@
+// File: src/hooks/useImageCacheTracker.ts
 import { useEffect, useRef, useState } from 'react';
 import { ensureNewsImageCachedByUrl } from '@/lib/news_images';
 import { ensureProductImageCachedByUrl } from '@/lib/products_images';
@@ -67,8 +68,44 @@ export function useImageCacheTracker(
         loadedRef.current.add(url);
       };
 
-      img.onerror = () => {
+      img.onerror = async () => {
         console.warn(`⚠️ Lỗi tải ảnh ${type}:`, url);
+
+        // ✅ Nếu ảnh bị chặn hoặc lỗi → thử lại qua proxy
+        if (!url.startsWith('/api/image-proxy?')) {
+          const proxyUrl = `/api/image-proxy?url=${encodeURIComponent(url)}`;
+          console.log(`↻ Thử tải lại qua proxy: ${proxyUrl}`);
+
+          try {
+            const proxyImg = new Image();
+            proxyImg.crossOrigin = 'anonymous';
+            proxyImg.loading = 'lazy';
+            proxyImg.decoding = 'async';
+            proxyImg.referrerPolicy = 'no-referrer';
+
+            proxyImg.onload = async () => {
+              try {
+                if (type === 'news') {
+                  await ensureNewsImageCachedByUrl(proxyUrl);
+                } else if (type === 'product') {
+                  await ensureProductImageCachedByUrl(proxyUrl);
+                }
+                console.log(`💾 Cached ${type} image qua proxy:`, proxyUrl);
+              } catch (err) {
+                console.warn('⚠️ Cache error (proxy):', proxyUrl, err);
+              }
+              loadedRef.current.add(url);
+            };
+
+            proxyImg.onerror = () => {
+              console.warn(`❌ Proxy cũng lỗi cho ảnh ${type}:`, url);
+            };
+
+            proxyImg.src = proxyUrl;
+          } catch (err) {
+            console.warn(`❌ Không thể tải qua proxy ${type}:`, url, err);
+          }
+        }
       };
 
       img.src = url;

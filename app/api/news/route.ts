@@ -139,8 +139,17 @@ export async function GET() {
       if (!rawImage) {
         rawImage = extractFirstImageFromHtml(content) || extractFirstImageFromHtml(summary);
       }
-      // Chuẩn hoá (nâng kích thước ảnh Blogger nếu cần)
-      const image_url = normalizeBloggerImage(rawImage, 480);
+      // ✅ Chuẩn hoá URL ảnh (tăng kích thước hiển thị)
+      const normalized = normalizeBloggerImage(rawImage, 480);
+
+      // ✅ Nếu ảnh thuộc Googleusercontent (có thể bị CORS khi fetch),
+      // ta gợi ý client dùng proxy fallback nếu cần.
+      let image_url: string | undefined = normalized;
+      let image_proxy_url: string | undefined;
+
+      if (normalized?.includes('blogger.googleusercontent.com')) {
+        image_proxy_url = `/api/image-proxy?url=${encodeURIComponent(normalized)}`;
+      }
 
       return {
         news_id: e.id || link || title,
@@ -151,7 +160,8 @@ export async function GET() {
         published: e.published ? new Date(e.published).toISOString() : '',
         updated: e.updated ? new Date(e.updated).toISOString() : '',
         summary,
-        image_url,
+        image_url, // ảnh gốc Blogger
+        image_proxy_url, // fallback proxy (nếu cần)
       };
     });
 
