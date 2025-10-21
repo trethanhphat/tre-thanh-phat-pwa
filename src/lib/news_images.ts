@@ -46,16 +46,29 @@ export async function saveNewsImageByUrl(url: string): Promise<string | null> {
   const db = await initDB();
 
   const exists = await db.get(STORE_NEWS_IMAGES, key);
-  if (exists?.blob instanceof Blob && Date.now() - exists.updated_at < CACHE_TTL) return key;
+  if (exists?.blob instanceof Blob && Date.now() - exists.updated_at < CACHE_TTL) {
+    console.log(`🗂 [NEWS_IMG] Cache hit: ${url}`);
+    return key;
+  }
 
   try {
     // ✅ Ưu tiên tải trực tiếp
+    console.log(`🧩 [NEWS_IMG] Try direct fetch:`, url);
     let blob = await waitForImageLoadThenFetchBlob(url);
 
     // 🔁 Nếu lỗi do CORS hoặc fetch fail → fallback sang proxy
-    if (!blob) blob = await waitForImageLoadThenFetchBlob(withProxy(url));
+    if (!blob) {
+      const proxyUrl = withProxy(url);
+      console.warn(`↻ [NEWS_IMG] Direct fetch failed, retry via proxy:`, proxyUrl);
+      blob = await waitForImageLoadThenFetchBlob(proxyUrl);
+    }
 
-    if (!blob) return null;
+    if (!blob) {
+      console.error(`❌ [NEWS_IMG] Both direct & proxy fetch failed for:`, url);
+      return null;
+    }
+
+    console.log(`✅ [NEWS_IMG] Blob OK (${blob.size} bytes):`, url);
 
     await db.put(STORE_NEWS_IMAGES, {
       key,
@@ -64,8 +77,10 @@ export async function saveNewsImageByUrl(url: string): Promise<string | null> {
       updated_at: Date.now(),
     });
     cleanupOldImages(db as any);
+    console.log(`💾 [NEWS_IMG] Saved blob in IndexedDB:`, key);
     return key;
   } catch {
+    console.error(`🔥 [NEWS_IMG] Unexpected error for ${url}:`, err);
     return null;
   }
 }
