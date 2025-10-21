@@ -79,7 +79,7 @@ export async function saveNewsImageByUrl(url: string): Promise<string | null> {
     cleanupOldImages(db as any);
     console.log(`💾 [NEWS_IMG] Saved blob in IndexedDB:`, key);
     return key;
-  } catch {
+  } catch (err) {
     console.error(`🔥 [NEWS_IMG] Unexpected error for ${url}:`, err);
     return null;
   }
