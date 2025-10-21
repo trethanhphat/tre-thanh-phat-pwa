@@ -9,8 +9,8 @@ const CACHE_TTL = 30 * 24 * 60 * 60 * 1000;
 function withProxy(url: string): string {
   if (!url) return '';
   if (url.startsWith('blob:') || url.startsWith('data:')) return url;
-  if (url.includes('/api/news/image-proxy')) return url;
-  return `/api/news/image-proxy?url=${encodeURIComponent(url)}`;
+  if (url.includes('/api/image-proxy')) return url;
+  return `/api/image-proxy?url=${encodeURIComponent(url)}`;
 }
 
 /** Tính SHA-256 cho chuỗi, trả về hex (64 ký tự). */
