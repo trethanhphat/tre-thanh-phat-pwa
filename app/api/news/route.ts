@@ -40,9 +40,33 @@ function toArray<T = any>(x: T | T[] | null | undefined): T[] {
   if (x == null) return [];
   return Array.isArray(x) ? x : [x];
 }
+
+/**
+ * Chuẩn hoá URL ảnh của Blogger (nếu có segment kích thước như /s72-c/ hoặc /s220/...) → thay bằng kích thước lớn hơn.
+ * Nếu không có segment kích thước thì trả về nguyên bản.
+ *
+ * Ví dụ: https://.../s72-c/Logo.png  -> https://.../s480/Logo.png
+ */
+function normalizeBloggerImage(url: string | undefined, targetSize = 480): string | undefined {
+  if (!url) return undefined;
+  try {
+    // Thay /s72-c/ hoặc /s320/ hoặc /s220/ ... bằng /s{targetSize}/
+    // Lưu ý: chỉ thay segment dạng /s<number>(-...)/
+    const replaced = url.replace(/\/s\d+(-[a-z]+)?\//, `\/s${targetSize}\/`);
+    return replaced;
+  } catch {
+    return url;
+  }
+}
+
+/**
+ * Lấy URL ảnh đầu tiên trong một chuỗi HTML.
+ * Hỗ trợ src="..." hoặc src='...'
+ */
 function extractFirstImageFromHtml(html: string): string | undefined {
   if (!html) return;
-  const m = html.match(/<img[^>]+src="'["']/i);
+  // ✅ Regex chuẩn bắt src="..." hoặc src='...'
+  const m = html.match(/<img[^>]+src=["']([^"']+)["']/i);
   return m?.[1];
 }
 
@@ -69,10 +93,7 @@ export async function GET() {
       headers: { Accept: 'application/atom+xml' },
     });
     if (!res.ok) {
-      return NextResponse.json(
-        { error: `Upstream HTTP ${res.status}` },
-        { status: 502 }
-      );
+      return NextResponse.json({ error: `Upstream HTTP ${res.status}` }, { status: 502 });
     }
 
     const xml = await res.text();
@@ -85,21 +106,20 @@ export async function GET() {
     const data = parser.parse(xml);
     const entries: RawEntry[] = toArray<RawEntry>(data?.feed?.entry);
 
-    const items = entries.map((e) => {
+    const items = entries.map(e => {
       /* link ưu tiên rel="alternate" */
       const linkArr = toArray<any>(e.link);
-      const alt = linkArr.find((l) => l?.['@_rel'] === 'alternate');
+      const alt = linkArr.find(l => l?.['@_rel'] === 'alternate');
       const link = alt?.['@_href'] || linkArr[0]?.['@_href'] || '';
 
       /* author (coerce về mảng rồi lấy phần tử đầu) */
       const authArr = toArray<any>(e.author);
-      const author =
-        (authArr[0] && typeof authArr[0] === 'object' && authArr[0].name) || '';
+      const author = (authArr[0] && typeof authArr[0] === 'object' && authArr[0].name) || '';
 
       /* categories (coerce về mảng, hỗ trợ object/string) */
       const catArr = toArray<any>(e.category);
       const categories: string[] = catArr
-        .map((c) => {
+        .map(c => {
           if (!c) return '';
           if (typeof c === 'string') return c;
           return c?.['@_term'] || '';
@@ -111,12 +131,16 @@ export async function GET() {
       const summary = getText(e.summary);
       const content = getText(e.content);
 
-      /* thumbnail: ưu tiên media:thumbnail, fallback ảnh đầu trong HTML */
+      /* thumbnail: ưu tiên media:thumbnail, fallback ảnh đầu trong content → summary */
       const thumbArr = toArray<any>(e['media:thumbnail']);
-      let image_url: string | undefined =
-        thumbArr[0]?.['@_url'] ||
-        extractFirstImageFromHtml(content) ||
-        extractFirstImageFromHtml(summary);
+      // Lấy url raw nếu có
+      let rawImage: string | undefined = thumbArr[0]?.['@_url'];
+      // Nếu không có media:thumbnail thì tìm ảnh trong content/summary
+      if (!rawImage) {
+        rawImage = extractFirstImageFromHtml(content) || extractFirstImageFromHtml(summary);
+      }
+      // Chuẩn hoá (nâng kích thước ảnh Blogger nếu cần)
+      const image_url = normalizeBloggerImage(rawImage, 480);
 
       return {
         news_id: e.id || link || title,
@@ -138,14 +162,8 @@ export async function GET() {
       return bd.localeCompare(ad);
     });
 
-    return NextResponse.json(
-      { data: items },
-      { headers: { 'Cache-Control': 'no-store' } }
-    );
+    return NextResponse.json({ data: items }, { headers: { 'Cache-Control': 'no-store' } });
   } catch (err: any) {
-    return NextResponse.json(
-      { error: err?.message || 'Parse error' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: err?.message || 'Parse error' }, { status: 500 });
   }
 }

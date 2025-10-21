@@ -40,6 +40,7 @@ export default function NewsListPage() {
     if (cached.length > 0) {
       setItems(cached);
       setUsingCache(true);
+      console.log(`🗄 Loaded ${cached.length} news items from IndexedDB`); // Hiện số mục được cache
     }
     setLoading(false);
   };
@@ -70,7 +71,7 @@ export default function NewsListPage() {
       if (hasChange) {
         setItems(fresh);
         setJustUpdated(true);
-        setTimeout(() => setJustUpdated(false), 2500); // ✅ tự ẩn banner sau 2.5s
+        // setTimeout(() => setJustUpdated(false), 2500); // ✅ tự ẩn banner sau 2.5s
       } else {
         setJustUpdated(false);
       }
