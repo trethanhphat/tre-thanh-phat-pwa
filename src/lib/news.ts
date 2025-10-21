@@ -11,6 +11,7 @@ export interface NewsItem {
   updated?: string; // ISO
   summary?: string;
   image_url?: string;
+  image_proxy_url?: string; // ✅ fallback proxy khi ảnh gốc bị CORS hoặc lỗi
 }
 
 /** 🔹 Load tin từ IndexedDB, mới nhất lên đầu */
