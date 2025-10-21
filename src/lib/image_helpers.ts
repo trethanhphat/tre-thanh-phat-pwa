@@ -1,30 +1,45 @@
 // 📄 src/lib/image_helpers.ts
-export async function waitForImageLoadThenFetchBlob(url: string): Promise<Blob | null> {
+// ✅ Ưu tiên tải trực tiếp, fallback proxy nếu lỗi hoặc blob rỗng
+export async function fetchImageBlobSmart(
+  url: string,
+  proxyBase = '/api/image-proxy?url='
+): Promise<Blob | null> {
   try {
-    console.log(`🔍 [FETCH_BLOB] Bắt đầu tải ảnh: ${url}`);
-
-    const resp = await fetch(url, {
-      mode: 'cors',
-      cache: 'no-store',
-    });
-
-    if (!resp.ok) {
-      console.warn(`⚠️ [FETCH_BLOB] HTTP ${resp.status} (${resp.statusText}) for ${url}`);
-      return null;
+    // 1️⃣ Thử tải trực tiếp
+    let blob = await tryFetchBlob(url, { mode: 'cors', cache: 'no-store' });
+    if (blob && blob.size > 0) {
+      console.log(`📦 [IMG] Loaded direct blob (${blob.size} bytes): ${url}`);
+      return blob;
     }
 
-    // ✅ Lấy blob sau khi fetch thành công
-    const blob = await resp.blob();
-
-    if (!(blob instanceof Blob)) {
-      console.error(`💥 [FETCH_BLOB] Invalid blob object for ${url}:`, blob);
-      return null;
+    console.warn(`⚠️ [IMG] Direct load failed or empty, fallback to proxy`);
+    // 2️⃣ Fallback qua proxy
+    const proxyUrl = proxyBase + encodeURIComponent(url);
+    blob = await tryFetchBlob(proxyUrl, { cache: 'no-store' });
+    if (blob && blob.size > 0) {
+      console.log(`📦 [IMG] Loaded via proxy (${blob.size} bytes): ${proxyUrl}`);
+      return blob;
     }
 
-    console.log(`📦 [FETCH_BLOB] Got blob (${blob.size} bytes) from ${url}`);
-    return blob;
+    console.error(`❌ [IMG] Both direct & proxy fetch failed: ${url}`);
+    return null;
   } catch (err) {
-    console.error(`💥 [FETCH_BLOB] Fetch error for ${url}:`, err);
+    console.error('❌ [IMG] Error fetching image:', err);
+    return null;
+  }
+}
+
+// 🧩 Helper: tải blob 1 lần (có timeout)
+async function tryFetchBlob(url: string, opts: RequestInit): Promise<Blob | null> {
+  try {
+    const ctrl = new AbortController();
+    const id = setTimeout(() => ctrl.abort(), 8000); // ⏱ timeout 8s
+    const resp = await fetch(url, { ...opts, signal: ctrl.signal, redirect: 'follow' });
+    clearTimeout(id);
+    if (!resp.ok) return null;
+    const blob = await resp.blob();
+    return blob;
+  } catch {
     return null;
   }
 }
