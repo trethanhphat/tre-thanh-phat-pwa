@@ -20,7 +20,7 @@ export default function NewsListPage() {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const imageURLs = items.map(n => n.image_url).filter(Boolean) as string[];
-  const { imageCache, replaceImageCache } = useImageCacheTracker(imageURLs); // ✅ thay cho useImageLoadTracker
+  const { imageCache, replaceImageCache } = useImageCacheTracker(imageURLs, { type: 'news' });
 
   // Sort / Filter / Pagination
   const [sortField, setSortField] = useState<SortField>('published');
