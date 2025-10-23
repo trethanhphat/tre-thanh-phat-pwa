@@ -8,7 +8,7 @@ export const runtime = 'nodejs';
 
 /**
  * Lấy URL feed từ ENV và đảm bảo hợp lệ.
- * - Cần khai báo: NEWS_FEED_URL="https://.../feeds/posts/default?alt=atom&max-results=200"
+ * - Cần khai báo: NEXT_PUBLIC_API_NEWS_URL="https://.../feeds/posts/default?alt=atom&max-results=200"
  * - Tự đảm bảo có alt=atom nếu thiếu.
  */
 function getFeedUrl(): URL {
