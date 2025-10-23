@@ -1,3 +1,4 @@
+// ✅ File: app/products/page.tsx
 /**
  * Trang /products
  * - ✅ OFFLINE FIRST:
@@ -23,7 +24,7 @@
  *    + Mobile: control bar hiển thị 3 hàng
  *    + Control bar đặt ở cả TRÊN & DƯỚI bảng sản phẩm
  */
-// ✅ File: app/products/page.tsx
+
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
