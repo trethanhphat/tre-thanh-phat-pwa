@@ -61,7 +61,23 @@ export function useImageCacheTracker(
           } else if (type === 'product') {
             await ensureProductImageCachedByUrl(url);
           }
-          console.log(`💾 Cached ${type} image:`, url);
+
+          // ✅ Load lại blob từ IndexedDB và cập nhật imageCache để hiển thị
+          const dbUrl =
+            type === 'news'
+              ? await ensureNewsImageCachedByUrl(url)
+              : type === 'product'
+              ? await ensureProductImageCachedByUrl(url)
+              : url;
+
+          if (dbUrl) {
+            setImageCache(prev => ({
+              ...prev,
+              [url]: dbUrl, // ✅ Hiển thị blob ngay
+            }));
+          }
+
+          console.log(`💾 Cached ${type} image:`, url, dbUrl);
         } catch (err) {
           console.warn('⚠️ Cache error:', url, err);
         }
@@ -90,7 +106,22 @@ export function useImageCacheTracker(
                 } else if (type === 'product') {
                   await ensureProductImageCachedByUrl(proxyUrl);
                 }
-                console.log(`💾 Cached ${type} image qua proxy:`, proxyUrl);
+
+                const dbUrl =
+                  type === 'news'
+                    ? await ensureNewsImageCachedByUrl(proxyUrl)
+                    : type === 'product'
+                    ? await ensureProductImageCachedByUrl(proxyUrl)
+                    : proxyUrl;
+
+                if (dbUrl) {
+                  setImageCache(prev => ({
+                    ...prev,
+                    [url]: dbUrl, // ✅ URL gốc ánh xạ sang blob từ proxy
+                  }));
+                }
+
+                console.log(`💾 Cached ${type} image qua proxy:`, dbUrl);
               } catch (err) {
                 console.warn('⚠️ Cache error (proxy):', proxyUrl, err);
               }

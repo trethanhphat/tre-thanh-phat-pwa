@@ -116,18 +116,17 @@ export default function ProductsTable({
                 }}
                 data-label="Ảnh sản phẩm"
               >
-                {imageCache[p.id] ? (
-                  <Link href={`/product/${p.id}`}>
-                    <img
-                      src={imageCache[p.image_url] || p.image_url} // ✅ Ưu tiên blob cache
-                      alt={p.name}
-                      style={{ width: 150, height: 150, objectFit: 'cover' }}
-                      loading="lazy"
-                    />
-                  </Link>
-                ) : (
-                  <span>...</span>
-                )}
+                <Link href={`/product/${p.id}`}>
+                  <img
+                    src={imageCache[p.image_url] || p.image_url} // ✅ Ưu tiên blob cache
+                    alt={p.name}
+                    style={{ width: 150, height: 150, objectFit: 'cover' }}
+                    loading="lazy"
+                  />
+                  <small style={{ fontSize: 10 }}>
+                    {imageCache[p.image_url] ? 'Cached ✅' : 'Online 🌐'}
+                  </small>
+                </Link>
               </td>
 
               {/* Tên + highlight + icon sort */}
