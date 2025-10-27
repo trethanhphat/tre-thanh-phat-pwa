@@ -116,6 +116,7 @@ export default function ProductsTable({
                 }}
                 data-label="Ảnh sản phẩm"
               >
+                {console.log('[IMG SRC]', p.id, imageCache[p.id])}
                 {imageCache[p.id] ? (
                   <Link href={`/product/${p.id}`}>
                     <img src={imageCache[p.id]} alt={p.name} style={{ maxWidth: '150px' }} />
