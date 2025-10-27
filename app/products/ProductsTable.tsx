@@ -116,14 +116,14 @@ export default function ProductsTable({
                 }}
                 data-label="Ảnh sản phẩm"
               >
-                {(() => {
-                  console.log('[IMG SRC]', p.id, imageCache[p.id]);
-                  return null;
-                })()}
-
                 {imageCache[p.id] ? (
                   <Link href={`/product/${p.id}`}>
-                    <img src={imageCache[p.id]} alt={p.name} style={{ maxWidth: '150px' }} />
+                    <img
+                      src={imageCache[p.image_url] || p.image_url} // ✅ Ưu tiên blob cache
+                      alt={p.name}
+                      style={{ width: 150, height: 150, objectFit: 'cover' }}
+                      loading="lazy"
+                    />
                   </Link>
                 ) : (
                   <span>...</span>
