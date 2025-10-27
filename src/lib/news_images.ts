@@ -1,6 +1,6 @@
 // ✅ File: src/lib/news_images.ts
 import { initDB, STORE_NEWS_IMAGES } from './db';
-import { waitForImageLoadThenFetchBlob } from './image_helpers';
+import { fetchImageBlobSmart } from './image_helpers';
 
 /** TTL cache (ms) – ví dụ 30 ngày */
 const CACHE_TTL = 30 * 24 * 60 * 60 * 1000;
@@ -54,13 +54,13 @@ export async function saveNewsImageByUrl(url: string): Promise<string | null> {
   try {
     // ✅ Ưu tiên tải trực tiếp
     console.log(`🧩 [NEWS_IMG] Try direct fetch:`, url);
-    let blob = await waitForImageLoadThenFetchBlob(url);
+    let blob = await fetchImageBlobSmart(url);
 
     // 🔁 Nếu lỗi do CORS hoặc fetch fail → fallback sang proxy
     if (!blob) {
       const proxyUrl = withProxy(url);
       console.warn(`↻ [NEWS_IMG] Direct fetch failed, retry via proxy:`, proxyUrl);
-      blob = await waitForImageLoadThenFetchBlob(proxyUrl);
+      blob = await fetchImageBlobSmart(proxyUrl);
     }
 
     if (!blob) {
