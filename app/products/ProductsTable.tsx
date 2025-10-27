@@ -117,14 +117,18 @@ export default function ProductsTable({
                 data-label="Ảnh sản phẩm"
               >
                 {(() => {
-                  const key = p.image_url ?? '';
-                  const imgSrc =
-                    key && imageCache?.[key] ? imageCache[key] : p.image_url || '/fallback.png';
-                  const sourceLabel = key && imageCache?.[key] ? 'Cached ✅' : 'Online 🌐';
+                  const url = p.image_url ?? '';
+
+                  // ✅ Blob URL từ cache (ưu tiên)
+                  const cachedBlobUrl = url && imageCache?.[url] ? imageCache[url] : null;
+
+                  // ✅ Nếu có blob → dùng; nếu không → link online gốc (hoặc fallback)
+                  const imgSrc = cachedBlobUrl || url || '/fallback.png';
+
+                  const sourceLabel = cachedBlobUrl ? 'Cached ✅' : 'Online 🌐';
 
                   return (
                     <Link href={`/product/${p.id}`}>
-                      {/* ✅ Không còn lỗi TS */}
                       <img
                         src={imgSrc}
                         alt={p.name}

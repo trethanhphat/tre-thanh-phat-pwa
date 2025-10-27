@@ -22,8 +22,12 @@ export const initDB = async () => {
         db.createObjectStore(STORE_PRODUCTS_IMAGES, { keyPath: 'url' });
       }
       // 🔹 Store ảnh sản phẩm
-      if (!db.objectStoreNames.contains(STORE_IMAGES)) {
-        db.createObjectStore(STORE_IMAGES, { keyPath: 'url' });
+      // ✅ Store ảnh sản phẩm — keyPath = 'key'
+      if (!db.objectStoreNames.contains(STORE_PRODUCTS_IMAGES)) {
+        const s = db.createObjectStore(STORE_PRODUCTS_IMAGES, { keyPath: 'key' });
+        s.createIndex('source_url', 'source_url', { unique: false });
+        s.createIndex('updated_at', 'updated_at', { unique: false });
+        s.createIndex('etag', 'etag', { unique: false });
       }
 
       // 🔹 Store batches

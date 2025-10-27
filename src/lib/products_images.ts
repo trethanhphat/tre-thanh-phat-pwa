@@ -11,100 +11,92 @@ async function sha256Hex(text: string): Promise<string> {
   return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
 }
 
-/** ✅ Thêm proxy fallback cho ảnh sản phẩm */
+/** ✅ API proxy fallback */
 function withProxy(url: string) {
   return `/api/image-proxy?url=${encodeURIComponent(url)}`;
 }
 
-/** ✅ Thử fetch ảnh và trả Blob nếu được */
-async function tryFetchImage(url: string): Promise<Blob | null> {
+/** ✅ Fetch ảnh → kèm lấy ETag nếu có */
+async function fetchBlobWithEtag(url: string): Promise<{ blob: Blob; etag?: string } | null> {
   try {
     const res = await fetch(url);
-    if (!res.ok) throw new Error(`Fetch failed: ${res.status}`);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
     const blob = await res.blob();
     if (blob.size === 0) throw new Error('Blob empty');
-    return blob;
+
+    const etag = res.headers.get('ETag') ?? undefined;
+    return { blob, etag };
   } catch (err) {
-    console.warn('❌ Lỗi tải ảnh:', url, err);
+    console.warn('❌ Fetch image error:', url, err);
     return null;
   }
 }
 
-/** ✅ Lưu ảnh sản phẩm nếu chưa có hoặc hết hạn */
+/** ✅ Lưu/cập nhật ảnh sản phẩm */
 export const saveProductImageIfNotExists = async (url: string) => {
   if (!url) return;
   const db = await initDB();
   const key = await sha256Hex(url);
+
   const existing = await db.get(STORE_PRODUCTS_IMAGES, key);
 
+  // ✅ TTL: nếu còn hạn → bỏ qua fetch
   if (existing && Date.now() - existing.updated_at < CACHE_TTL) {
-    console.log('✅ Ảnh sản phẩm đã có cache:', url);
     return;
   }
 
-  let blob = await tryFetchImage(url);
-  if (!blob) {
-    console.log('⚙️ Dùng proxy để tải ảnh sản phẩm:', url);
-    blob = await tryFetchImage(withProxy(url));
-  }
+  let result = await fetchBlobWithEtag(url);
+  if (!result) result = await fetchBlobWithEtag(withProxy(url));
+  if (!result) return;
 
-  if (blob) {
-    await db.put(STORE_PRODUCTS_IMAGES, { key, url, blob, updated_at: Date.now() });
-    console.log('💾 Đã lưu ảnh sản phẩm:', url);
-    console.log(`📦 Direct blob size = ${blob.size} bytes: ${url}`);
-  }
+  const { blob, etag } = result;
+  const updated_at = Date.now();
+
+  await db.put(STORE_PRODUCTS_IMAGES, {
+    key,
+    source_url: url,
+    blob,
+    etag,
+    updated_at,
+  });
+
+  console.log(`💾 Cached product image: ${url} (${blob.size} bytes)`);
 };
 
-/** ✅ Lấy URL ảnh sản phẩm từ cache hoặc fallback proxy */
+/** ✅ Offline-first lấy ảnh → nếu có blob thì hiển thị ngay */
 export const getProductImageURL = async (url: string) => {
   if (!url) return '';
   const db = await initDB();
   const key = await sha256Hex(url);
   const record = await db.get(STORE_PRODUCTS_IMAGES, key);
-  if (record?.blob) return URL.createObjectURL(record.blob);
 
-  try {
-    const res = await fetch(url, { method: 'HEAD' });
-    if (res.ok) return url;
-  } catch {}
+  if (record?.blob) {
+    return URL.createObjectURL(record.blob);
+  }
+
+  // 🔹 Nếu chưa có blob → thử online trước
   return withProxy(url);
 };
 
-/** ✅ Prefetch ảnh sản phẩm nền (ví dụ top 5 sản phẩm nổi bật) */
+/** ✅ Prefetch một số ảnh nổi bật */
 export async function prefetchProductImages(urls: string[]) {
   if (!urls?.length) return;
 
-  const conn = (navigator as any).connection as
-    | { saveData?: boolean; effectiveType?: string }
-    | undefined;
-
-  if (conn?.saveData) {
-    console.log('⚠️ Bỏ qua prefetch ảnh sản phẩm (saveData bật)');
-    return;
-  }
-
-  const db = await initDB();
+  const conn = (navigator as any).connection;
+  if (conn?.saveData) return;
 
   for (const url of urls.slice(0, 5)) {
-    const key = await sha256Hex(url);
-    const existing = await db.get(STORE_PRODUCTS_IMAGES, key);
-    if (existing) continue;
-
-    let blob = await tryFetchImage(url);
-    if (!blob) blob = await tryFetchImage(withProxy(url));
-    if (!blob) continue;
-
-    await db.put(STORE_PRODUCTS_IMAGES, { key, url, blob, updated_at: Date.now() });
-    console.log('🔥 Prefetched & cached product image:', url);
+    await saveProductImageIfNotExists(url);
   }
 }
 
-/** ✅ Đảm bảo ảnh sản phẩm được cache sẵn */
+/** ✅ Đảm bảo cache trước khi hiển thị */
 export async function ensureProductImageCachedByUrl(url: string) {
   if (!url) return;
   try {
     await saveProductImageIfNotExists(url);
   } catch (err) {
-    console.warn('⚠️ Lỗi cache ảnh sản phẩm:', url, err);
+    console.warn('⚠️ Cache error:', url, err);
   }
 }
