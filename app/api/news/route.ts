@@ -42,17 +42,14 @@ function toArray<T = any>(x: T | T[] | null | undefined): T[] {
 }
 
 /**
- * Chuẩn hoá URL ảnh của Blogger (nếu có segment kích thước như /s72-c/ hoặc /s220/...) → thay bằng kích thước lớn hơn.
- * Nếu không có segment kích thước thì trả về nguyên bản.
- *
- * Ví dụ: https://.../s72-c/Logo.png  -> https://.../s480/Logo.png
+ * Chuẩn hoá URL ảnh Blogger, đổi kích thước theo targetSize.
+ * Ví dụ: /s72-c/ hoặc /s72-w640-h288-c/ -> /s480/
  */
 function normalizeBloggerImage(url: string | undefined, targetSize = 480): string | undefined {
   if (!url) return undefined;
   try {
-    // Thay /s72-c/ hoặc /s320/ hoặc /s220/ ... bằng /s{targetSize}/
-    // Lưu ý: chỉ thay segment dạng /s<number>(-...)/
-    const replaced = url.replace(/\/s\d+(-[a-z]+)?\//, `\/s${targetSize}\/`);
+    // Thay thế toàn bộ segment /s.../ (ví dụ /s72-w640-h288-c/)
+    const replaced = url.replace(/\/s\d+[^/]*\//, `/s${targetSize}/`);
     return replaced;
   } catch {
     return url;
