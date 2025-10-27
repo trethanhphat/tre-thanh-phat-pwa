@@ -10,10 +10,17 @@ const ALLOWED_ORIGINS = [
   'https://rungkhoai.com',
 ];
 
+// 🔹 Các host chứa ảnh được phép proxy (tối ưu bảo mật)
+const ALLOWED_IMAGE_HOSTS = [
+  'upload.wikimedia.org',
+  'blogger.googleusercontent.com',
+  'trethanhphat.vn',
+  'tpbc.top',
+];
+
 function isAllowedOrigin(req: NextRequest): boolean {
   const origin = req.headers.get('origin');
-  // ✅ Nếu không có Origin (do gọi nội bộ, SW, SSR...) → cho phép
-  if (!origin) return true;
+  if (!origin) return true; // ✅ Nếu gọi nội bộ, SW, SSR → cho phép
   return ALLOWED_ORIGINS.includes(origin);
 }
 
@@ -28,17 +35,29 @@ export async function GET(req: NextRequest) {
   }
 
   try {
+    const target = new URL(url);
+    if (!ALLOWED_IMAGE_HOSTS.includes(target.hostname)) {
+      return NextResponse.json({ error: 'Blocked image host' }, { status: 403 });
+    }
+
     const response = await fetch(url, { redirect: 'follow' });
 
-    if (!response.ok || !response.body) {
+    if (!response.ok) {
       return NextResponse.json({ error: 'Failed to fetch image' }, { status: 502 });
     }
 
-    // ✅ Thiết lập header cache và CORS
-    const headers = new Headers(response.headers);
-    headers.set('Access-Control-Allow-Origin', '*');
-    headers.set('Cache-Control', 'public, s-maxage=28800, immutable');
-    headers.set('Content-Type', response.headers.get('Content-Type') || 'image/jpeg');
+    const contentType = response.headers.get('Content-Type')?.split(';')[0] || 'image/jpeg';
+
+    // ✅ Kiểm tra loại file có thực sự là image không
+    if (!contentType.startsWith('image/')) {
+      return NextResponse.json({ error: 'Invalid content type' }, { status: 415 });
+    }
+
+    const headers = new Headers({
+      'Content-Type': contentType,
+      'Access-Control-Allow-Origin': '*',
+      'Cache-Control': 'public, s-maxage=28800, immutable',
+    });
 
     return new Response(response.body, { status: 200, headers });
   } catch (error) {

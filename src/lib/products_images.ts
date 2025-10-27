@@ -19,11 +19,13 @@ function withProxy(url: string) {
 /** ✅ Thử fetch ảnh và trả Blob nếu được */
 async function tryFetchImage(url: string): Promise<Blob | null> {
   try {
-    const res = await fetch(url, { mode: 'no-cors', priority: 'low' as any });
-    if (!res.ok && res.type !== 'opaque') throw new Error('Fetch error');
-    return await res.blob();
+    const res = await fetch(url);
+    if (!res.ok) throw new Error(`Fetch failed: ${res.status}`);
+    const blob = await res.blob();
+    if (blob.size === 0) throw new Error('Blob empty');
+    return blob;
   } catch (err) {
-    console.warn('❌ Lỗi tải ảnh sản phẩm:', url, err);
+    console.warn('❌ Lỗi tải ảnh:', url, err);
     return null;
   }
 }
@@ -49,6 +51,7 @@ export const saveProductImageIfNotExists = async (url: string) => {
   if (blob) {
     await db.put(STORE_PRODUCTS_IMAGES, { key, url, blob, updated_at: Date.now() });
     console.log('💾 Đã lưu ảnh sản phẩm:', url);
+    console.log(`📦 Direct blob size = ${blob.size} bytes: ${url}`);
   }
 };
 
@@ -87,20 +90,12 @@ export async function prefetchProductImages(urls: string[]) {
     const existing = await db.get(STORE_PRODUCTS_IMAGES, key);
     if (existing) continue;
 
-    fetch(withProxy(url), { mode: 'no-cors', priority: 'low' as any })
-      .then(res => res.blob())
-      .then(async blob => {
-        if (blob) {
-          await db.put(STORE_PRODUCTS_IMAGES, {
-            key,
-            url,
-            blob,
-            updated_at: Date.now(),
-          });
-          console.log('🔥 Prefetched & cached product image:', url);
-        }
-      })
-      .catch(() => console.warn('Prefetch fail:', url));
+    let blob = await tryFetchImage(url);
+    if (!blob) blob = await tryFetchImage(withProxy(url));
+    if (!blob) continue;
+
+    await db.put(STORE_PRODUCTS_IMAGES, { key, url, blob, updated_at: Date.now() });
+    console.log('🔥 Prefetched & cached product image:', url);
   }
 }
 
