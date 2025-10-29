@@ -60,7 +60,7 @@ export default function ProductsListPage() {
   // ---------------------- IMAGE CACHE ----------------------
   // ✅ Dùng custom hook thay vì tự load blob và revoke
   const imageKeys = products
-    .map(p => p.image_key) // ✅ key đúng được lưu trong DB khi sync
+    .map(p => p.image_url) // ✅ key đúng được lưu trong DB khi sync
     .filter(Boolean) as string[];
   const { imageCache, replaceImageCache } = useImageCacheTracker(imageKeys, { type: 'product' });
 
