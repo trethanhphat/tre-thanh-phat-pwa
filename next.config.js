@@ -76,7 +76,7 @@ const runtimeCaching = [
     },
   },
   {
-    // 🔹 Cache API products
+    // 🔹 Cache API product
     urlPattern: /^https:\/\/app\.trethanhphat\.vn\/api\/product/,
     handler: 'StaleWhileRevalidate',
     options: {
