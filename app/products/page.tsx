@@ -100,7 +100,7 @@ export default function ProductsListPage() {
       if (hasChange) {
         setProducts(fresh);
         // ✅ Reset lại imageCache (hook sẽ tự tải lại blob)
-        const keys = fresh.map(p => p.image_key).filter(Boolean) as string[];
+        const keys = fresh.map(p => p.image_url).filter(Boolean) as string[];
         replaceImageCache(Object.fromEntries(keys.map(k => [k, k])));
 
         setJustUpdated(true);
