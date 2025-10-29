@@ -4,8 +4,8 @@
 import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
 
-import { saveProductOffline, getProductOffline } from '@/lib/products';
-import { getProductImageURL, ensureProductImageCachedByUrl } from '@/lib/products_images';
+import { saveProductOffline, getProductOffline } from '@/repositories/productRepository';
+import { getProductImageURL, ensureProductImageCachedByUrl } from '@/services/productImageService';
 import { useImageCacheTracker } from '@/hooks/useImageCacheTracker';
 import { formatPrice, formatStockStatus } from '@/utils/format';
 

@@ -1,7 +1,7 @@
 // File: src/hooks/useImageCacheTracker.ts
 import { useEffect, useRef, useState } from 'react';
 import { ensureNewsImageCachedByUrl } from '@/lib/news_images';
-import { ensureProductImageCachedByUrl } from '@/lib/products_images';
+import { ensureProductImageCachedByUrl } from '@/services/productImageService';
 
 /**
  * ✅ Hook tải và cache ảnh (tự động phân luồng theo loại).

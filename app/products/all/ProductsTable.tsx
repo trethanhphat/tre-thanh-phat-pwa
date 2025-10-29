@@ -2,7 +2,7 @@
 'use client';
 
 import Link from 'next/link';
-import { Product } from '@/lib/products';
+import { Product } from '@/repositories/productRepository';
 import { formatPrice, formatStockStatus } from '@/utils/format';
 
 interface ProductsTableProps {

@@ -1,3 +1,4 @@
+// File: src/services/productImageService.ts
 import { initDB, STORE_PRODUCTS_IMAGES } from '@/lib/db';
 
 /** ⏱ TTL cache tối đa (7 ngày) cho ảnh sản phẩm */

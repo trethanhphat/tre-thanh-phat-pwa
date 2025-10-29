@@ -1,9 +1,10 @@
 // File: src/models/Product.ts
 export interface Product {
-  id: string;
+  id: number;
   name: string;
-  price: number;
+  price: string;
   stock_quantity: number;
-  // ✅ Thêm trường image_key để không lỗi TS
-  image_key?: string; // ✅ có thể undefined nếu chưa sync ảnh
+  stock_status: string;
+  image_url?: string;
+  image_key?: string; // ✅ để load offline hoàn chỉnh
 }

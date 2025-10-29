@@ -3,7 +3,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import ProductsTable from '../all/ProductsTable';
-import { Product, loadProductsFromDB, syncProducts } from '@/lib/products';
+import { Product, loadProductsFromDB, syncProducts } from '@/repositories/productRepository';
 import { useImageCacheTracker } from '@/hooks/useImageCacheTracker'; // ✅ dùng hook thay thế cho tự quản lý blob
 
 type SortField = 'name' | 'price' | 'stock_quantity';

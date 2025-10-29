@@ -3,8 +3,8 @@
 
 import { useEffect, useRef, useState } from 'react';
 import ProductsTable from './ProductsTable';
-import { Product, loadProductsFromDB, syncProducts } from '@/lib/products';
-import { getProductImageURL, ensureProductImageCachedByUrl } from '@/lib/products_images';
+import { Product, loadProductsFromDB, syncProducts } from '@/repositories/productRepository';
+import { getProductImageURL, ensureProductImageCachedByUrl } from '@/services/productImageService';
 import { useImageCacheTracker } from '@/hooks/useImageCacheTracker';
 
 type SortField = 'stock_status' | 'price' | 'stock_quantity' | 'name';

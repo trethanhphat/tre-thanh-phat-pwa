@@ -31,7 +31,7 @@ import { useEffect, useRef, useState } from 'react';
 import axios from 'axios';
 import ProductsTable from './ProductsTable';
 import ControlBar from '@/components/ControlBar';
-import { Product, loadProductsFromDB, syncProducts } from '@/lib/products';
+import { Product, loadProductsFromDB, syncProducts } from '@/repositories/productRepository';
 import { useImageCacheTracker } from '@/hooks/useImageCacheTracker';
 
 type SortField = 'stock_status' | 'price' | 'stock_quantity' | 'name';
