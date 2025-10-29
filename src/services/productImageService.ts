@@ -93,11 +93,12 @@ export async function prefetchProductImages(urls: string[]) {
 }
 
 /** ✅ Đảm bảo cache trước khi hiển thị */
-export async function ensureProductImageCachedByUrl(url: string) {
-  if (!url) return;
+export async function ensureProductImageCachedByUrl(originalUrl: string, fetchUrl?: string) {
+  if (!originalUrl) return null;
   try {
-    await saveProductImageIfNotExists(url);
+    // ✅ Ưu tiên fetch URL (proxy) nếu có, nếu không dùng originalUrl
+    await saveProductImageIfNotExists(fetchUrl || originalUrl);
   } catch (err) {
-    console.warn('⚠️ Cache error:', url, err);
+    console.warn('⚠️ Cache error:', originalUrl, err);
   }
 }

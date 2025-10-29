@@ -41,6 +41,8 @@ export default function ProductsListPage() {
   // ---------------------- STATE ----------------------
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
+  const [hasLocalData, setHasLocalData] = useState(false);
+  const [syncedOnce, setSyncedOnce] = useState(false);
   const [usingCache, setUsingCache] = useState(false);
   const [justUpdated, setJustUpdated] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -67,11 +69,18 @@ export default function ProductsListPage() {
   // ---------------------- OFFLINE FIRST ----------------------
   const loadOfflineFirst = async () => {
     const cached = await loadProductsFromDB();
-    if (cached.length > 0) {
+
+    const hasLocal = cached.length > 0;
+    setHasLocalData(hasLocal);
+
+    if (hasLocal) {
       setProducts(cached);
       setUsingCache(true);
+    } else {
+      setUsingCache(false);
     }
-    setLoading(false);
+
+    // ❌ Không setLoading(false) ở đây nữa!
   };
 
   // ---------------------- ONLINE UPDATE ----------------------
@@ -124,6 +133,12 @@ export default function ProductsListPage() {
       await loadOfflineFirst();
       if (navigator.onLine) {
         await fetchOnlineAndUpdate();
+        if (!navigator.onLine) {
+          if (!hasLocalData) {
+            setErrorMessage('⚠️ Chưa có dữ liệu cục bộ — vui lòng online để tải dữ liệu lần đầu.');
+          }
+          setLoading(false);
+        }
       } else {
         setUsingCache(true);
         setLoading(false);
@@ -168,8 +183,23 @@ export default function ProductsListPage() {
           {products.length === 0 && ' Chưa có sản phẩm, cần mở online để đồng bộ lần đầu.'}
         </p>
       )}
-      {justUpdated && !usingCache && <p style={{ color: 'green' }}>✅ Đã cập nhật dữ liệu mới</p>}
-      {!justUpdated && !usingCache && <p style={{ color: 'green' }}>✅ Dữ liệu đã là mới nhất</p>}
+      {!navigator.onLine && hasLocalData && (
+        <p style={{ color: 'orange' }}>📦 Đang hiển thị dữ liệu cục bộ (offline)</p>
+      )}
+
+      {!navigator.onLine && !hasLocalData && (
+        <p style={{ color: 'red' }}>
+          ⚠️ Chưa có dữ liệu cục bộ — vui lòng online để tải dữ liệu lần đầu.
+        </p>
+      )}
+
+      {navigator.onLine && justUpdated && (
+        <p style={{ color: 'green' }}>✅ Vừa cập nhật dữ liệu mới từ server</p>
+      )}
+
+      {navigator.onLine && !justUpdated && hasLocalData && (
+        <p style={{ color: 'green' }}>✅ Dữ liệu đã là mới nhất</p>
+      )}
 
       {loading ? (
         <p>⏳ Đang tải dữ liệu...</p>

@@ -104,7 +104,7 @@ export function useImageCacheTracker(
                 if (type === 'news') {
                   await ensureNewsImageCachedByUrl(proxyUrl);
                 } else if (type === 'product') {
-                  await ensureProductImageCachedByUrl(proxyUrl);
+                  await ensureProductImageCachedByUrl(url, proxyUrl);
                 }
 
                 const dbUrl =
