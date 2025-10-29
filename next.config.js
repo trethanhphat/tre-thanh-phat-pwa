@@ -18,10 +18,10 @@ const runtimeCaching = [
     },
   },
   {
-    // 🔹 Cache pages: batches, products, report, photos, policy
+    // 🔹 Cache pages: news, batches, products, report, photos, policy
     urlPattern: ({ url }) =>
       url.origin === 'https://app.trethanhphat.vn' &&
-      /^\/(batches|products|report|photos|policy)/.test(url.pathname),
+      /^\/(news|batches|products|report|photos|policy)/.test(url.pathname),
     handler: 'NetworkFirst', // Ưu tiên mạng, fallback cache
     options: {
       cacheName: 'ttp-api',

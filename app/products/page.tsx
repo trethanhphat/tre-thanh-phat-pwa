@@ -59,8 +59,10 @@ export default function ProductsListPage() {
 
   // ---------------------- IMAGE CACHE ----------------------
   // ✅ Dùng custom hook thay vì tự load blob và revoke
-  const imageURLs = products.map(p => p.image_url).filter(Boolean) as string[];
-  const { imageCache, replaceImageCache } = useImageCacheTracker(imageURLs, { type: 'product' });
+  const imageKeys = products
+    .map(p => p.image_key) // ✅ key đúng được lưu trong DB khi sync
+    .filter(Boolean) as string[];
+  const { imageCache, replaceImageCache } = useImageCacheTracker(imageKeys, { type: 'product' });
 
   // ---------------------- OFFLINE FIRST ----------------------
   const loadOfflineFirst = async () => {
@@ -98,8 +100,9 @@ export default function ProductsListPage() {
       if (hasChange) {
         setProducts(fresh);
         // ✅ Reset lại imageCache (hook sẽ tự tải lại blob)
-        const urls = fresh.map(p => p.image_url).filter(Boolean) as string[];
-        replaceImageCache(Object.fromEntries(urls.map(u => [u, u])));
+        const keys = fresh.map(p => p.image_key).filter(Boolean) as string[];
+        replaceImageCache(Object.fromEntries(keys.map(k => [k, k])));
+
         setJustUpdated(true);
       } else {
         setJustUpdated(false);

@@ -125,7 +125,7 @@ export default function ProductsTable({
                   // ✅ Nếu có blob → dùng; nếu không → link online gốc (hoặc fallback)
                   const imgSrc = cachedBlobUrl || url || '/fallback.png';
 
-                  const sourceLabel = cachedBlobUrl ? 'Cached ✅' : 'Online 🌐';
+                  const sourceLabel = cachedBlobUrl ? '✅' : '🌐';
 
                   return (
                     <Link href={`/product/${p.id}`}>
