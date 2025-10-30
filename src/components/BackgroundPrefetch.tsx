@@ -20,7 +20,7 @@ export default function BackgroundPrefetch() {
 
         // Detect QR prefix (format: 2 + 3 + 2 = 7 ký tự)
         const href = window.location.href;
-        const match = href.match(/[A-Z]{2}[A-Z0-9]{3}[A-Z0-9]{2}/);
+        const match = href.match(/[A-Z0-9]{2}[A-Z0-9]{3}(?:[A-Z0-9]{2})?/);
         if (match) {
           const prefix = match[0];
           console.log('[BackgroundPrefetch] detected prefix', prefix);

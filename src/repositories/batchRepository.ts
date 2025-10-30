@@ -46,3 +46,31 @@ export async function pruneBatches(validIds: string[]): Promise<void> {
 
   await tx.done;
 }
+
+// 🔄 Đồng bộ batch theo prefix (VD: 'MD', 'BK', 'PT' ...)
+// Lấy danh sách từ API /api/sheet/batches?prefix=MD và cập nhật IndexedDB
+export async function syncBatchesByPrefix(prefix: string): Promise<void> {
+  if (!prefix) return;
+  try {
+    const res = await fetch(`/api/sheet/batches?prefix=${prefix}`, {
+      headers: { 'Cache-Control': 'no-store' },
+    });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
+    const data = await res.json();
+    const items = Array.isArray(data) ? data : data?.data ?? [];
+    if (!items.length) {
+      console.warn(`[batchRepository] ⚠️ Không có dữ liệu cho prefix ${prefix}`);
+      return;
+    }
+
+    console.log(`[batchRepository] 🔄 Đồng bộ ${items.length} batch(s) cho prefix ${prefix}`);
+    await upsertBatches(items);
+
+    // Tuỳ chọn: prune các batch không còn thuộc prefix đó
+    const validIds = items.map((b: any) => b.batch_id);
+    await pruneBatches(validIds);
+  } catch (err) {
+    console.warn('[batchRepository] ⚠️ Lỗi syncBatchesByPrefix:', err);
+  }
+}

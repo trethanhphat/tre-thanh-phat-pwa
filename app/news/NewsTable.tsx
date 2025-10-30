@@ -123,7 +123,9 @@ export default function NewsTable({
                       crossOrigin="anonymous"
                       onError={e => {
                         // ✅ Fallback sang proxy nếu ảnh gốc lỗi
-                        const proxyUrl = `/api/image-proxy?url=${encodeURIComponent(n.image_url)}`;
+                        const proxyUrl = `/api/image-proxy?url=${encodeURIComponent(
+                          n.image_url || ''
+                        )}`;
                         if (n.image_url && e.currentTarget.src !== proxyUrl) {
                           console.warn('⚠️ Fallback sang proxy cho ảnh lỗi:', n.image_url);
                           e.currentTarget.src = proxyUrl;
