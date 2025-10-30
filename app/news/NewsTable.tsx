@@ -2,7 +2,7 @@
 'use client';
 
 import React from 'react';
-import type { NewsItem } from '@/lib/news';
+import type { NewsItem } from '@/repositories/newsRepository';
 
 interface NewsTableProps {
   items: NewsItem[]; // ✅ đã phân trang từ page.tsx

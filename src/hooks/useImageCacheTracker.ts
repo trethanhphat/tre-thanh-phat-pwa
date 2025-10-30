@@ -1,6 +1,6 @@
 // File: src/hooks/useImageCacheTracker.ts
 import { useEffect, useRef, useState } from 'react';
-import { ensureNewsImageCachedByUrl } from '@/lib/news_images';
+import { ensureNewsImageCachedByUrl } from '@/services/newsImageService';
 import { ensureProductImageCachedByUrl } from '@/services/productImageService';
 
 /**

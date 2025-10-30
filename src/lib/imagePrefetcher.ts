@@ -1,6 +1,6 @@
 // ✅ Prefetch & warm CDN + IndexedDB image cache (dùng chung cho news + product)
 
-import { ensureNewsImageCachedByUrl } from './news_images';
+import { ensureNewsImageCachedByUrl } from '../services/newsImageService';
 import { ensureProductImageCachedByUrl } from '../services/productImageService';
 
 // 👇 Fix type "navigator.connection" (Network Information API)

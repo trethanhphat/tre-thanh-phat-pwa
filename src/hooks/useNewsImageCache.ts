@@ -1,7 +1,7 @@
 //File: src/hooks/useNewsImageCache.ts
 import { useEffect, useState } from 'react';
-import { getNewsImageURLByUrl } from '@/lib/news_images';
-import { NewsItem } from '@/lib/news';
+import { getNewsImageURLByUrl } from '@/services/newsImageService';
+import { NewsItem } from '@/repositories/newsRepository';
 
 export function useNewsImageCache(items: NewsItem[]) {
   const [imageCache, setImageCache] = useState<Record<string, string>>({});

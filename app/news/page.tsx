@@ -5,7 +5,7 @@ import { useEffect, useRef, useState } from 'react';
 import axios from 'axios';
 import ControlBar from '@/components/ControlBar';
 import NewsTable from '@app/news/NewsTable';
-import { NewsItem, loadNewsFromDB, syncNews } from '@/lib/news';
+import { NewsItem, loadNewsFromDB, syncNews } from '@/repositories/newsRepository';
 import { useImageCacheTracker } from '@/hooks/useImageCacheTracker'; // ✅ dùng hook mới theo dõi cache ảnh
 
 type SortField = 'published' | 'title' | 'author';
@@ -110,7 +110,7 @@ export default function NewsListPage() {
   useEffect(() => {
     if (!items.length) return;
     (async () => {
-      const { getNewsImageURLByUrl } = await import('@/lib/news_images');
+      const { getNewsImageURLByUrl } = await import('@/services/newsImageService');
       const map: { id: string; url: string }[] = [];
 
       for (const n of items) {

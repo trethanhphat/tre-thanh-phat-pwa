@@ -1,6 +1,6 @@
 // ✅ File: src/hooks/useImageLoadTracker.ts
 import { useEffect, useRef } from 'react';
-import { ensureNewsImageCachedByUrl } from '@/lib/news_images';
+import { ensureNewsImageCachedByUrl } from '@/services/newsImageService';
 
 /**
  * Hook để tải và cache ảnh khi hiển thị lần đầu.

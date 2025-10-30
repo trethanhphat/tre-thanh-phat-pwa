@@ -1,4 +1,4 @@
-// ✅ File: src/lib/products.ts
+// ✅ File: src/repositories/productRepository.ts
 import { initDB, STORE_PRODUCTS } from '../lib/db';
 import {
   prefetchProductImages,
