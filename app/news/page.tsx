@@ -5,7 +5,7 @@ import { useEffect, useRef, useState } from 'react';
 import axios from 'axios';
 import ControlBar from '@/components/ControlBar';
 import NewsTable from '@app/news/NewsTable';
-import { NewsItem, loadNewsFromDB, syncNews } from '@/repositories/newsRepository';
+import { News, loadNewsFromDB, syncNews } from '@/repositories/newsRepository';
 import { useImageCacheTracker } from '@/hooks/useImageCacheTracker'; // ✅ dùng hook mới theo dõi cache ảnh
 
 type SortField = 'published' | 'title' | 'author';
@@ -13,7 +13,7 @@ type SortOrder = 'asc' | 'desc';
 
 export default function NewsListPage() {
   // ---------------------- STATE ----------------------
-  const [items, setItems] = useState<NewsItem[]>([]);
+  const [items, setItems] = useState<News[]>([]);
   const [loading, setLoading] = useState(true);
   const [usingCache, setUsingCache] = useState(false);
   const [justUpdated, setJustUpdated] = useState(false);
@@ -29,7 +29,7 @@ export default function NewsListPage() {
   const [pageSize, setPageSize] = useState(10);
   const [searchText, setSearchText] = useState('');
 
-  const itemsRef = useRef<NewsItem[]>([]);
+  const itemsRef = useRef<News[]>([]);
   useEffect(() => {
     itemsRef.current = items;
   }, [items]);
@@ -58,7 +58,7 @@ export default function NewsListPage() {
       }
 
       const payload = res.data;
-      const fresh: NewsItem[] = Array.isArray(payload) ? payload : payload?.data ?? [];
+      const fresh: News[] = Array.isArray(payload) ? payload : payload?.data ?? [];
 
       if (!Array.isArray(fresh) || fresh.length === 0) {
         setLoading(false);
@@ -207,7 +207,7 @@ export default function NewsListPage() {
 
 // ---------------------- Helpers ----------------------
 function sortedAndFiltered(
-  items: NewsItem[],
+  items: News[],
   sortField: SortField,
   sortOrder: SortOrder,
   searchText: string
