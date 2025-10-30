@@ -1,6 +1,19 @@
 // ✅ File: src/repositories/newsRepository.ts
+// ─────────────────────────────────────────────
+// 📘 Chức năng: Quản lý dữ liệu tin tức (news) trong IndexedDB
+// 🔹 Load, đồng bộ và lưu cache ảnh offline-first
+//
+// 🛠️ Đã đổi sang phương án mới như sau:
+//   • Sau khi fetch API, tự động gọi ensureNewsImageCachedByUrl()
+//     để lưu blob ảnh vào IndexedDB (newsImageService)
+//   • Hàm fetchAndSyncNewsFromAPI() nay trả về mảng tin hợp lệ,
+//     đồng thời prefetch ảnh top N cho offline hiển thị nhanh
+//   • Giữ nguyên tương thích loadNewsFromDB, upsertNews, pruneNews
+// ─────────────────────────────────────────────
+
 import axios from 'axios';
 import { initDB, STORE_NEWS } from '@/lib/db';
+import { ensureNewsImageCachedByUrl } from '@/services/newsImageService';
 
 /** 🔹 Kiểu dữ liệu tin tức (đồng bộ với /api/news) */
 export interface News {
@@ -12,7 +25,7 @@ export interface News {
   published?: string; // ISO
   updated?: string; // ISO
   summary?: string;
-  image_url?: string; // 🟢 chỉ lưu URL gốc, không có proxy
+  image_url?: string; // 🟢 chỉ lưu URL gốc
 }
 
 /** 🔹 Load tin từ IndexedDB (offline-first, mới nhất lên đầu) */
@@ -27,15 +40,13 @@ export async function loadNewsFromDB(): Promise<News[]> {
 }
 
 /**
- * 💾 Đồng bộ tin tức vào IndexedDB
- *  - chỉ thêm/cập nhật nếu khác
- *  - trả về true nếu có thay đổi (để UI reload)
+ * 💾 Upsert tin tức (thêm/cập nhật nếu khác)
+ *  - Trả về true nếu có thay đổi (để UI reload)
  */
 export async function upsertNews(items: News[]): Promise<boolean> {
   const db = await initDB();
   const tx = db.transaction(STORE_NEWS, 'readwrite');
   const store = tx.store;
-
   let hasChange = false;
 
   for (const n of items) {
@@ -66,12 +77,10 @@ export async function pruneNews(validIds: string[]): Promise<void> {
 }
 
 /**
- * 🔹 Fetch từ API → Đồng bộ vào IndexedDB
+ * 🔹 Fetch tin tức từ API → Đồng bộ vào IndexedDB + cache ảnh offline
  * @param limit Số lượng tin (mặc định 10)
  */
-export async function fetchAndSyncNewsFromAPI(
-  limit = 10
-): Promise<{ items: News[]; hasChange: boolean }> {
+export async function fetchAndSyncNewsFromAPI(limit = 10): Promise<News[]> {
   try {
     const res = await axios.get('/api/news', {
       params: { limit },
@@ -81,7 +90,7 @@ export async function fetchAndSyncNewsFromAPI(
 
     if (res.status < 200 || res.status >= 300) {
       console.warn('[newsRepository] ❌ API HTTP', res.status, res.data);
-      return { items: [], hasChange: false };
+      return [];
     }
 
     const payload = res.data;
@@ -89,31 +98,48 @@ export async function fetchAndSyncNewsFromAPI(
 
     if (!Array.isArray(fresh)) {
       console.warn('[newsRepository] ⚠️ API trả về không đúng định dạng');
-      return { items: [], hasChange: false };
+      return [];
     }
 
+    // ✅ Lưu DB trước
     const hasChange = await upsertNews(fresh);
-    return { items: fresh, hasChange };
+
+    // ✅ Nếu có ảnh, pre-cache qua ensureNewsImageCachedByUrl
+    const topImages = fresh
+      .map(n => n.image_url)
+      .filter(Boolean)
+      .slice(0, 10) as string[];
+
+    for (const imgUrl of topImages) {
+      try {
+        await ensureNewsImageCachedByUrl(imgUrl);
+      } catch (err) {
+        console.debug('[newsRepository] ⚠️ cache image fail:', imgUrl, err);
+      }
+    }
+
+    return fresh;
   } catch (err) {
     console.warn('[newsRepository] ⚠️ fetchAndSyncNewsFromAPI error:', err);
-    return { items: [], hasChange: false };
+    return [];
   }
 }
 
-// ✅ Đồng bộ dữ liệu tin tức từ API online về IndexedDB (giống products)
+/** ✅ Đồng bộ tin tức đầy đủ (fallback cho service worker hoặc job nền) */
 export async function syncNews(): Promise<void> {
   try {
     const db = await initDB();
-
-    // 🔹 Gọi API online
     const res = await fetch('/api/news');
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const newsList = await res.json();
 
-    // 🔹 Ghi đè toàn bộ vào IndexedDB
     const tx = db.transaction(STORE_NEWS, 'readwrite');
     await Promise.all(newsList.map((n: any) => tx.store.put(n)));
     await tx.done;
+
+    // Cache ảnh luôn cho offline (song song)
+    const urls = newsList.map((n: any) => n.image_url).filter(Boolean);
+    for (const u of urls.slice(0, 10)) ensureNewsImageCachedByUrl(u);
 
     console.log(`[newsRepository] ✅ Đã đồng bộ ${newsList.length} tin tức.`);
   } catch (err) {

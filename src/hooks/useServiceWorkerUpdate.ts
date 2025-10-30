@@ -2,14 +2,18 @@
 
 import { useEffect, useState } from 'react';
 
+type UpdateStatus = 'idle' | 'checking' | 'hasUpdate' | 'updating' | 'done' | 'error';
+
 export function useServiceWorkerUpdate() {
   const [waitingWorker, setWaitingWorker] = useState<ServiceWorker | null>(null);
-  const [hasUpdate, setHasUpdate] = useState(false);
+  const [status, setStatus] = useState<UpdateStatus>('idle');
   const [connectionType, setConnectionType] = useState<string | null>(null);
+  const [hasUpdate, setHasUpdate] = useState(false);
 
   useEffect(() => {
     if (typeof window === 'undefined' || !('serviceWorker' in navigator)) return;
 
+    // 🔹 Theo dõi loại kết nối (Wi-Fi / 4G / 3G)
     const connection =
       (navigator as any).connection ||
       (navigator as any).mozConnection ||
@@ -18,10 +22,11 @@ export function useServiceWorkerUpdate() {
       setConnectionType(connection.effectiveType);
     }
 
+    // 🔹 Lấy registration hiện có
     navigator.serviceWorker.getRegistration().then(reg => {
       if (!reg) return;
 
-      // Khi có update
+      // Khi có update mới
       reg.onupdatefound = () => {
         const newWorker = reg.installing;
         if (!newWorker) return;
@@ -30,29 +35,60 @@ export function useServiceWorkerUpdate() {
           if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
             setWaitingWorker(newWorker);
             setHasUpdate(true);
+            setStatus('hasUpdate');
+            console.log('[PWA] ⚡ Có bản cập nhật mới sẵn sàng.');
           }
         };
       };
     });
 
-    // Lắng nghe controller change (khi worker mới được activate)
-    navigator.serviceWorker.addEventListener('controllerchange', () => {
-      window.location.reload();
-    });
+    // Khi SW mới được kích hoạt
+    const onControllerChange = () => {
+      console.log('[PWA] ✅ Bản cập nhật đã được kích hoạt.');
+      setStatus('done');
+      // Tránh reload loop — chỉ reload 1 lần
+      if (!sessionStorage.getItem('pwa_reloaded')) {
+        sessionStorage.setItem('pwa_reloaded', 'true');
+        setTimeout(() => window.location.reload(), 1500);
+      }
+    };
+
+    navigator.serviceWorker.addEventListener('controllerchange', onControllerChange);
+    return () => {
+      navigator.serviceWorker.removeEventListener('controllerchange', onControllerChange);
+    };
   }, []);
 
+  // ✅ Khi người dùng nhấn "Cập nhật"
   const update = () => {
-    if (connectionType && connectionType !== 'wifi') {
-      alert('Chỉ cập nhật khi có kết nối Wi-Fi để tiết kiệm dữ liệu.');
+    if (!navigator.onLine) {
+      alert('❌ Không có kết nối mạng. Vui lòng thử lại khi có Internet.');
       return;
     }
-    waitingWorker?.postMessage({ type: 'SKIP_WAITING' });
-    // Lúc này reload sẽ được gọi qua controllerchange listener ở trên
+
+    if (connectionType && connectionType !== 'wifi') {
+      const confirmUpdate = confirm(
+        '⚠️ Bạn đang dùng mạng di động. Tải bản cập nhật có thể tốn dữ liệu.\nBạn có muốn tiếp tục không?'
+      );
+      if (!confirmUpdate) {
+        alert('⏳ Bản cập nhật sẽ tự động cài khi bạn có Wi-Fi.');
+        return;
+      }
+    }
+
+    if (waitingWorker) {
+      console.log('[PWA] 🚀 Gửi tín hiệu SKIP_WAITING để kích hoạt SW mới.');
+      setStatus('updating');
+      waitingWorker.postMessage({ type: 'SKIP_WAITING' });
+    } else {
+      alert('Không có bản cập nhật khả dụng.');
+    }
   };
 
   return {
     hasUpdate,
     update,
+    status, // 'hasUpdate' | 'updating' | 'done'
     connectionType,
   };
 }

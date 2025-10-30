@@ -16,11 +16,6 @@ export const initDB = async () => {
       if (!db.objectStoreNames.contains(STORE_PRODUCTS)) {
         db.createObjectStore(STORE_PRODUCTS, { keyPath: 'id' });
       }
-
-      // 🔹 Store ảnh sản phẩm
-      if (!db.objectStoreNames.contains(STORE_PRODUCTS_IMAGES)) {
-        db.createObjectStore(STORE_PRODUCTS_IMAGES, { keyPath: 'url' });
-      }
       // 🔹 Store ảnh sản phẩm
       if (!db.objectStoreNames.contains(STORE_PRODUCTS_IMAGES)) {
         const s = db.createObjectStore(STORE_PRODUCTS_IMAGES, { keyPath: 'key' });
