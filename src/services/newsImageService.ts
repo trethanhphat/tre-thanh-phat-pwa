@@ -81,15 +81,20 @@ export async function saveNewsImageIfNotExists(
 }
 
 /** ✅ Offline-first lấy ảnh → nếu có blob thì trả blob URL (objectURL), nếu chưa có trả proxy URL */
+/** ✅ Offline-first lấy ảnh → ưu tiên blob, fallback qua proxy */
 export async function getNewsImageURLByUrl(url?: string): Promise<string> {
   if (!url) return '';
   const db = await initDB();
   const key = await sha256Hex(url);
   const rec = await db.get(STORE_NEWS_IMAGES, key);
   if (rec?.blob) {
-    return URL.createObjectURL(rec.blob);
+    // ✅ Có blob → tạo object URL
+    const objUrl = URL.createObjectURL(rec.blob);
+    // Giữ 1 log nhẹ để debug (có thể bỏ)
+    console.debug('[newsImageService] blob hit:', url);
+    return objUrl;
   }
-  // nếu chưa có blob, trả về proxy URL để browser có thể hiển thị tạm khi online
+  console.debug('[newsImageService] blob miss, fallback proxy:', url);
   return withProxy(url);
 }
 
