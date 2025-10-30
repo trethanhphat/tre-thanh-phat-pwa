@@ -2,6 +2,7 @@
 import axios from 'axios';
 import { initDB, STORE_NEWS } from '@/lib/db';
 
+/** 🔹 Kiểu dữ liệu tin tức (đồng bộ với /api/news) */
 export interface NewsItem {
   news_id: string; // keyPath
   title: string;
@@ -11,39 +12,35 @@ export interface NewsItem {
   published?: string; // ISO
   updated?: string; // ISO
   summary?: string;
-  image_url?: string;
-  // NOTE: không lưu proxy URL vào DB
+  image_url?: string; // 🟢 chỉ lưu URL gốc, không có proxy
 }
 
-/** 🔹 Load tin từ IndexedDB, mới nhất lên đầu */
-export const loadNewsFromDB = async (): Promise<NewsItem[]> => {
+/** 🔹 Load tin từ IndexedDB (offline-first, mới nhất lên đầu) */
+export async function loadNewsFromDB(): Promise<NewsItem[]> {
   const db = await initDB();
-  const all = await db.getAll(STORE_NEWS);
-  // sắp xếp mới nhất lên trên
-  return (all as NewsItem[]).sort((a, b) => {
+  const all = (await db.getAll(STORE_NEWS)) as NewsItem[];
+  return all.sort((a, b) => {
     const ad = a.published || a.updated || '';
     const bd = b.published || b.updated || '';
     return bd.localeCompare(ad);
   });
-};
+}
 
 /**
- * 🔹 Đồng bộ tin tức: chỉ thêm/cập nhật những item có khác
- *    Trả về true nếu có thay đổi (cần update UI)
+ * 💾 Đồng bộ tin tức vào IndexedDB
+ *  - chỉ thêm/cập nhật nếu khác
+ *  - trả về true nếu có thay đổi (để UI reload)
  */
-export const syncNews = async (items: NewsItem[]): Promise<boolean> => {
+export async function upsertNews(items: NewsItem[]): Promise<boolean> {
   const db = await initDB();
   const tx = db.transaction(STORE_NEWS, 'readwrite');
   const store = tx.store;
 
   let hasChange = false;
 
-  // Xóa tin cũ không còn (tùy muốn — giữ nguyên hiện tại bạn có prune function ở nơi khác)
-  // Ở đây chỉ tập trung thêm / cập nhật
   for (const n of items) {
     const existing = await store.get(n.news_id);
-    // Nếu chưa có hoặc có trường updated khác → cập nhật
-    if (!existing || (n.updated && n.updated !== existing.updated)) {
+    if (!existing || JSON.stringify(existing) !== JSON.stringify(n)) {
       await store.put(n);
       hasChange = true;
     }
@@ -51,12 +48,26 @@ export const syncNews = async (items: NewsItem[]): Promise<boolean> => {
 
   await tx.done;
   return hasChange;
-};
+}
+
+/** ❌ Xóa các bản ghi không còn tồn tại trên server (nếu cần) */
+export async function pruneNews(validIds: string[]): Promise<void> {
+  const db = await initDB();
+  const tx = db.transaction(STORE_NEWS, 'readwrite');
+  const store = tx.objectStore(STORE_NEWS);
+  let cursor = await store.openCursor();
+  while (cursor) {
+    if (!validIds.includes(cursor.key as string)) {
+      await cursor.delete();
+    }
+    cursor = await cursor.continue();
+  }
+  await tx.done;
+}
 
 /**
- * 🔹 Gọi API /api/news và đồng bộ vào IndexedDB
- * @param limit số tin lấy (mặc định 10)
- * @returns { items, hasChange } - items = mảng news mới (từ API) hoặc []
+ * 🔹 Fetch từ API → Đồng bộ vào IndexedDB
+ * @param limit Số lượng tin (mặc định 10)
  */
 export async function fetchAndSyncNewsFromAPI(
   limit = 10
@@ -69,7 +80,7 @@ export async function fetchAndSyncNewsFromAPI(
     });
 
     if (res.status < 200 || res.status >= 300) {
-      console.warn('[newsRepository] API HTTP', res.status, res.data);
+      console.warn('[newsRepository] ❌ API HTTP', res.status, res.data);
       return { items: [], hasChange: false };
     }
 
@@ -77,14 +88,14 @@ export async function fetchAndSyncNewsFromAPI(
     const fresh: NewsItem[] = Array.isArray(payload) ? payload : payload?.data ?? [];
 
     if (!Array.isArray(fresh)) {
-      console.warn('[newsRepository] API trả về không đúng định dạng');
+      console.warn('[newsRepository] ⚠️ API trả về không đúng định dạng');
       return { items: [], hasChange: false };
     }
 
-    const hasChange = await syncNews(fresh);
+    const hasChange = await upsertNews(fresh);
     return { items: fresh, hasChange };
   } catch (err) {
-    console.warn('[newsRepository] fetchAndSyncNewsFromAPI error:', err);
+    console.warn('[newsRepository] ⚠️ fetchAndSyncNewsFromAPI error:', err);
     return { items: [], hasChange: false };
   }
 }
