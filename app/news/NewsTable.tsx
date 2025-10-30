@@ -2,10 +2,10 @@
 'use client';
 
 import React from 'react';
-import type { NewsItem } from '@/repositories/newsRepository';
+import type { News } from '@/repositories/newsRepository';
 
 interface NewsTableProps {
-  items: NewsItem[]; // ✅ đã phân trang từ page.tsx
+  items: News[]; // ✅ đã phân trang từ page.tsx
   imageCache: { [news_id: string]: string }; // ✅ map news_id -> URL (có thể là blob:)
   sortField: 'title' | 'published' | 'author';
   sortOrder: 'asc' | 'desc';
