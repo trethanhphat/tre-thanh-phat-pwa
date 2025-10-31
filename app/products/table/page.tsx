@@ -71,8 +71,6 @@ export default function ProductsListPage() {
 
       if (isDifferent) {
         setProducts(fresh);
-        replaceImageCache(Object.fromEntries(fresh.map(p => [p.image_url, p.image_url])));
-        // ✅ cập nhật cache ảnh
       }
 
       // Nếu trước đó đang hiển thị offline -> show banner "Đã cập nhật"
