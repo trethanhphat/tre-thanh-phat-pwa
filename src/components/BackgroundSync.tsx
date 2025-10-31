@@ -1,5 +1,10 @@
 // ✅ File: src/components/BackgroundSync.tsx
-// ✅ Bản có log và fix fallback cho connection.type undefined
+// Mục đích: Tự động đồng bộ dữ liệu nền (background sync) khi có mạng, tránh chạy khi dùng mobile data
+// Đã đổi sang phương án mới như sau:
+//  - Thêm console log chi tiết giúp debug dễ hơn
+//  - Thêm fallback cho connection.type === undefined (trình duyệt không hỗ trợ API này)
+//  - Giữ nguyên cơ chế chỉ sync 1 lần/ngày
+
 'use client';
 
 import { useEffect } from 'react';
