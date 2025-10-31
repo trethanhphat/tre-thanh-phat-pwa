@@ -126,23 +126,45 @@ export async function fetchAndSyncNewsFromAPI(limit = 10): Promise<News[]> {
 }
 
 /** ✅ Đồng bộ tin tức đầy đủ (fallback cho service worker hoặc job nền) */
-export async function syncNews(): Promise<void> {
+export async function syncNews(fresh?: News[]): Promise<boolean> {
   try {
-    const db = await initDB();
-    const res = await fetch('/api/news');
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    const newsList = await res.json();
+    let newsList = fresh;
 
+    // Nếu không có tham số → tự fetch từ API
+    if (!newsList) {
+      const res = await fetch('/api/news');
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      newsList = await res.json();
+    }
+
+    if (!Array.isArray(newsList)) return false;
+
+    const db = await initDB();
     const tx = db.transaction(STORE_NEWS, 'readwrite');
-    await Promise.all(newsList.map((n: any) => tx.store.put(n)));
+    const store = tx.store;
+
+    let hasChange = false;
+    for (const n of newsList) {
+      const existing = await store.get(n.news_id);
+      if (!existing || JSON.stringify(existing) !== JSON.stringify(n)) {
+        await store.put(n);
+        hasChange = true;
+      }
+    }
     await tx.done;
 
-    // Cache ảnh luôn cho offline (song song)
+    // ✅ Cache ảnh song song
     const urls = newsList.map((n: any) => n.image_url).filter(Boolean);
     for (const u of urls.slice(0, 10)) ensureNewsImageCachedByUrl(u);
 
-    console.log(`[newsRepository] ✅ Đã đồng bộ ${newsList.length} tin tức.`);
+    console.log(
+      `[newsRepository] ✅ Đồng bộ ${newsList.length} tin (${
+        hasChange ? 'có thay đổi' : 'không thay đổi'
+      })`
+    );
+    return hasChange;
   } catch (err) {
     console.warn('[newsRepository] ⚠️ Lỗi syncNews:', err);
+    return false;
   }
 }
