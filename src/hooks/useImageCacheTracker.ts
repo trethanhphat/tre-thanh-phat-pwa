@@ -109,10 +109,13 @@ export function useImageCacheTracker(
   const [status, setStatus] = useState<'idle' | 'syncing' | 'done'>('idle');
 
   // ✅ Fallback an toàn khi type sai
-  const storeName = STORE_MAP[type] ?? STORE_IMAGES;
+  const storeName = STORE_MAP[options?.type ?? 'generic'] ?? STORE_IMAGES;
 
   /** ✅ Dùng hàm đảm bảo cache ảnh từ module dùng chung */
-  const ensureImage = useCallback((url: string) => ensureImageCachedByUrl(url, type), [type]);
+  const ensureImage = useCallback(
+    (url: string) => ensureImageCachedByUrl(url, options?.type ?? 'generic'),
+    [options?.type]
+  );
 
   /** ✅ Đồng bộ nhiều ảnh (ví dụ: danh sách news/products) */
   const syncImages = useCallback(
@@ -148,6 +151,7 @@ export function useImageCacheTracker(
     status,
     ensureImage,
     syncImages,
-    getImageBlobUrl: (url: string) => getImageBlobUrl(url, options?.type ?? 'generic'),
+    getImageBlobUrl: (url: string, type?: 'news' | 'product' | 'generic') =>
+      getImageBlobUrl(url, type ?? options?.type ?? 'generic'),
   };
 }
