@@ -156,7 +156,9 @@ export async function syncNews(fresh?: News[]): Promise<boolean> {
     // Tối đa 3 ảnh song song để tránh nghẽn mạng
     for (let i = 0; i < urls.length; i += 3) {
       const chunk = urls.slice(i, i + 3);
-      await Promise.allSettled(chunk.map(u => ensureImageCachedByUrl(u, 'news')));
+      await Promise.allSettled(
+        chunk.filter((u): u is string => !!u).map(u => ensureImageCachedByUrl(u, 'news'))
+      );
     }
 
     console.log(
