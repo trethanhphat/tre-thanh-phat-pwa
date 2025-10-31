@@ -3,14 +3,17 @@
 
 import { useEffect } from 'react';
 import { prefetchNewsOnce } from '@/services/newsPrefetch';
-import { prefetchProductsOnce } from '@/services/productsPrefetch'; // nếu bạn có tương tự cho products
+import { prefetchProductsOnce } from '@/services/productsPrefetch';
 import { syncBatchesByPrefix } from '@/repositories/batchRepository';
 
 export default function BackgroundPrefetch() {
   useEffect(() => {
-    const run = async () => {
-      console.log('[BackgroundPrefetch] 🚀 run() start');
+    console.log('[BackgroundPrefetch] ⏱ useEffect() triggered');
 
+    const run = async (reason = 'initial') => {
+      console.log(`[BackgroundPrefetch] 🚀 run() start — reason: ${reason}`);
+
+      console.log('[BackgroundPrefetch] 🌍 navigator.onLine =', navigator.onLine);
       if (!navigator.onLine) {
         console.log('[BackgroundPrefetch] ❌ Offline — skip prefetch');
         return;
@@ -19,14 +22,22 @@ export default function BackgroundPrefetch() {
       try {
         console.log('[BackgroundPrefetch] 🌐 Online detected, start prefetch');
 
-        const tasks = [
-          (async () => {
-            console.log('[BackgroundPrefetch] 📰 prefetchNewsOnce() start');
-            await prefetchNewsOnce();
-            console.log('[BackgroundPrefetch] ✅ prefetchNewsOnce() done');
-          })(),
-        ];
+        const tasks: Promise<void>[] = [];
 
+        // --- News ---
+        if (typeof prefetchNewsOnce === 'function') {
+          tasks.push(
+            (async () => {
+              console.log('[BackgroundPrefetch] 📰 prefetchNewsOnce() start');
+              await prefetchNewsOnce();
+              console.log('[BackgroundPrefetch] ✅ prefetchNewsOnce() done');
+            })()
+          );
+        } else {
+          console.log('[BackgroundPrefetch] ⚠️ prefetchNewsOnce not defined');
+        }
+
+        // --- Products ---
         if (typeof prefetchProductsOnce === 'function') {
           tasks.push(
             (async () => {
@@ -36,13 +47,13 @@ export default function BackgroundPrefetch() {
             })()
           );
         } else {
-          console.log('[BackgroundPrefetch] ⚠️ prefetchProductsOnce not defined, skipped');
+          console.log('[BackgroundPrefetch] ⚠️ prefetchProductsOnce not defined');
         }
 
         await Promise.all(tasks);
         console.log('[BackgroundPrefetch] ✅ All prefetch tasks completed');
 
-        // Detect QR prefix (ví dụ: 2+3+2 = 7 ký tự, như "AB123CD")
+        // --- QR Prefix ---
         const href = window.location.href;
         const match = href.match(/[A-Z0-9]{2}[A-Z0-9]{3}(?:[A-Z0-9]{2})?/);
         if (match) {
@@ -64,9 +75,11 @@ export default function BackgroundPrefetch() {
       }
     };
 
-    // Chạy khi component mount (nếu online)
-    console.log('[BackgroundPrefetch] ⏱ useEffect() triggered');
-    run();
+    // Run immediately
+    run('initial');
+
+    // Retry when online again
+    window.addEventListener('online', () => run('online event'));
 
     // Khi app được cài PWA lên home screen → event 'appinstalled'
     const onInstalled = () => {
@@ -77,7 +90,10 @@ export default function BackgroundPrefetch() {
     };
 
     window.addEventListener('appinstalled', onInstalled);
-    return () => window.removeEventListener('appinstalled', onInstalled);
+    return () => {
+      window.removeEventListener('appinstalled', onInstalled);
+      window.removeEventListener('online', () => run('online event'));
+    };
   }, []);
 
   return null;
