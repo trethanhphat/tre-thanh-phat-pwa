@@ -52,7 +52,7 @@ export default function NewsListPage() {
     getImageBlobUrl,
     loading: imageSyncing,
     progress,
-  } = useImageCacheTracker('news');
+  } = useImageCacheTracker([], { type: 'news' });
   const [imageMap, setImageMap] = useState<Record<string, string>>({});
 
   // ---------------------- SORT / FILTER / PAGINATION ----------------------
