@@ -16,9 +16,7 @@ export default function ProductDetailPage() {
   const [localImageUrl, setLocalImageUrl] = useState<string | null>(null);
 
   // ✅ Hook theo dõi cache ảnh (tự động hoá theo type)
-  useImageCacheTracker(product?.image_url ? [product.image_url] : [], {
-    type: 'product',
-  });
+  const { syncImages } = useImageCacheTracker([], { type: 'product' });
 
   useEffect(() => {
     if (!id) return;
@@ -37,7 +35,7 @@ export default function ProductDetailPage() {
 
         // ✅ Cache ảnh sản phẩm
         if (data.image_url) {
-          await ensureProductImageCachedByUrl(data.image_url);
+          await syncImages([data.image_url]);
           const localUrl = await getProductImageURL(data.image_url);
           objectUrlToRevoke = localUrl;
           if (isMounted) {

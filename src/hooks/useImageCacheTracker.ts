@@ -100,8 +100,8 @@ async function fetchImageMeta(url: string): Promise<{ hash?: string; etag?: stri
 
 /** 🔹 Hook chính */
 export function useImageCacheTracker(
-  type: keyof typeof STORE_MAP = 'generic',
-  options?: { autoSync?: boolean }
+  urls: string[] = [],
+  options: { type?: 'news' | 'product' | 'generic'; autoSync?: boolean } = {}
 ) {
   const [loading, setLoading] = useState(false);
   const [progress, setProgress] = useState(0);
