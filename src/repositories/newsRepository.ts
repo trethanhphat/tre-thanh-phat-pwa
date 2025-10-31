@@ -13,7 +13,7 @@
 
 import axios from 'axios';
 import { initDB, STORE_NEWS } from '@/lib/db';
-import { ensureNewsImageCachedByUrl } from '@/services/newsImageService';
+import { ensureImageCachedByUrl } from '@/lib/ensureImageCachedByUrl';
 
 /** 🔹 Kiểu dữ liệu tin tức (đồng bộ với /api/news) */
 export interface News {
@@ -110,13 +110,7 @@ export async function fetchAndSyncNewsFromAPI(limit = 10): Promise<News[]> {
       .filter(Boolean)
       .slice(0, 10) as string[];
 
-    for (const imgUrl of topImages) {
-      try {
-        await ensureNewsImageCachedByUrl(imgUrl);
-      } catch (err) {
-        console.debug('[newsRepository] ⚠️ cache image fail:', imgUrl, err);
-      }
-    }
+    await Promise.allSettled(topImages.map(url => ensureImageCachedByUrl(url, 'news')));
 
     return fresh;
   } catch (err) {
@@ -154,8 +148,16 @@ export async function syncNews(fresh?: News[]): Promise<boolean> {
     await tx.done;
 
     // ✅ Cache ảnh song song
-    const urls = newsList.map((n: any) => n.image_url).filter(Boolean);
-    for (const u of urls.slice(0, 10)) ensureNewsImageCachedByUrl(u);
+    const urls = newsList
+      .map(n => n.image_url)
+      .filter(Boolean)
+      .slice(0, 10);
+
+    // Tối đa 3 ảnh song song để tránh nghẽn mạng
+    for (let i = 0; i < urls.length; i += 3) {
+      const chunk = urls.slice(i, i + 3);
+      await Promise.allSettled(chunk.map(u => ensureImageCachedByUrl(u, 'news')));
+    }
 
     console.log(
       `[newsRepository] ✅ Đồng bộ ${newsList.length} tin (${
