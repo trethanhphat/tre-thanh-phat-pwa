@@ -38,7 +38,7 @@ export default function BackgroundSync() {
 
     if (navigator.onLine) {
       // ⚙️ Nếu không xác định được loại kết nối, mặc định cho phép chạy (thường là WiFi)
-      if (allowMobile || !connection || connection.type === 'wifi') {
+      if (allowMobile || !connection?.type || connection.type === 'wifi') {
         console.log('[BackgroundSync] 🚀 Running sync now...');
         checkAndSync();
       } else {
