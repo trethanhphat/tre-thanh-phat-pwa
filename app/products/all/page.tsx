@@ -36,7 +36,6 @@ export default function ProductsListPage() {
   // ✅ Prefetch & cache toàn bộ ảnh hiển thị
   useImageCacheTracker(products.map(p => p.image_url).filter(Boolean) as string[], {
     type: 'product',
-    skipPrefetch: false,
   });
 
   // ✅ tải ảnh (local blob nếu có cache)
