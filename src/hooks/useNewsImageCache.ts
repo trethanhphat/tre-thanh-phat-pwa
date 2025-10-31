@@ -1,6 +1,6 @@
 //File: src/hooks/useNewsImageCache.ts
 import { useEffect, useState } from 'react';
-import { getNewsImageURLByUrl } from '@/services/newsImageService';
+import { getImageBlobUrl } from '@/lib/getImageBlobUrl';
 import { News } from '@/repositories/newsRepository';
 
 export function useNewsImageCache(items: News[]) {
@@ -14,7 +14,7 @@ export function useNewsImageCache(items: News[]) {
       const entries = await Promise.all(
         items.map(async n => {
           if (!n.image_url) return [n.news_id, ''] as const;
-          const url = await getNewsImageURLByUrl(n.image_url);
+          const url = await getImageBlobUrl(url, 'news');
           return [n.news_id, url] as const;
         })
       );
