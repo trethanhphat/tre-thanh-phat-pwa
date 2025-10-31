@@ -9,6 +9,7 @@ import type { Metadata } from 'next';
 import ServiceWorkerCheck from '@/components/ServiceWorkerCheck';
 import ServiceWorkerRegister from '@/components/ServiceWorkerRegister';
 import BackgroundSync from '@/components/BackgroundSync'; // import client component
+import BackgroundPrefetch from '@/components/BackgroundPrefetch';
 import ResponsiveTableLabels from '@/components/ResponsiveTableLabels';
 
 export const viewport = {
@@ -35,7 +36,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <UpdateNotifier />
         <ServiceWorkerRegister /> {/* ✅ Đăng ký Service Worker */}
         <ServiceWorkerCheck /> {/* ✅ Theo dõi Service Worker */}
-        <BackgroundSync /> {/* client component chạy useEffect */}
+        <BackgroundSync />{' '}
+        {/* client component chạy useEffect để đồng bộ dữ liệu trong nền -- Cần cải tiến*/}
+        <BackgroundPrefetch />{' '}
+        {/* client component chạy useEffect để tải dữ liệu lần đầu khi mở hoặc cài app*/}
         <ResponsiveTableLabels /> {/* ✅ Tự động thêm data-label cho bảng */}
       </body>
     </html>
