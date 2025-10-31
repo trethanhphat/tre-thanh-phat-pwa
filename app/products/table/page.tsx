@@ -147,7 +147,7 @@ export default function ProductsListPage() {
       ) : (
         <ProductsTable
           products={sortedProducts}
-          getImageBlobUrl={getImageBlobUrl}
+          imageCache={imageCache}
           sortField={sortField}
           sortOrder={sortOrder}
           onSortChange={handleSortChange}

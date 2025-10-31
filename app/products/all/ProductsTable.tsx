@@ -7,6 +7,7 @@ import { formatPrice, formatStockStatus } from '@/utils/format';
 
 interface ProductsTableProps {
   products: Product[];
+  getImageBlobUrl: (url: string) => Promise<string | null>;
   imageCache: { [id: number]: string };
   sortField: 'name' | 'price' | 'stock_quantity' | 'stock_status';
   sortOrder: 'asc' | 'desc';
