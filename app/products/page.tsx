@@ -71,7 +71,7 @@ export default function ProductsListPage() {
     getImageBlobUrl,
     loading: imageSyncing,
     progress,
-  } = useImageCacheTracker('products');
+  } = useImageCacheTracker([], { type: 'product' });
   const [imageMap, setImageMap] = useState<Record<string, string>>({});
 
   // ---------------------- OFFLINE FIRST ----------------------
