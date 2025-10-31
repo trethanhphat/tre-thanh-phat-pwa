@@ -1,4 +1,31 @@
 // ✅ File: app/news/page.tsx
+/**
+ * Trang /news
+ * - ✅ OFFLINE FIRST:
+ *    + Luôn thử load dữ liệu từ IndexedDB trước (loadNewsFromDB)
+ *    + Nếu có → hiển thị ngay, đánh dấu đang dùng cache (offline)
+ *    + Nếu chưa có → thông báo cần mở online để đồng bộ lần đầu
+ *
+ * - ✅ ONLINE UPDATE:
+ *    + Khi online, gọi /api/news bằng axios để lấy danh sách mới
+ *    + Nếu có khác biệt → syncNews và cập nhật IndexedDB
+ *    + Nếu không thay đổi → giữ nguyên cache cũ
+ *
+ * - ✅ IMAGE CACHE (phiên bản mới):
+ *    + Dùng useImageCacheTracker('news') để đồng bộ ảnh vào IndexedDB
+ *    + Mỗi ảnh được lưu bằng hash(blob) để nhận diện trùng lặp
+ *    + Khi render → lấy blob URL từ getImageBlobUrl(url)
+ *
+ * - ✅ Control Bar:
+ *    + Tìm kiếm, phân trang, chọn số lượng bài/trang
+ *    + Pagination ở cả TRÊN & DƯỚI bảng tin
+ *
+ * 🟢 ĐÃ ĐỔI SANG PHƯƠNG ÁN MỚI NHƯ SAU:
+ *    - Thay cơ chế cache ảnh cũ bằng hook useImageCacheTracker mới.
+ *    - Đồng bộ cách load ảnh giống app/products/page.tsx.
+ *    - Dọn dẹp code và đồng nhất cấu trúc, thêm log kiểm soát rõ ràng.
+ */
+
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
@@ -6,7 +33,7 @@ import axios from 'axios';
 import ControlBar from '@/components/ControlBar';
 import NewsTable from '@app/news/NewsTable';
 import { News, loadNewsFromDB, syncNews } from '@/repositories/newsRepository';
-import { useImageCacheTracker } from '@/hooks/useImageCacheTracker'; // ✅ dùng hook mới theo dõi cache ảnh
+import { useImageCacheTracker } from '@/hooks/useImageCacheTracker'; // ✅ dùng hook mới hợp nhất
 
 type SortField = 'published' | 'title' | 'author';
 type SortOrder = 'asc' | 'desc';
@@ -19,10 +46,16 @@ export default function NewsListPage() {
   const [justUpdated, setJustUpdated] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  const imageURLs = items.map(n => n.image_url).filter(Boolean) as string[];
-  const { imageCache, replaceImageCache } = useImageCacheTracker(imageURLs, { type: 'news' });
+  // ---------------------- IMAGE CACHE ----------------------
+  const {
+    syncImages,
+    getImageBlobUrl,
+    loading: imageSyncing,
+    progress,
+  } = useImageCacheTracker('news');
+  const [imageMap, setImageMap] = useState<Record<string, string>>({});
 
-  // Sort / Filter / Pagination
+  // ---------------------- SORT / FILTER / PAGINATION ----------------------
   const [sortField, setSortField] = useState<SortField>('published');
   const [sortOrder, setSortOrder] = useState<SortOrder>('desc');
   const [currentPage, setCurrentPage] = useState(1);
@@ -40,7 +73,7 @@ export default function NewsListPage() {
     if (cached.length > 0) {
       setItems(cached);
       setUsingCache(true);
-      console.log(`🗄 Có ${cached.length} mục trong Local DB`); // Hiện số mục tin được lưu trong Local DB
+      console.log(`🗄 Có ${cached.length} bài trong Local DB`);
     }
     setLoading(false);
   };
@@ -52,10 +85,8 @@ export default function NewsListPage() {
         headers: { 'Cache-Control': 'no-store' },
         validateStatus: () => true,
       });
-
-      if (res.status < 200 || res.status >= 300) {
+      if (res.status < 200 || res.status >= 300)
         throw new Error(`HTTP ${res.status}: ${res.data?.error || 'API lỗi'}`);
-      }
 
       const payload = res.data;
       const fresh: News[] = Array.isArray(payload) ? payload : payload?.data ?? [];
@@ -71,13 +102,18 @@ export default function NewsListPage() {
       if (hasChange) {
         setItems(fresh);
         setJustUpdated(true);
-        // setTimeout(() => setJustUpdated(false), 2500); // ✅ tự ẩn banner sau 2.5s
       } else {
         setJustUpdated(false);
       }
 
       setUsingCache(false);
       setLoading(false);
+
+      // ✅ Sau khi đồng bộ dữ liệu, đồng bộ luôn ảnh offline
+      const urls = fresh.map(n => n.image_url).filter(Boolean) as string[];
+      if (urls.length) {
+        syncImages(urls);
+      }
     } catch (err: any) {
       console.warn('⚠️ Không thể tải online:', err);
       setErrorMessage(err.message || '⚠️ Có lỗi khi tải dữ liệu');
@@ -91,7 +127,7 @@ export default function NewsListPage() {
   useEffect(() => {
     const init = async () => {
       await loadOfflineFirst();
-      if (typeof navigator !== 'undefined' && navigator.onLine) {
+      if (navigator.onLine) {
         await fetchOnlineAndUpdate();
       } else {
         setUsingCache(true);
@@ -102,25 +138,22 @@ export default function NewsListPage() {
 
     const handleOnline = () => fetchOnlineAndUpdate();
     window.addEventListener('online', handleOnline);
-
     return () => window.removeEventListener('online', handleOnline);
   }, []);
 
-  // ✅ Mỗi khi danh sách tin thay đổi → tải blob từ IndexedDB để hiển thị ngay
+  // ---------------------- IMAGE RENDER MAP ----------------------
   useEffect(() => {
     if (!items.length) return;
     (async () => {
-      const { getNewsImageURLByUrl } = await import('@/services/newsImageService');
-      const map: { id: string; url: string }[] = [];
-
+      const map: Record<string, string> = {};
       for (const n of items) {
-        const blobUrl = await getNewsImageURLByUrl(n.image_url || '');
-        if (blobUrl) map.push({ id: n.news_id, url: blobUrl });
+        if (!n.image_url) continue;
+        const blobUrl = await getImageBlobUrl(n.image_url);
+        if (blobUrl) map[n.news_id] = blobUrl;
       }
-
-      replaceImageCache(map); // 🔁 cập nhật cache hiển thị
+      setImageMap(map);
     })();
-  }, [items]);
+  }, [items, getImageBlobUrl]);
 
   // ---------------------- SORT / FILTER / PAGINATION ----------------------
   const handleSortChange = (field: SortField) => {
@@ -142,12 +175,13 @@ export default function NewsListPage() {
   // ---------------------- RENDER ----------------------
   return (
     <div style={{ padding: '1rem' }}>
-      <h1>📰 News</h1>
+      <h1>📰 Danh sách tin tức</h1>
 
-      {loading && <p>Đang tải dữ liệu...</p>}
+      {loading && <p>⏳ Đang tải dữ liệu...</p>}
+      {imageSyncing && <p style={{ color: 'dodgerblue' }}>💾 Đang đồng bộ ảnh... {progress}%</p>}
       {usingCache && !loading && (
         <p style={{ color: 'orange', marginBottom: 8 }}>
-          ⚠️ Đang hiển thị dữ liệu offline và đang chờ cập nhật...
+          ⚠️ Đang hiển thị dữ liệu offline và chờ cập nhật...
         </p>
       )}
       {justUpdated && !usingCache && (
@@ -177,7 +211,7 @@ export default function NewsListPage() {
 
       <NewsTable
         items={paginatedItems}
-        imageCache={imageCache} // ✅ truyền cache blob thực tế
+        imageCache={imageMap}
         sortField={sortField}
         sortOrder={sortOrder}
         onSortChange={handleSortChange}
@@ -213,7 +247,6 @@ function sortedAndFiltered(
   searchText: string
 ) {
   const q = (searchText || '').toLowerCase().trim();
-
   const filtered = q
     ? items.filter(n => {
         const hay = `${n.title} ${n.summary || ''} ${n.author || ''} ${(n.categories || []).join(
@@ -238,6 +271,5 @@ function sortedAndFiltered(
       }
     }
   });
-
   return sorted;
 }

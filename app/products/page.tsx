@@ -11,8 +11,10 @@
  *    + Nếu có dữ liệu mới khác với cache → cập nhật UI và hiện banner xanh "✅ Đã cập nhật dữ liệu mới"
  *    + Nếu offline/lỗi API → fallback về cache, hiển thị banner cam
  *
- * - ✅ Image cache:
- *    + Dùng hook useImageCacheTracker để prefetch và auto cleanup blob
+ * - ✅ IMAGE CACHE (phiên bản mới):
+ *    + Dùng hook useImageCacheTracker('products') thay vì truyền danh sách keys
+ *    + Khi có dữ liệu mới → gọi syncImages(urls) để prefetch blob và lưu IndexedDB
+ *    + Khi render → getImageBlobUrl(url) để lấy blobUrl hiển thị
  *
  * - ✅ Control bar:
  *    + Search theo tên
@@ -23,6 +25,12 @@
  *    + PC: control bar hiển thị 1 hàng
  *    + Mobile: control bar hiển thị 3 hàng
  *    + Control bar đặt ở cả TRÊN & DƯỚI bảng sản phẩm
+ *
+ * 🟢 ĐÃ ĐỔI SANG PHƯƠNG ÁN MỚI NHƯ SAU:
+ *    - Thay toàn bộ cơ chế imageCache cũ (imageKeys, replaceImageCache) bằng hook hợp nhất.
+ *    - Dùng { syncImages, getImageBlobUrl, progress } từ useImageCacheTracker.
+ *    - Có bước map blobUrl → imageMap giống như bên News.
+ *    - Giảm code trùng, đồng nhất với app/news/page.tsx.
  */
 
 'use client';
@@ -32,7 +40,7 @@ import axios from 'axios';
 import ProductsTable from './ProductsTable';
 import ControlBar from '@/components/ControlBar';
 import { Product, loadProductsFromDB, syncProducts } from '@/repositories/productRepository';
-import { useImageCacheTracker } from '@/hooks/useImageCacheTracker';
+import { useImageCacheTracker } from '@/hooks/useImageCacheTracker'; // ✅ hook hợp nhất mới
 
 type SortField = 'stock_status' | 'price' | 'stock_quantity' | 'name';
 type SortOrder = 'asc' | 'desc';
@@ -41,8 +49,6 @@ export default function ProductsListPage() {
   // ---------------------- STATE ----------------------
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
-  const [hasLocalData, setHasLocalData] = useState(false);
-  const [syncedOnce, setSyncedOnce] = useState(false);
   const [usingCache, setUsingCache] = useState(false);
   const [justUpdated, setJustUpdated] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -60,27 +66,23 @@ export default function ProductsListPage() {
   }, [products]);
 
   // ---------------------- IMAGE CACHE ----------------------
-  // ✅ Dùng custom hook thay vì tự load blob và revoke
-  const imageKeys = products
-    .map(p => p.image_url) // ✅ key đúng được lưu trong DB khi sync
-    .filter(Boolean) as string[];
-  const { imageCache, replaceImageCache } = useImageCacheTracker(imageKeys, { type: 'product' });
+  const {
+    syncImages,
+    getImageBlobUrl,
+    loading: imageSyncing,
+    progress,
+  } = useImageCacheTracker('products');
+  const [imageMap, setImageMap] = useState<Record<string, string>>({});
 
   // ---------------------- OFFLINE FIRST ----------------------
   const loadOfflineFirst = async () => {
     const cached = await loadProductsFromDB();
-
-    const hasLocal = cached.length > 0;
-    setHasLocalData(hasLocal);
-
-    if (hasLocal) {
+    if (cached.length > 0) {
       setProducts(cached);
       setUsingCache(true);
-    } else {
-      setUsingCache(false);
+      console.log(`🗄 Có ${cached.length} sản phẩm trong Local DB`);
     }
-
-    // ❌ Không setLoading(false) ở đây nữa!
+    setLoading(false);
   };
 
   // ---------------------- ONLINE UPDATE ----------------------
@@ -90,15 +92,15 @@ export default function ProductsListPage() {
         headers: { 'Cache-Control': 'no-store' },
         validateStatus: () => true,
       });
-      if (res.status < 200 || res.status >= 300) throw new Error(`HTTP ${res.status}`);
+      if (res.status < 200 || res.status >= 300)
+        throw new Error(`HTTP ${res.status}: ${res.data?.error || 'API lỗi'}`);
 
       const payload = res.data;
       const fresh: Product[] = Array.isArray(payload)
         ? payload
         : payload?.products ?? payload?.data ?? [];
 
-      if (!Array.isArray(fresh)) throw new Error('API không trả về mảng hợp lệ');
-      if (fresh.length === 0) {
+      if (!Array.isArray(fresh) || fresh.length === 0) {
         setLoading(false);
         return;
       }
@@ -108,16 +110,19 @@ export default function ProductsListPage() {
 
       if (hasChange) {
         setProducts(fresh);
-        // ✅ Reset lại imageCache (hook sẽ tự tải lại blob)
-        const keys = fresh.map(p => p.image_url).filter(Boolean) as string[];
-        replaceImageCache(Object.fromEntries(keys.map(k => [k, k])));
-
         setJustUpdated(true);
       } else {
         setJustUpdated(false);
       }
+
       setUsingCache(false);
       setLoading(false);
+
+      // ✅ Sau khi sync sản phẩm, đồng bộ luôn ảnh
+      const urls = fresh.map(p => p.image_url).filter(Boolean) as string[];
+      if (urls.length) {
+        syncImages(urls);
+      }
     } catch (err: any) {
       console.warn('⚠️ Không thể tải online:', err);
       setErrorMessage(err.message || '⚠️ Có lỗi khi tải dữ liệu');
@@ -133,12 +138,6 @@ export default function ProductsListPage() {
       await loadOfflineFirst();
       if (navigator.onLine) {
         await fetchOnlineAndUpdate();
-        if (!navigator.onLine) {
-          if (!hasLocalData) {
-            setErrorMessage('⚠️ Chưa có dữ liệu cục bộ — vui lòng online để tải dữ liệu lần đầu.');
-          }
-          setLoading(false);
-        }
       } else {
         setUsingCache(true);
         setLoading(false);
@@ -148,11 +147,22 @@ export default function ProductsListPage() {
 
     const handleOnline = () => fetchOnlineAndUpdate();
     window.addEventListener('online', handleOnline);
-    return () => {
-      window.removeEventListener('online', handleOnline);
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    return () => window.removeEventListener('online', handleOnline);
   }, []);
+
+  // ---------------------- IMAGE BLOB MAP ----------------------
+  useEffect(() => {
+    if (!products.length) return;
+    (async () => {
+      const map: Record<string, string> = {};
+      for (const p of products) {
+        if (!p.image_url) continue;
+        const blobUrl = await getImageBlobUrl(p.image_url);
+        if (blobUrl) map[p.id ?? p.sku ?? p.name] = blobUrl;
+      }
+      setImageMap(map);
+    })();
+  }, [products, getImageBlobUrl]);
 
   // ---------------------- SORT / FILTER / PAGINATION ----------------------
   const handleSortChange = (field: SortField) => {
@@ -176,69 +186,58 @@ export default function ProductsListPage() {
     <div style={{ padding: '1rem' }}>
       <h1>Danh sách sản phẩm</h1>
 
-      {errorMessage && <p style={{ color: 'red' }}>{errorMessage}</p>}
-      {usingCache && !justUpdated && (
-        <p style={{ color: 'orange' }}>
-          ⚠️ Đang hiển thị dữ liệu trên máy (chưa có cập nhật mới).
-          {products.length === 0 && ' Chưa có sản phẩm, cần mở online để đồng bộ lần đầu.'}
-        </p>
+      {loading && <p>⏳ Đang tải dữ liệu...</p>}
+      {imageSyncing && <p style={{ color: 'dodgerblue' }}>💾 Đang đồng bộ ảnh... {progress}%</p>}
+      {usingCache && !loading && (
+        <p style={{ color: 'orange' }}>⚠️ Đang hiển thị dữ liệu offline và chờ cập nhật...</p>
       )}
-      {!navigator.onLine && hasLocalData && (
-        <p style={{ color: 'orange' }}>📦 Đang hiển thị dữ liệu cục bộ (offline)</p>
-      )}
+      {justUpdated && !usingCache && <p style={{ color: 'green' }}>✅ Đã cập nhật dữ liệu mới</p>}
+      {errorMessage && !loading && <p style={{ color: 'red' }}>⚠️ {errorMessage}</p>}
 
-      {!navigator.onLine && !hasLocalData && (
-        <p style={{ color: 'red' }}>
-          ⚠️ Chưa có dữ liệu cục bộ — vui lòng online để tải dữ liệu lần đầu.
-        </p>
-      )}
+      <ControlBar
+        searchText={searchText}
+        setSearchText={v => {
+          setSearchText(v);
+          setCurrentPage(1);
+        }}
+        pageSize={pageSize}
+        setPageSize={n => {
+          setPageSize(n);
+          setCurrentPage(1);
+        }}
+        currentPage={currentPage}
+        setCurrentPage={setCurrentPage}
+        totalPages={totalPages}
+        searchPlaceholder="🔎 Tìm sản phẩm..."
+        unitLabel="sp/trang"
+      />
 
-      {navigator.onLine && justUpdated && (
-        <p style={{ color: 'green' }}>✅ Vừa cập nhật dữ liệu mới từ server</p>
-      )}
+      <ProductsTable
+        products={paginatedProducts}
+        imageCache={imageMap}
+        sortField={sortField}
+        sortOrder={sortOrder}
+        onSortChange={handleSortChange}
+        searchText={searchText}
+      />
 
-      {navigator.onLine && !justUpdated && hasLocalData && (
-        <p style={{ color: 'green' }}>✅ Dữ liệu đã là mới nhất</p>
-      )}
-
-      {loading ? (
-        <p>⏳ Đang tải dữ liệu...</p>
-      ) : products.length === 0 ? (
-        <p>⚠️ Không có sản phẩm</p>
-      ) : (
-        <>
-          {/* Control bar TRÊN bảng */}
-          <ControlBar
-            searchText={searchText}
-            setSearchText={setSearchText}
-            pageSize={pageSize}
-            setPageSize={setPageSize}
-            currentPage={currentPage}
-            setCurrentPage={setCurrentPage}
-            totalPages={totalPages}
-          />
-
-          <ProductsTable
-            products={paginatedProducts}
-            imageCache={imageCache}
-            sortField={sortField}
-            sortOrder={sortOrder}
-            onSortChange={handleSortChange}
-            searchText={searchText}
-          />
-
-          {/* Control bar DƯỚI bảng */}
-          <ControlBar
-            searchText={searchText}
-            setSearchText={setSearchText}
-            pageSize={pageSize}
-            setPageSize={setPageSize}
-            currentPage={currentPage}
-            setCurrentPage={setCurrentPage}
-            totalPages={totalPages}
-          />
-        </>
-      )}
+      <ControlBar
+        searchText={searchText}
+        setSearchText={v => {
+          setSearchText(v);
+          setCurrentPage(1);
+        }}
+        pageSize={pageSize}
+        setPageSize={n => {
+          setPageSize(n);
+          setCurrentPage(1);
+        }}
+        currentPage={currentPage}
+        setCurrentPage={setCurrentPage}
+        totalPages={totalPages}
+        searchPlaceholder="🔎 Tìm sản phẩm..."
+        unitLabel="sp/trang"
+      />
     </div>
   );
 }

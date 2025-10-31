@@ -1,30 +1,56 @@
 // ✅ File: src/hooks/useImageCacheTracker.ts
-// 🧩 Đã đổi sang phương án mới: hợp nhất hook cache ảnh của news & products
-//    - Dùng tham số type: 'news' | 'product' | 'generic' để chọn store.
-//    - Hỗ trợ tính hash(blob) và so sánh thay đổi nội dung.
-//    - Tự động đồng bộ cache offline-first qua IndexedDB.
-//    - Có thể mở rộng thêm type khác (user, article, v.v.)
-// ------------------------------------------------------------
+// =============================================================
+// 📜 Ghi chú tính năng cũ:
+//   - Theo dõi cache ảnh riêng cho từng nhóm (news / products / generic).
+//   - Lưu blob + etag vào IndexedDB, tránh tải lại khi ảnh không đổi.
+//   - Nếu không có etag từ server thì không phát hiện được thay đổi.
+//   - Không có fallback nếu type sai → lỗi transaction.
+//   - Cơ chế autoSync chưa thực sự dùng.
+//
+// 🧩 Đã đổi sang phương án mới như sau:
+//   ✅ Giữ nguyên cơ chế IndexedDB, nhóm store theo từng loại.
+//   ✅ Thêm hash(blob) SHA-256 để kiểm tra thay đổi nội dung khi không có ETag.
+//   ✅ Giữ `generic` store (STORE_IMAGES) cho ảnh chung.
+//   ✅ Thêm fallback khi type không hợp lệ → tự động dùng STORE_IMAGES.
+//   ✅ Hỗ trợ lấy hash/etag từ API Edge (`/api/image-meta`) nếu có.
+//   ✅ Hoàn toàn tương thích với version cũ.
+//   ✅ Có thể mở rộng cho ảnh banner, avatar, gallery, v.v.
+// =============================================================
+// 📦 Cấu trúc lưu trong IndexedDB (tham chiếu từ src/lib/db.ts):
+//
+//   DB: TPBC_DB
+//   ├── products              (keyPath: id)
+//   ├── products_images       (keyPath: key)
+//   │     • source_url: string     ← link ảnh gốc
+//   │     • updated_at: string     ← ISO date cập nhật
+//   │     • etag: string | null    ← từ server nếu có
+//   │     • hash: string | null    ← SHA-256 blob
+//   │     • blob: Blob             ← nội dung file
+//   │     • key: string            ← hash(url) dùng làm key ngắn
+//   ├── news_images           (cấu trúc tương tự products_images)
+//   └── images                (store generic cho ảnh khác)
+//
+// =============================================================
 
 'use client';
 
 import { useEffect, useState, useCallback } from 'react';
-import { initDB } from '@/lib/db';
+import { initDB, STORE_NEWS_IMAGES, STORE_PRODUCTS_IMAGES, STORE_IMAGES } from '@/lib/db';
 
-/** 🔹 Cấu hình bảng lưu ảnh */
+/** 🔹 Cấu hình bảng lưu ảnh — đồng bộ với src/lib/db.ts */
 const STORE_MAP = {
-  news: 'news_images',
-  product: 'product_images',
-  generic: 'image_cache',
+  news: STORE_NEWS_IMAGES,
+  product: STORE_PRODUCTS_IMAGES,
+  generic: STORE_IMAGES,
 } as const;
 
 /** 🔹 Thông tin ảnh cache */
 export interface CachedImage {
   url: string; // URL gốc
-  blob?: Blob; // Dữ liệu blob
-  hash?: string; // hash nội dung (SHA-256)
-  etag?: string; // nếu có từ server
-  lastFetched?: string;
+  blob?: Blob; // dữ liệu blob
+  hash?: string; // SHA-256 của blob
+  etag?: string; // nếu server trả
+  lastFetched?: string; // thời điểm tải
 }
 
 /** 🔹 Tính SHA-256 hash từ Blob */
@@ -55,10 +81,11 @@ export function useImageCacheTracker(
   options?: { autoSync?: boolean }
 ) {
   const [loading, setLoading] = useState(false);
-  const [progress, setProgress] = useState<number>(0);
+  const [progress, setProgress] = useState(0);
   const [status, setStatus] = useState<'idle' | 'syncing' | 'done'>('idle');
 
-  const storeName = STORE_MAP[type];
+  // ✅ Fallback an toàn khi type sai
+  const storeName = STORE_MAP[type] ?? STORE_IMAGES;
 
   /** ✅ Đảm bảo ảnh được cache (nếu chưa có hoặc đã thay đổi) */
   const ensureImageCachedByUrl = useCallback(
@@ -70,12 +97,12 @@ export function useImageCacheTracker(
         const store = db.transaction(storeName, 'readwrite').store;
         const existing = (await store.get(url)) as CachedImage | undefined;
 
-        // 🔹 Lấy meta từ Edge API trước (để giảm tải client)
+        // 🔹 Lấy meta từ Edge API (hash/etag) trước
         const meta = await fetchImageMeta(url);
         const remoteHash = meta?.hash;
         const remoteEtag = meta?.etag;
 
-        // 🔹 Nếu có hash/etag giống nhau → dùng cache cũ
+        // 🔹 Nếu hash hoặc etag trùng → dùng cache cũ
         if (
           existing &&
           ((remoteHash && existing.hash === remoteHash) ||
@@ -91,7 +118,7 @@ export function useImageCacheTracker(
         const blob = await res.blob();
         const hash = await hashBlob(blob);
 
-        // 🔹 Nếu hash trùng cache cũ → giữ nguyên
+        // 🔹 Nếu hash trùng cache cũ → không cần ghi đè
         if (existing?.hash === hash) {
           return URL.createObjectURL(existing.blob!);
         }
@@ -132,7 +159,7 @@ export function useImageCacheTracker(
     [storeName]
   );
 
-  /** ✅ Đồng bộ nhiều ảnh (ví dụ khi load danh sách news/products) */
+  /** ✅ Đồng bộ nhiều ảnh (ví dụ: danh sách news/products) */
   const syncImages = useCallback(
     async (urls: string[]) => {
       if (!urls?.length) return;
@@ -153,10 +180,10 @@ export function useImageCacheTracker(
     [ensureImageCachedByUrl]
   );
 
-  /** 🔹 Tự động sync nếu được bật */
+  /** 🔹 Auto sync (nếu bật) */
   useEffect(() => {
     if (options?.autoSync) {
-      // Bạn có thể truyền danh sách URL riêng ở ngoài thay vì auto-sync tại đây.
+      // Có thể gọi syncImages ở component ngoài
     }
   }, [options]);
 

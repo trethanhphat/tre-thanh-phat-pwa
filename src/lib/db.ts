@@ -22,6 +22,7 @@ export const initDB = async () => {
         s.createIndex('source_url', 'source_url', { unique: false });
         s.createIndex('updated_at', 'updated_at', { unique: false });
         s.createIndex('etag', 'etag', { unique: false });
+        s.createIndex('hash', 'hash', { unique: false });
       }
 
       // 🔹 Store batches
@@ -38,6 +39,7 @@ export const initDB = async () => {
         s.createIndex('source_url', 'source_url', { unique: false });
         s.createIndex('updated_at', 'updated_at', { unique: false });
         s.createIndex('etag', 'etag', { unique: false });
+        s.createIndex('hash', 'hash', { unique: false });
       }
     },
   });
