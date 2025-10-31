@@ -147,7 +147,7 @@ export function useImageCacheTracker(
     progress,
     status,
     ensureImage,
-    getImageBlobUrl,
     syncImages,
+    getImageBlobUrl: (url: string) => getImageBlobUrl(url, options?.type ?? 'generic'),
   };
 }

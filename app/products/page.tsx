@@ -157,7 +157,7 @@ export default function ProductsListPage() {
       const map: Record<string, string> = {};
       for (const p of products) {
         if (!p.image_url) continue;
-        const blobUrl = await getImageBlobUrl(p.image_url);
+        const blobUrl = await getImageBlobUrl(p.image_url, 'product');
         if (blobUrl) map[p.id ?? p.name] = blobUrl;
       }
       setImageMap(map);

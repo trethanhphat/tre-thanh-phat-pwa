@@ -148,7 +148,7 @@ export default function NewsListPage() {
       const map: Record<string, string> = {};
       for (const n of items) {
         if (!n.image_url) continue;
-        const blobUrl = await getImageBlobUrl(n.image_url);
+        const blobUrl = await getImageBlobUrl(n.image_url, 'news');
         if (blobUrl) map[n.news_id] = blobUrl;
       }
       setImageMap(map);
