@@ -1,7 +1,6 @@
 // ✅ File: src/services/newsImageService.ts
 import { initDB, STORE_NEWS_IMAGES } from '@/lib/db';
 
-/** TTL cache (ms) – 30 ngày */
 const CACHE_TTL = 30 * 24 * 60 * 60 * 1000;
 
 /** ✅ Tạo key hash từ URL (SHA-256 hex) */
@@ -20,23 +19,22 @@ function withProxy(url: string) {
 /** ✅ Fetch ảnh → kèm lấy ETag nếu có */
 async function fetchBlobWithEtag(url: string): Promise<{ blob: Blob; etag?: string } | null> {
   try {
-    const res = await fetch(url);
+    const res = await fetch(url, { redirect: 'follow' });
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const blob = await res.blob();
     if (blob.size === 0) throw new Error('Blob empty');
     const etag = res.headers.get('ETag') ?? undefined;
     return { blob, etag };
   } catch (err) {
-    // không throw để còn thử fallback
-    console.warn('[newsImageService] fetch error', url, err);
+    console.warn('[newsImageService] ⚠️ fetch error:', url, err);
     return null;
   }
 }
 
 /**
  * 🔹 Lưu/cập nhật ảnh news (key = sha256(originalUrl))
- * @param originalUrl URL gốc dùng làm key trong DB (bắt buộc)
- * @param fetchUrl optional - URL dùng để fetch (ví dụ proxy). Nếu cung cấp, sẽ thử fetch fetchUrl trước rồi mới fetch originalUrl
+ * @param originalUrl URL gốc dùng làm key trong DB
+ * @param fetchUrl optional - URL dùng để fetch (ví dụ proxy)
  * @returns key (sha256 hex) khi thành công, hoặc null khi fail
  */
 export async function saveNewsImageIfNotExists(
@@ -49,39 +47,45 @@ export async function saveNewsImageIfNotExists(
 
   const existing = await db.get(STORE_NEWS_IMAGES, key);
   if (existing && Date.now() - existing.updated_at < CACHE_TTL) {
-    // vẫn còn hạn
-    return key;
+    return key; // ✅ cache còn hạn
   }
 
-  // Thử fetch theo thứ tự: fetchUrl (proxy) nếu có -> originalUrl
-  const targets = fetchUrl ? [fetchUrl, originalUrl] : [originalUrl];
+  // 🆕 ✅ Danh sách URL thử lần lượt: fetchUrl (nếu có) → originalUrl → proxy fallback
+  const fallbackProxy = withProxy(originalUrl);
+  const targets = fetchUrl ? [fetchUrl, originalUrl, fallbackProxy] : [originalUrl, fallbackProxy];
 
   let result: Awaited<ReturnType<typeof fetchBlobWithEtag>> = null;
 
   for (const t of targets) {
+    console.log('[newsImageService] 🔎 try fetch:', t);
     result = await fetchBlobWithEtag(t);
-    if (result) break;
+    if (result) {
+      if (t === fallbackProxy)
+        console.log('[newsImageService] ✅ fetched via proxy fallback:', originalUrl);
+      break;
+    }
   }
 
-  if (!result) return null;
+  if (!result) {
+    console.warn('[newsImageService] ❌ All fetch attempts failed for', originalUrl);
+    return null;
+  }
 
   const { blob, etag } = result;
   const updated_at = Date.now();
 
   await db.put(STORE_NEWS_IMAGES, {
     key,
-    source_url: originalUrl, // lưu URL gốc để debug/lookup
+    source_url: originalUrl,
     blob,
     etag,
     updated_at,
   });
 
-  // Không cần trả về blob URL — caller có thể gọi getNewsImageURLByUrl
-  console.log('[newsImageService] Cached news image', originalUrl);
+  console.log('[newsImageService] 💾 Cached news image', originalUrl);
   return key;
 }
 
-/** ✅ Offline-first lấy ảnh → nếu có blob thì trả blob URL (objectURL), nếu chưa có trả proxy URL */
 /** ✅ Offline-first lấy ảnh → ưu tiên blob, fallback qua proxy */
 export async function getNewsImageURLByUrl(url?: string): Promise<string> {
   if (!url) return '';
@@ -89,13 +93,10 @@ export async function getNewsImageURLByUrl(url?: string): Promise<string> {
   const key = await sha256Hex(url);
   const rec = await db.get(STORE_NEWS_IMAGES, key);
   if (rec?.blob) {
-    // ✅ Có blob → tạo object URL
-    const objUrl = URL.createObjectURL(rec.blob);
-    // Giữ 1 log nhẹ để debug (có thể bỏ)
-    console.debug('[newsImageService] blob hit:', url);
-    return objUrl;
+    console.debug('[newsImageService] 🎯 blob hit:', url);
+    return URL.createObjectURL(rec.blob);
   }
-  console.debug('[newsImageService] blob miss, fallback proxy:', url);
+  console.debug('[newsImageService] 📡 blob miss → use proxy:', url);
   return withProxy(url);
 }
 
@@ -103,8 +104,7 @@ export async function getNewsImageURLByUrl(url?: string): Promise<string> {
 export async function prefetchNewsImages(urls: string[]) {
   if (!urls?.length) return;
   const conn = (navigator as any).connection;
-  if (conn?.saveData) return; // bỏ qua nếu user tiết kiệm dữ liệu
-
+  if (conn?.saveData) return;
   for (const url of urls.slice(0, 10)) {
     try {
       await saveNewsImageIfNotExists(url);
@@ -114,7 +114,7 @@ export async function prefetchNewsImages(urls: string[]) {
   }
 }
 
-/** Ensure cache (không block UI). Trả về key khi thành công hoặc null khi fail */
+/** Ensure cache (non-blocking) */
 export async function ensureNewsImageCachedByUrl(
   originalUrl?: string,
   fetchUrl?: string
