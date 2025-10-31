@@ -59,6 +59,7 @@
 import { useEffect, useState, useCallback } from 'react';
 import { initDB, STORE_NEWS_IMAGES, STORE_PRODUCTS_IMAGES, STORE_IMAGES } from '@/lib/db';
 import { ensureImageCachedByUrl } from '@/lib/ensureImageCachedByUrl';
+import { getImageBlobUrl } from '@/lib/getImageBlobUrl';
 
 /** 🔹 Cấu hình bảng lưu ảnh — đồng bộ với src/lib/db.ts */
 const STORE_MAP = {
@@ -112,23 +113,6 @@ export function useImageCacheTracker(
 
   /** ✅ Dùng hàm đảm bảo cache ảnh từ module dùng chung */
   const ensureImage = useCallback((url: string) => ensureImageCachedByUrl(url, type), [type]);
-
-  /** ✅ Lấy blob URL đã cache (nếu có sẵn) */
-  const getImageBlobUrl = useCallback(
-    async (url: string): Promise<string | null> => {
-      try {
-        const db = await initDB();
-        const store = db.transaction(storeName, 'readonly').store;
-        const cached = (await store.get(url)) as CachedImage | undefined;
-        if (!cached?.blob) return null;
-        return URL.createObjectURL(cached.blob);
-      } catch (err) {
-        console.warn('[useImageCacheTracker] ⚠️ getImageBlobUrl failed:', err);
-        return null;
-      }
-    },
-    [storeName]
-  );
 
   /** ✅ Đồng bộ nhiều ảnh (ví dụ: danh sách news/products) */
   const syncImages = useCallback(
