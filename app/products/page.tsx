@@ -158,7 +158,7 @@ export default function ProductsListPage() {
       for (const p of products) {
         if (!p.image_url) continue;
         const blobUrl = await getImageBlobUrl(p.image_url);
-        if (blobUrl) map[p.id ?? p.sku ?? p.name] = blobUrl;
+        if (blobUrl) map[p.id ?? p.name] = blobUrl;
       }
       setImageMap(map);
     })();
