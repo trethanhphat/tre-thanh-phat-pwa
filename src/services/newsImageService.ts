@@ -56,6 +56,14 @@ export async function saveNewsImageIfNotExists(
 
   let result: Awaited<ReturnType<typeof fetchBlobWithEtag>> = null;
 
+  /** 🔹 Tính SHA-256 hex từ Blob (để phát hiện ảnh đổi nội dung) */
+  async function sha256Blob(blob: Blob): Promise<string> {
+    const buffer = await blob.arrayBuffer();
+    const hashBuffer = await crypto.subtle.digest('SHA-256', buffer);
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+  }
+
   for (const t of targets) {
     console.log('[newsImageService] 🔎 try fetch:', t);
     result = await fetchBlobWithEtag(t);
@@ -74,15 +82,28 @@ export async function saveNewsImageIfNotExists(
   const { blob, etag } = result;
   const updated_at = Date.now();
 
+  // 🔹 Tính hash nội dung blob
+  const blobHash = await sha256Blob(blob);
+
   await db.put(STORE_NEWS_IMAGES, {
-    key,
+    key, // hash của URL (định danh)
     source_url: originalUrl,
     blob,
     etag,
     updated_at,
+    blob_hash: blobHash, // ✅ thêm hash nội dung ảnh
+    size: blob.size, // (tùy chọn, giúp debug)
   });
 
-  console.log('[newsImageService] 💾 Cached news image', originalUrl);
+  console.log('[newsImageService] 💾 Cached news image', originalUrl, {
+    key,
+    blob_hash: blobHash,
+    size: blob.size,
+  });
+
+  const viaProxy =
+    result && targets.includes(withProxy(originalUrl)) && result !== null && result !== undefined;
+  console.log(`[newsImageService] 💾 Cached ${viaProxy ? 'via proxy' : 'direct'}:`, originalUrl);
   return key;
 }
 
