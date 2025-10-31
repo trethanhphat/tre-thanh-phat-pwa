@@ -20,7 +20,7 @@ function withProxy(url: string) {
 /** ✅ Fetch ảnh → kèm lấy ETag nếu có */
 async function fetchBlobWithEtag(url: string): Promise<{ blob: Blob; etag?: string } | null> {
   try {
-    const res = await fetch(url);
+    const res = await fetch(url, { cache: 'no-cache' });
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
 
     const blob = await res.blob();
@@ -34,35 +34,58 @@ async function fetchBlobWithEtag(url: string): Promise<{ blob: Blob; etag?: stri
   }
 }
 
-/** ✅ Lưu/cập nhật ảnh sản phẩm */
+/** ✅ Hash nội dung blob (SHA-256) */
+async function hashBlob(blob: Blob): Promise<string> {
+  const buffer = await blob.arrayBuffer();
+  const digest = await crypto.subtle.digest('SHA-256', buffer);
+  const bytes = Array.from(new Uint8Array(digest));
+  return bytes.map(b => b.toString(16).padStart(2, '0')).join('');
+}
+
+/** ✅ Lưu/cập nhật ảnh sản phẩm (có kiểm tra thay đổi nội dung) */
 export const saveProductImageIfNotExists = async (url: string) => {
   if (!url) return;
   const db = await initDB();
   const key = await sha256Hex(url);
-
   const existing = await db.get(STORE_PRODUCTS_IMAGES, key);
 
-  // ✅ TTL: nếu còn hạn → bỏ qua fetch
+  // 🔹 TTL check: còn hạn → bỏ qua
   if (existing && Date.now() - existing.updated_at < CACHE_TTL) {
     return;
   }
 
+  // 🔹 Thử fetch trực tiếp, nếu lỗi mới fallback qua proxy
   let result = await fetchBlobWithEtag(url);
   if (!result) result = await fetchBlobWithEtag(withProxy(url));
   if (!result) return;
 
   const { blob, etag } = result;
+  const blob_hash = await hashBlob(blob);
   const updated_at = Date.now();
+
+  // 🟢 Đã đổi sang phương án mới như sau:
+  // Chỉ cập nhật khi etag hoặc blob_hash thay đổi
+  if (existing) {
+    const sameEtag = etag && etag === existing.etag;
+    const sameBlob = blob_hash === existing.blob_hash;
+
+    if (sameEtag || sameBlob) {
+      // Không cần ghi lại nếu nội dung không đổi
+      console.log(`⚡ Skip unchanged image: ${url}`);
+      return;
+    }
+  }
 
   await db.put(STORE_PRODUCTS_IMAGES, {
     key,
     source_url: url,
     blob,
     etag,
+    blob_hash,
     updated_at,
   });
 
-  console.log(`💾 Cached product image: ${url} (${blob.size} bytes)`);
+  console.log(`💾 Cached product image: ${url} (${blob.size} bytes, etag=${etag || 'none'})`);
 };
 
 /** ✅ Offline-first lấy ảnh → nếu có blob thì hiển thị ngay */
@@ -96,7 +119,6 @@ export async function prefetchProductImages(urls: string[]) {
 export async function ensureProductImageCachedByUrl(originalUrl: string, fetchUrl?: string) {
   if (!originalUrl) return null;
   try {
-    // ✅ Ưu tiên fetch URL (proxy) nếu có, nếu không dùng originalUrl
     await saveProductImageIfNotExists(fetchUrl || originalUrl);
   } catch (err) {
     console.warn('⚠️ Cache error:', originalUrl, err);
