@@ -32,7 +32,7 @@ export async function prefetchNewsOnce(force = false) {
   await new Promise(res => setTimeout(res, jitter));
 
   try {
-    const { items } = await fetchAndSyncNewsFromAPI(10);
+    const items = await fetchAndSyncNewsFromAPI(10);
     if (items?.length) {
       // Prefetch ảnh top10
       const imgs = items.map(i => i.image_url).filter(Boolean) as string[];

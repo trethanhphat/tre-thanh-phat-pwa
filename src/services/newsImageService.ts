@@ -56,7 +56,7 @@ export async function saveNewsImageIfNotExists(
   // Thử fetch theo thứ tự: fetchUrl (proxy) nếu có -> originalUrl
   const targets = fetchUrl ? [fetchUrl, originalUrl] : [originalUrl];
 
-  let result: { blob: Blob; etag?: string } | null = null;
+  let result: Awaited<ReturnType<typeof fetchBlobWithEtag>> = null;
 
   for (const t of targets) {
     result = await fetchBlobWithEtag(t);
