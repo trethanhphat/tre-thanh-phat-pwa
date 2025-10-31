@@ -31,11 +31,34 @@
 //   └── images                (store generic cho ảnh khác)
 //
 // =============================================================
+// ✅ File: src/hooks/useImageCacheTracker.ts
+// =============================================================
+// 🛠️ Đã chỉnh theo module ensureImageCachedByUrl.ts:
+//   - Dùng hàm ensureImage (truyền type đúng cho từng nhóm).
+//   - Đồng bộ type cho syncImages.
+//   - Giữ fallback về STORE_IMAGES khi type không hợp lệ.
+//
+// 📜 Ghi chú tính năng cũ:
+//   - Theo dõi cache ảnh riêng cho từng nhóm (news / products / generic).
+//   - Lưu blob + etag vào IndexedDB, tránh tải lại khi ảnh không đổi.
+//   - Nếu không có etag từ server thì không phát hiện được thay đổi.
+//   - Không có fallback nếu type sai → lỗi transaction.
+//   - Cơ chế autoSync chưa thực sự dùng.
+//
+// 🧩 Đã đổi sang phương án mới như sau:
+//   ✅ Giữ nguyên cơ chế IndexedDB, nhóm store theo từng loại.
+//   ✅ Thêm hash(blob) SHA-256 để kiểm tra thay đổi nội dung khi không có ETag.
+//   ✅ Giữ `generic` store (STORE_IMAGES) cho ảnh chung.
+//   ✅ Thêm fallback khi type không hợp lệ → tự động dùng STORE_IMAGES.
+//   ✅ Hỗ trợ lấy hash/etag từ API Edge (`/api/image-meta`) nếu có.
+//   ✅ Hoàn toàn tương thích với version cũ.
+//   ✅ Có thể mở rộng cho ảnh banner, avatar, gallery, v.v.
 
 'use client';
 
 import { useEffect, useState, useCallback } from 'react';
 import { initDB, STORE_NEWS_IMAGES, STORE_PRODUCTS_IMAGES, STORE_IMAGES } from '@/lib/db';
+import { ensureImageCachedByUrl } from '@/lib/ensureImageCachedByUrl';
 
 /** 🔹 Cấu hình bảng lưu ảnh — đồng bộ với src/lib/db.ts */
 const STORE_MAP = {
@@ -87,60 +110,8 @@ export function useImageCacheTracker(
   // ✅ Fallback an toàn khi type sai
   const storeName = STORE_MAP[type] ?? STORE_IMAGES;
 
-  /** ✅ Đảm bảo ảnh được cache (nếu chưa có hoặc đã thay đổi) */
-  const ensureImageCachedByUrl = useCallback(
-    async (url: string): Promise<string | null> => {
-      if (!url) return null;
-
-      try {
-        const db = await initDB();
-        const store = db.transaction(storeName, 'readwrite').store;
-        const existing = (await store.get(url)) as CachedImage | undefined;
-
-        // 🔹 Lấy meta từ Edge API (hash/etag) trước
-        const meta = await fetchImageMeta(url);
-        const remoteHash = meta?.hash;
-        const remoteEtag = meta?.etag;
-
-        // 🔹 Nếu hash hoặc etag trùng → dùng cache cũ
-        if (
-          existing &&
-          ((remoteHash && existing.hash === remoteHash) ||
-            (remoteEtag && existing.etag === remoteEtag))
-        ) {
-          return URL.createObjectURL(existing.blob!);
-        }
-
-        // 🔹 Tải blob mới
-        const res = await fetch(url, { cache: 'no-store' });
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-
-        const blob = await res.blob();
-        const hash = await hashBlob(blob);
-
-        // 🔹 Nếu hash trùng cache cũ → không cần ghi đè
-        if (existing?.hash === hash) {
-          return URL.createObjectURL(existing.blob!);
-        }
-
-        // 🔹 Lưu mới vào IndexedDB
-        const updated: CachedImage = {
-          url,
-          blob,
-          hash,
-          etag: remoteEtag || res.headers.get('ETag') || undefined,
-          lastFetched: new Date().toISOString(),
-        };
-        await store.put(updated, url);
-
-        return URL.createObjectURL(blob);
-      } catch (err) {
-        console.warn('[useImageCacheTracker] ⚠️ ensureImageCachedByUrl failed:', err);
-        return null;
-      }
-    },
-    [storeName]
-  );
+  /** ✅ Dùng hàm đảm bảo cache ảnh từ module dùng chung */
+  const ensureImage = useCallback((url: string) => ensureImageCachedByUrl(url, type), [type]);
 
   /** ✅ Lấy blob URL đã cache (nếu có sẵn) */
   const getImageBlobUrl = useCallback(
@@ -169,7 +140,7 @@ export function useImageCacheTracker(
 
       let done = 0;
       for (const url of urls) {
-        await ensureImageCachedByUrl(url);
+        await ensureImage(url);
         done++;
         setProgress(Math.round((done / urls.length) * 100));
       }
@@ -177,7 +148,7 @@ export function useImageCacheTracker(
       setLoading(false);
       setStatus('done');
     },
-    [ensureImageCachedByUrl]
+    [ensureImage]
   );
 
   /** 🔹 Auto sync (nếu bật) */
@@ -191,7 +162,7 @@ export function useImageCacheTracker(
     loading,
     progress,
     status,
-    ensureImageCachedByUrl,
+    ensureImage,
     getImageBlobUrl,
     syncImages,
   };
