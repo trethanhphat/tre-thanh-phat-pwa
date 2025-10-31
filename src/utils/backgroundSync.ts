@@ -25,7 +25,7 @@ export async function backgroundSync() {
   }
 
   try {
-    const res = await fetch('/api/products-list');
+    const res = await fetch('/api/products');
     const { products } = await res.json();
 
     await saveProductsToDB(products);
