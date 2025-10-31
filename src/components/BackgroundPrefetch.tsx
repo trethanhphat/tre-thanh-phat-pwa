@@ -4,7 +4,7 @@
 import { useEffect } from 'react';
 import { prefetchNewsOnce } from '@/services/newsPrefetch';
 import { prefetchProductsOnce } from '@/services/productsPrefetch';
-import { syncBatchesByPrefix } from '@/repositories/batchRepository';
+import { syncBatchesByPrefix } from '@/repositories/batchesRepository';
 
 export default function BackgroundPrefetch() {
   useEffect(() => {

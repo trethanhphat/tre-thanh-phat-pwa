@@ -1,9 +1,9 @@
-// ✅ File: src/repositories/productRepository.ts
+// ✅ File: src/repositories/productsRepository.ts
 import { initDB, STORE_PRODUCTS } from '../lib/db';
 import {
   prefetchProductImages,
   ensureProductImageCachedByUrl,
-} from '../services/productImageService'; // ✅ Chuyển hoàn toàn sang module riêng
+} from '../services/productsImageService'; // ✅ Chuyển hoàn toàn sang module riêng
 
 export interface Product {
   id: number;

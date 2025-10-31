@@ -1,7 +1,7 @@
 // ✅ Controller: src/controllers/batchController.ts
 import { Batch } from '@/models/Batch';
 import { fetchBatchListFromApi, fetchBatchDetailFromApi } from '@/services/api/batchApi';
-import { loadBatchesFromDB, upsertBatches, pruneBatches } from '@/repositories/batchRepository';
+import { loadBatchesFromDB, upsertBatches, pruneBatches } from '@/repositories/batchesRepository';
 
 const STATUS = {
   OFFLINE: '❌ Không có dữ liệu offline (cần online lần đầu)',

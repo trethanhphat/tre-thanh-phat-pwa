@@ -1,7 +1,7 @@
 // ✅ File: src/services/batchSync.ts
 import { Batch } from '@/models/Batch';
 import { fetchBatchListFromApi } from './api/batchApi';
-import { loadBatchesFromDB, upsertBatches, pruneBatches } from '@/repositories/batchRepository';
+import { loadBatchesFromDB, upsertBatches, pruneBatches } from '@/repositories/batchesRepository';
 
 /**
  * 🔹 Lấy danh sách lô: ưu tiên IndexedDB trước, sau đó tải nền từ API.

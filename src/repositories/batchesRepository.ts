@@ -1,4 +1,4 @@
-// ✅ Repository: src/repositories/batchRepository.ts
+// ✅ Repository: src/repositories/batchesRepository.ts
 import { initDB, STORE_BATCHES } from '@/lib/db';
 import { Batch } from '@/models/Batch';
 
