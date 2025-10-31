@@ -28,7 +28,7 @@ export default function ProductsListPage() {
   }, [offline]);
 
   // ✅ Hook theo dõi và cache ảnh, tự revoke khi thay đổi hoặc unmount
-  const { imageCache, replaceImageCache } = useImageCacheTracker(
+  const { syncImages, getImageBlobUrl } = useImageCacheTracker(
     products.map(p => p.image_url).filter(Boolean) as string[],
     { type: 'product' }
   );
@@ -149,7 +149,7 @@ export default function ProductsListPage() {
       ) : (
         <ProductsTable
           products={sortedProducts}
-          imageCache={imageCache}
+          getImageBlobUrl={getImageBlobUrl}
           sortField={sortField}
           sortOrder={sortOrder}
           onSortChange={handleSortChange}
