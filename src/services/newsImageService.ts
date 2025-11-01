@@ -65,7 +65,7 @@ export async function saveNewsImageIfNotExists(url: string) {
 
   // 🟢 Đã đổi sang phương án mới:
   // Chỉ cập nhật nếu ETag hoặc blob_hash thay đổi
-    if (existing) {
+  if (existing) {
     const sameEtag = etag && etag === existing.etag;
     const sameBlob = blob_hash === existing.blob_hash;
 
@@ -78,22 +78,21 @@ export async function saveNewsImageIfNotExists(url: string) {
     const allRecords = await db.getAll(STORE_NEWS_IMAGES);
     const duplicate = allRecords.find(r => r.blob_hash === blob_hash);
     if (duplicate) {
-  // ✅ Tạo alias cho key mới nhưng dùng lại blob cũ
-  await db.put(STORE_NEWS_IMAGES, {
-    key,
-    source_url: url,
-    blob: duplicate.blob,
-    etag: duplicate.etag,
-    blob_hash,
-    updated_at: Date.now(),
-  });
-  console.log(`[newsImageService] 🔁 Linked duplicate key to existing blob`, {
-    url,
-    existingKey: duplicate.key,
-  });
-  return;
-}
-
+      // ✅ Tạo alias cho key mới nhưng dùng lại blob cũ
+      await db.put(STORE_NEWS_IMAGES, {
+        key,
+        source_url: url,
+        blob: duplicate.blob,
+        etag: duplicate.etag,
+        blob_hash,
+        updated_at: Date.now(),
+      });
+      console.log(`[newsImageService] 🔁 Linked duplicate key to existing blob`, {
+        url,
+        existingKey: duplicate.key,
+      });
+      return;
+    }
   }
 
   // 💾 Lưu mới hoặc cập nhật
@@ -111,7 +110,7 @@ export async function saveNewsImageIfNotExists(url: string) {
     blob_hash,
     size: blob.size,
   });
-
+}
 
 /** ✅ Đảm bảo cache */
 export async function ensureNewsImageCachedByUrl(url: string) {
