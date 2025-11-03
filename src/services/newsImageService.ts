@@ -73,8 +73,29 @@ export async function saveNewsImageIfNotExists(url: string) {
       console.log(`[newsImageService] ⚡ Skip unchanged image: ${url}`);
       return;
     }
+  } else {
+    // 🧩 Nếu chưa có record cùng key → kiểm tra xem blob này đã tồn tại ở key khác chưa
+    const allRecords = await db.getAll(STORE_NEWS_IMAGES);
+    const duplicate = allRecords.find(r => r.blob_hash === blob_hash);
+    if (duplicate) {
+      // ✅ Tạo alias cho key mới nhưng dùng lại blob cũ
+      await db.put(STORE_NEWS_IMAGES, {
+        key,
+        source_url: url,
+        blob: duplicate.blob,
+        etag: duplicate.etag,
+        blob_hash,
+        updated_at: Date.now(),
+      });
+      console.log(`[newsImageService] 🔁 Linked duplicate key to existing blob`, {
+        url,
+        existingKey: duplicate.key,
+      });
+      return;
+    }
   }
 
+  // 💾 Lưu mới hoặc cập nhật
   await db.put(STORE_NEWS_IMAGES, {
     key,
     source_url: url,
