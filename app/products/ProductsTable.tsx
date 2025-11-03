@@ -134,6 +134,12 @@ export default function ProductsTable({
                         alt={p.name}
                         style={{ width: 150, height: 150, objectFit: 'cover' }}
                         loading="lazy"
+                        onError={e => {
+                          if (url) {
+                            const proxyUrl = `/api/image-proxy?url=${encodeURIComponent(url)}`;
+                            if (e.currentTarget.src !== proxyUrl) e.currentTarget.src = proxyUrl;
+                          }
+                        }}
                       />
                       <small style={{ fontSize: 10 }}>{sourceLabel}</small>
                     </Link>

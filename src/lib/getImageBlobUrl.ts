@@ -14,10 +14,20 @@ export async function getImageBlobUrl(
   if (type === 'news') storeName = STORE_NEWS_IMAGES;
   else if (type === 'product') storeName = STORE_PRODUCTS_IMAGES;
 
-  const record = await db.get(storeName, url);
-  if (record?.blob) {
-    return URL.createObjectURL(record.blob);
+  const tx = (await db).transaction(storeName);
+  const store = tx.store;
+
+  // 1) tìm theo index 'source_url'
+  let record: any = store.index?.('source_url') ? await store.index('source_url').get(url) : null;
+
+  // 2) fallback: thử theo key = SHA-256(url) (cách các hook mô tả)
+  if (!record && storeName !== STORE_IMAGES) {
+    const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(url));
+    const hash = Array.from(new Uint8Array(buf))
+      .map(b => b.toString(16).padStart(2, '0'))
+      .join('');
+    record = await store.get(hash);
   }
 
-  return url; // fallback khi chưa có
+  return record?.blob ? URL.createObjectURL(record.blob) : url;
 }
