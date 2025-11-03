@@ -2,7 +2,7 @@
 'use client';
 
 import Link from 'next/link';
-import { Product } from '@/repositories/productsRepository'; // ✅ dùng type gốc của bạn
+import { Product } from '@/models/Product';
 import { formatPrice, formatStockStatus } from '@/utils/format'; // ✅ giữ logic format sẵn có
 
 /**
