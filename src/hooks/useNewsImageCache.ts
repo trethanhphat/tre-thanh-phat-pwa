@@ -1,6 +1,7 @@
 // ✅ File: src/hooks/useNewsImageCache.ts
 import { useEffect, useState } from 'react';
-import { getNewsImageURLByUrl, ensureNewsImageCachedByUrl } from '@/services/newsImageService';
+import { ensureNewsImageCachedByUrl } from '@/services/newsImageService';
+import { getImageBlobUrl } from '@/lib/getImageBlobUrl';
 import { News } from '@/repositories/newsRepository';
 
 export function useNewsImageCache(items: News[]) {
@@ -9,6 +10,7 @@ export function useNewsImageCache(items: News[]) {
   useEffect(() => {
     let isMounted = true;
     const prevURLs: string[] = Object.values(imageCache);
+    const createdBlobUrls: string[] = [];
 
     const loadImages = async () => {
       const entries = await Promise.all(
@@ -16,10 +18,15 @@ export function useNewsImageCache(items: News[]) {
           if (!n.image_url) return [n.news_id, ''] as const;
 
           // ✅ Đảm bảo có cache nếu chưa có
-          await ensureNewsImageCachedByUrl(n.image_url);
+          try {
+            await ensureNewsImageCachedByUrl(n.image_url);
+          } catch (err) {
+            console.warn('[NewsImageCache] ensure cache failed:', err);
+          }
 
           // ✅ Lấy URL blob (hoặc proxy fallback)
-          const url = await getNewsImageURLByUrl(n.image_url);
+          const url = await getImageBlobUrl(n.image_url, 'news');
+          if (url.startsWith('blob:')) createdBlobUrls.push(url);
           return [n.news_id, url] as const;
         })
       );
@@ -36,9 +43,10 @@ export function useNewsImageCache(items: News[]) {
     return () => {
       isMounted = false;
       // Dọn toàn bộ blob khi unmount
-      Object.values(imageCache).forEach(u => {
+      Object.values(imageCache).forEach((u: string) => {
         if (u.startsWith('blob:')) URL.revokeObjectURL(u);
       });
+      for (const u of createdBlobUrls) URL.revokeObjectURL(u);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [items]);
