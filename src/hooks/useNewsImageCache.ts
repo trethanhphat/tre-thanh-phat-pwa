@@ -2,7 +2,7 @@
 import { useEffect, useState } from 'react';
 import { ensureNewsImageCachedByUrl } from '@/services/newsImageService';
 import { getImageBlobUrl } from '@/lib/getImageBlobUrl';
-import { News } from '@/repositories/newsRepository';
+import { News } from '@/models/News';
 
 export function useNewsImageCache(items: News[]) {
   const [imageCache, setImageCache] = useState<Record<string, string>>({});
