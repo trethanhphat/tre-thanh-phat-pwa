@@ -123,7 +123,7 @@ export default function ProductsTable({
                   const cachedBlobUrl = imageCache?.[p.id] ?? null; // ✅ blob lấy theo id
 
                   // ✅ Nếu có blob → dùng; nếu không → link online gốc (hoặc fallback)
-                  const imgSrc = cachedBlobUrl || url || '/fallback.png';
+                  const imgSrc = cachedBlobUrl || url || '/assets/icon/icon-512.png';
 
                   const sourceLabel = cachedBlobUrl ? '✅' : '🌐';
 
