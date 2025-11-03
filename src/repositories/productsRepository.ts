@@ -24,28 +24,24 @@ export async function countProductsInDB(): Promise<boolean> {
 // 🔎 Lấy danh sách sản phẩm từ IndexedDB */
 export const loadProductsFromDB = async (): Promise<Product[]> => {
   const db = await initDB();
-  const all = await db.getAll(STORE_PRODUCTS);
-  return all;
+  return await db.getAll(STORE_PRODUCTS);
 };
 
-/** 🔹 Đồng bộ dữ liệu sản phẩm + cache ảnh */
+/** 🔹 Đồng bộ dữ liệu sản phẩm + cache ảnh (AN TOÀN) */
 export const syncProducts = async (products: Product[]): Promise<boolean> => {
   const db = await initDB();
   const newIds = new Set(products.map(p => p.id));
 
   const tx = db.transaction(STORE_PRODUCTS, 'readwrite');
   const store = tx.store;
-
   let hasChange = false;
 
   // Xóa sản phẩm cũ không còn
-  let cursor = await store.openCursor();
-  while (cursor) {
+  for (let cursor = await store.openCursor(); cursor; cursor = await cursor.continue()) {
     if (!newIds.has(cursor.key as number)) {
       await cursor.delete();
       hasChange = true;
     }
-    cursor = await cursor.continue();
   }
 
   // Thêm / cập nhật sản phẩm mới
@@ -55,24 +51,29 @@ export const syncProducts = async (products: Product[]): Promise<boolean> => {
       await store.put(p);
       hasChange = true;
     }
+    // 🚫 KHÔNG cache ảnh ở đây (transaction đang mở)
+  }
 
-    // ✅ Lưu ảnh offline trong nền (phân luồng theo loại product)
-    if (p.image_url) {
-      ensureProductImageCachedByUrl(p.image_url);
+  // ✅ Đóng transaction products trước khi thao tác ảnh
+  await tx.done;
+
+  // ✅ Cache ảnh SAU transaction (dedupe + await tuần tự để tránh đua)
+  const urls = Array.from(new Set(products.map(p => p.image_url).filter(Boolean))) as string[];
+  for (const url of urls) {
+    try {
+      await ensureProductImageCachedByUrl(url);
+    } catch (e) {
+      console.warn('[syncProducts] cache image failed:', url, e);
     }
   }
 
-  await tx.done;
-
-  // 🔹 Prefetch ảnh cho top 5 sản phẩm (nếu không bật tiết kiệm dữ liệu)
-  if ('connection' in navigator && (navigator as any).connection?.saveData) {
-    console.log('⚡ Bỏ qua prefetch ảnh sản phẩm vì bật tiết kiệm dữ liệu');
+  // 🔹 Prefetch ảnh top 5 (nếu không bật tiết kiệm dữ liệu)
+  const conn: any = (navigator as any).connection;
+  if (!conn?.saveData) {
+    const top5 = urls.slice(0, 5);
+    if (top5.length) prefetchProductImages(top5);
   } else {
-    const top5 = products
-      .slice(0, 5)
-      .map(p => p.image_url)
-      .filter(Boolean) as string[];
-    if (top5.length) prefetchProductImages(top5); // ✅ Dùng hàm mới riêng cho product
+    console.log('⚡ Bỏ qua prefetch ảnh sản phẩm vì bật tiết kiệm dữ liệu');
   }
 
   return hasChange;
@@ -83,8 +84,13 @@ export const saveProductOffline = async (product: Product) => {
   const db = await initDB();
   await db.put(STORE_PRODUCTS, product);
 
+  // ✅ Cache ảnh sau khi put (ngoài transaction dài), có thể await cho chắc
   if (product.image_url) {
-    ensureProductImageCachedByUrl(product.image_url); // ✅ đồng bộ với hàm mới
+    try {
+      await ensureProductImageCachedByUrl(product.image_url);
+    } catch (e) {
+      console.warn('[saveProductOffline] cache image failed:', product.image_url, e);
+    }
   }
 };
 
