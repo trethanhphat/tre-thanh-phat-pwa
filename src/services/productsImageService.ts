@@ -1,5 +1,5 @@
 // File: src/services/productsImageService.ts
-import { initDB, STORE_PRODUCTS_IMAGES } from '@/lib/db';
+import { initDB, STORE_PRODUCTS, STORE_PRODUCTS_IMAGES } from '@/lib/db';
 
 /** ⏱ TTL cache tối đa (7 ngày) cho ảnh sản phẩm */
 const CACHE_TTL = 7 * 24 * 60 * 60 * 1000;
@@ -87,6 +87,31 @@ export const saveProductImageIfNotExists = async (url: string) => {
 
   console.log(`💾 Cached product image: ${url} (${blob.size} bytes, etag=${etag || 'none'})`);
 };
+
+//** ✅ Lấy Blob URL ảnh sản phẩm theo productId */
+export async function getProductBlobUrlById(productId: number): Promise<string | null> {
+  const db = await initDB();
+  const prod = await db.get(STORE_PRODUCTS, productId);
+  const url: string | undefined = prod?.image_url;
+  if (!url) return null;
+
+  const tx = db.transaction(STORE_PRODUCTS_IMAGES);
+  const store: any = tx.store;
+
+  // Tìm theo index 'source_url'
+  let rec = store.index?.('source_url') ? await store.index('source_url').get(url) : null;
+
+  // Fallback: key = SHA-256(url)
+  if (!rec) {
+    const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(url));
+    const hash = Array.from(new Uint8Array(buf))
+      .map(b => b.toString(16).padStart(2, '0'))
+      .join('');
+    rec = await store.get(hash);
+  }
+
+  return rec?.blob ? URL.createObjectURL(rec.blob) : null;
+}
 
 /** ✅ Offline-first lấy ảnh → nếu có blob thì hiển thị ngay */
 export const getProductImageURL = async (url: string) => {

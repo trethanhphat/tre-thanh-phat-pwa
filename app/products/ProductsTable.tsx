@@ -120,7 +120,7 @@ export default function ProductsTable({
                   const url = p.image_url ?? '';
 
                   // ✅ Blob URL từ cache (ưu tiên)
-                  const cachedBlobUrl = url && imageCache?.[url] ? imageCache[url] : null;
+                  const cachedBlobUrl = imageCache?.[p.id] ?? null; // ✅ blob lấy theo id
 
                   // ✅ Nếu có blob → dùng; nếu không → link online gốc (hoặc fallback)
                   const imgSrc = cachedBlobUrl || url || '/fallback.png';

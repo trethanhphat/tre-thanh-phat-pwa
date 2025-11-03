@@ -72,7 +72,7 @@ export default function ProductsListPage() {
     loading: imageSyncing,
     progress,
   } = useImageCacheTracker([], { type: 'product' });
-  const [imageMap, setImageMap] = useState<Record<string, string>>({});
+  const [imageMap, setImageMap] = useState<Record<number, string>>({});
 
   // ---------------------- OFFLINE FIRST ----------------------
   const loadOfflineFirst = async () => {
@@ -154,11 +154,11 @@ export default function ProductsListPage() {
   useEffect(() => {
     if (!products.length) return;
     (async () => {
-      const map: Record<string, string> = {};
+      const map: Record<number, string> = {};
       for (const p of products) {
         if (!p.image_url) continue;
         const blobUrl = await getImageBlobUrl(p.image_url, 'product');
-        if (blobUrl) map[p.id ?? p.name] = blobUrl;
+        if (blobUrl) map[p.id] = blobUrl;
       }
       setImageMap(map);
     })();
