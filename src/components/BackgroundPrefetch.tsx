@@ -4,11 +4,10 @@
 import { useEffect } from 'react';
 import { hasNewsInDB } from '@/repositories/newsRepository';
 import { hasProductsInDB } from '@/repositories/productsRepository';
-import { hasBatchesInDB } from '@/repositories/batchesRepository';
+import { hasBatchesInDB, syncBatchesByPrefix } from '@/repositories/batchesRepository';
 import { prefetchNewsOnce } from '@/services/newsPrefetch';
 import { prefetchProductsOnce } from '@/services/productsPrefetch';
 import { prefetchBatchesOnce } from '@/services/batchesPrefetch'; // ⬅️ thêm
-import { syncBatchesByPrefix } from '@/repositories/batchesRepository';
 
 export default function BackgroundPrefetch() {
   useEffect(() => {

@@ -19,7 +19,7 @@ import { ensureImageCachedByUrl } from '@/lib/ensureImageCachedByUrl';
 /** 🔹 Kiểu dữ liệu tin tức (đồng bộ với /api/news) */
 
 // ✅ Kiểm tra nếu store 'news' có ít nhất 1 bản ghi thì trả kết quả true
-export async function hasBatchesInDB(): Promise<boolean> {
+export async function hasNewsInDB(): Promise<boolean> {
   const db = await initDB();
   const tx = db.transaction(STORE_NEWS);
   // Lấy 1 khóa (nếu có)
