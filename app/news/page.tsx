@@ -153,7 +153,7 @@ export default function NewsListPage() {
       }
       setImageMap(map);
     })();
-  }, [items, getImageBlobUrl]);
+  }, [items]); // getImageBlobUrl đã stable
 
   // ---------------------- SORT / FILTER / PAGINATION ----------------------
   const handleSortChange = (field: SortField) => {

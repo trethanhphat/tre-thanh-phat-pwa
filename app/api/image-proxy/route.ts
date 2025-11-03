@@ -16,6 +16,7 @@ const ALLOWED_IMAGE_HOSTS = [
   'blogger.googleusercontent.com',
   'trethanhphat.vn',
   'tpbc.top',
+  'rungkhoai.com',
 ];
 
 function isAllowedOrigin(req: NextRequest): boolean {

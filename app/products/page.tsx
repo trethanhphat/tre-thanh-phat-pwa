@@ -162,7 +162,7 @@ export default function ProductsListPage() {
       }
       setImageMap(map);
     })();
-  }, [products, getImageBlobUrl]);
+  }, [products]); // getImageBlobUrl đã stable
 
   // ---------------------- SORT / FILTER / PAGINATION ----------------------
   const handleSortChange = (field: SortField) => {

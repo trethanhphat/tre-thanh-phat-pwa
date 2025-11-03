@@ -44,3 +44,31 @@ export const initDB = async () => {
     },
   });
 };
+
+// 🔹 Helper chung cho CRUD
+export const dbHelpers = {
+  async get(storeName: string, key: IDBValidKey) {
+    const db = await initDB();
+    return db.transaction(storeName).objectStore(storeName).get(key);
+  },
+
+  async getAll(storeName: string) {
+    const db = await initDB();
+    return db.transaction(storeName).objectStore(storeName).getAll();
+  },
+
+  async set(storeName: string, value: any) {
+    const db = await initDB();
+    return db.transaction(storeName, 'readwrite').objectStore(storeName).put(value);
+  },
+
+  async delete(storeName: string, key: IDBValidKey) {
+    const db = await initDB();
+    return db.transaction(storeName, 'readwrite').objectStore(storeName).delete(key);
+  },
+
+  async clear(storeName: string) {
+    const db = await initDB();
+    return db.transaction(storeName, 'readwrite').objectStore(storeName).clear();
+  },
+};
