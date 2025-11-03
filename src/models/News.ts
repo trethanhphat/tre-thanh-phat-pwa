@@ -1,10 +1,12 @@
 // File: src/models/News.ts
 export interface News {
-  id: string;
+  news_id: string; // keyPath
   title: string;
-  excerpt?: string;
-  content?: string;
-  date?: string;
-  image_url?: string;
-  link?: string;
+  link: string;
+  author?: string;
+  categories: string[];
+  published?: string; // ISO
+  updated?: string; // ISO
+  summary?: string;
+  image_url?: string; // 🟢 chỉ lưu URL gốc
 }

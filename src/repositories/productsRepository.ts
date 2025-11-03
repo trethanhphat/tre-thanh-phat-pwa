@@ -4,17 +4,24 @@ import {
   prefetchProductImages,
   ensureProductImageCachedByUrl,
 } from '../services/productsImageService'; // ✅ Chuyển hoàn toàn sang module riêng
+import { Product } from '@/models/Product';
 
-export interface Product {
-  id: number;
-  name: string;
-  price: string;
-  stock_quantity: number;
-  stock_status: string;
-  image_url?: string;
+// ✅ Kiểm tra nếu store 'products' có ít nhất 1 bản ghi thì trả kết quả true
+export async function hasProductsInDB(): Promise<boolean> {
+  const db = await initDB();
+  const tx = db.transaction(STORE_PRODUCTS);
+  // Lấy 1 khóa (nếu có)
+  const cursor = await tx.store.openCursor(); // lấy con trỏ đầu
+  return !!cursor; // true nếu có ít nhất 1 record
 }
 
-/** 🔹 Load toàn bộ sản phẩm từ IndexedDB */
+// Đếm số bản ghi trong store 'products'
+export async function countProductsInDB(): Promise<boolean> {
+  const db = await initDB();
+  return (await db.count(STORE_PRODUCTS)) > 0;
+}
+
+// 🔎 Lấy danh sách sản phẩm từ IndexedDB */
 export const loadProductsFromDB = async (): Promise<Product[]> => {
   const db = await initDB();
   const all = await db.getAll(STORE_PRODUCTS);

@@ -13,19 +13,23 @@
 
 import axios from 'axios';
 import { initDB, STORE_NEWS } from '@/lib/db';
+import { News } from '@/models/News';
 import { ensureImageCachedByUrl } from '@/lib/ensureImageCachedByUrl';
 
 /** 🔹 Kiểu dữ liệu tin tức (đồng bộ với /api/news) */
-export interface News {
-  news_id: string; // keyPath
-  title: string;
-  link: string;
-  author?: string;
-  categories: string[];
-  published?: string; // ISO
-  updated?: string; // ISO
-  summary?: string;
-  image_url?: string; // 🟢 chỉ lưu URL gốc
+
+// ✅ Kiểm tra nếu store 'news' có ít nhất 1 bản ghi thì trả kết quả true
+export async function hasBatchesInDB(): Promise<boolean> {
+  const db = await initDB();
+  const tx = db.transaction(STORE_NEWS);
+  // Lấy 1 khóa (nếu có)
+  const cursor = await tx.store.openCursor(); // lấy con trỏ đầu
+  return !!cursor; // true nếu có ít nhất 1 record
+}
+// Đếm số bản ghi trong store 'news'
+export async function countNewsInDB(): Promise<boolean> {
+  const db = await initDB();
+  return (await db.count(STORE_NEWS)) > 0;
 }
 
 /** 🔹 Load tin từ IndexedDB (offline-first, mới nhất lên đầu) */

@@ -1,8 +1,24 @@
-// ✅ Repository: src/repositories/batchesRepository.ts
+// File: src/repositories/batchesRepository.ts
 import { initDB, STORE_BATCHES } from '@/lib/db';
 import { Batch } from '@/models/Batch';
 
-// 🔎 Lấy danh sách batch từ IndexedDB
+// ✅ Kiểm tra nếu store 'batches' có ít nhất 1 bản ghi thì trả kết quả true
+export async function hasBatchesInDB(): Promise<boolean> {
+  const db = await initDB();
+  const tx = db.transaction(STORE_BATCHES);
+  // Lấy 1 khóa (nếu có)
+  const cursor = await tx.store.openCursor(); // lấy con trỏ đầu
+  return !!cursor; // true nếu có ít nhất 1 record
+}
+
+// 📝 Đếm số bản ghi trong store 'batches'
+export async function countBatchesInDB(): Promise<boolean> {
+  const db = await initDB();
+  const cnt = await db.count(STORE_BATCHES); // idb hỗ trợ .count()
+  return cnt > 0;
+}
+
+// 🔎 Lấy danh sách batches từ IndexedDB
 export async function loadBatchesFromDB(): Promise<Batch[]> {
   const db = await initDB();
   return (await db.getAll(STORE_BATCHES)) as Batch[];

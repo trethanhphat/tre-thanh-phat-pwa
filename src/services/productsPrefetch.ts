@@ -1,7 +1,8 @@
 // ✅ File: src/services/productsPrefetch.ts
 import { initDB, STORE_PRODUCTS } from '@/lib/db';
+import { Product } from '@/models/Product';
+import { syncProducts } from '@/repositories/productsRepository';
 import { ensureImageCachedByUrl } from '@/lib/ensureImageCachedByUrl';
-import { Product, syncProducts } from '@/repositories/productsRepository';
 
 let hasPrefetched = false;
 
