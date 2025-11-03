@@ -176,7 +176,9 @@ export default function NewsListPage() {
   return (
     <div style={{ padding: '1rem' }}>
       <h1>📰 Danh sách tin tức</h1>
-
+      {errorMessage && !loading && (
+        <p style={{ color: 'red', marginBottom: 8 }}>⚠️ {errorMessage}</p>
+      )}
       {loading && <p>⏳ Đang tải dữ liệu...</p>}
       {imageSyncing && <p style={{ color: 'dodgerblue' }}>💾 Đang đồng bộ ảnh... {progress}%</p>}
       {usingCache && !loading && (
@@ -186,9 +188,6 @@ export default function NewsListPage() {
       )}
       {justUpdated && !usingCache && (
         <p style={{ color: 'green', marginBottom: 8 }}>✅ Đã cập nhật dữ liệu mới</p>
-      )}
-      {errorMessage && !loading && (
-        <p style={{ color: 'red', marginBottom: 8 }}>⚠️ {errorMessage}</p>
       )}
 
       <ControlBar
