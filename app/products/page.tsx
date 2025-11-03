@@ -37,9 +37,10 @@
 
 import { useEffect, useRef, useState } from 'react';
 import axios from 'axios';
+import { Product } from '@/models/Product';
 import ProductsTable from './ProductsTable';
 import ControlBar from '@/components/ControlBar';
-import { Product, loadProductsFromDB, syncProducts } from '@/repositories/productsRepository';
+import { loadProductsFromDB, syncProducts } from '@/repositories/productsRepository';
 import { useImageCacheTracker } from '@/hooks/useImageCacheTracker'; // ✅ hook hợp nhất mới
 
 type SortField = 'stock_status' | 'price' | 'stock_quantity' | 'name';
