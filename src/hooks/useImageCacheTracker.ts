@@ -56,7 +56,7 @@
 
 'use client';
 
-import { useEffect, useState, useCallback } from 'react';
+import { useRef, useEffect, useState, useCallback } from 'react';
 import { initDB, STORE_NEWS_IMAGES, STORE_PRODUCTS_IMAGES, STORE_IMAGES } from '@/lib/db';
 import { ensureImageCachedByUrl } from '@/lib/ensureImageCachedByUrl';
 import { getImageBlobUrl } from '@/lib/getImageBlobUrl';
@@ -107,6 +107,7 @@ export function useImageCacheTracker(
   const [loading, setLoading] = useState(false);
   const [progress, setProgress] = useState(0);
   const [status, setStatus] = useState<'idle' | 'syncing' | 'done'>('idle');
+  const syncedRef = useRef<Set<string>>(new Set()); // ✅ guard re-sync
 
   // ✅ Fallback an toàn khi type sai
   const storeName = STORE_MAP[options?.type ?? 'generic'] ?? STORE_IMAGES;
@@ -121,19 +122,28 @@ export function useImageCacheTracker(
   const syncImages = useCallback(
     async (urls: string[]) => {
       if (!urls?.length) return;
+
+      const unique = Array.from(new Set(urls)).filter(u => !syncedRef.current.has(u));
+      if (!unique.length) return;
       setStatus('syncing');
       setProgress(0);
       setLoading(true);
-
       let done = 0;
-      for (const url of urls) {
-        await ensureImage(url);
-        done++;
-        setProgress(Math.round((done / urls.length) * 100));
+      try {
+        for (const url of unique) {
+          try {
+            await ensureImage(url);
+          } catch (e) {
+            console.warn('[useImageCacheTracker] ensureImage failed:', url, e);
+          }
+          done++;
+          setProgress(Math.round((done / unique.length) * 100));
+        }
+        unique.forEach(u => syncedRef.current.add(u));
+        setStatus('done');
+      } finally {
+        setLoading(false);
       }
-
-      setLoading(false);
-      setStatus('done');
     },
     [ensureImage]
   );
@@ -145,13 +155,17 @@ export function useImageCacheTracker(
     }
   }, [options]);
 
+  const getBlobUrl = useCallback(
+    (url: string, type?: 'news' | 'product' | 'generic') =>
+      getImageBlobUrl(url, type ?? options?.type ?? 'generic'),
+    [options?.type]
+  );
   return {
     loading,
     progress,
     status,
     ensureImage,
     syncImages,
-    getImageBlobUrl: (url: string, type?: 'news' | 'product' | 'generic') =>
-      getImageBlobUrl(url, type ?? options?.type ?? 'generic'),
+    getImageBlobUrl: getBlobUrl, // ✅ ổn định tham chiếu
   };
 }
