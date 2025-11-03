@@ -43,49 +43,75 @@ async function hashBlob(blob: Blob): Promise<string> {
 }
 
 /** ✅ Lưu/cập nhật ảnh sản phẩm (có kiểm tra thay đổi nội dung) */
+
+const inFlight = new Map<string, Promise<any>>(); // chống tải/ghi trùng
+
+/** ✅ Lưu/cập nhật ảnh sản phẩm (TTL + kiểm tra thay đổi bằng etag/blob_hash) */
 export const saveProductImageIfNotExists = async (url: string) => {
   if (!url) return;
-  const db = await initDB();
-  const key = await sha256Hex(url);
-  const existing = await db.get(STORE_PRODUCTS_IMAGES, key);
 
-  // 🔹 TTL check: còn hạn → bỏ qua
-  if (existing && Date.now() - existing.updated_at < CACHE_TTL) {
-    return;
-  }
+  // Chống trùng lặp khi nhiều nơi gọi đồng thời
+  if (inFlight.has(url)) return inFlight.get(url);
+  const task = (async () => {
+    const db = await initDB();
 
-  // 🔹 Thử fetch trực tiếp, nếu lỗi mới fallback qua proxy
-  let result = await fetchBlobWithEtag(url);
-  if (!result) result = await fetchBlobWithEtag(withProxy(url));
-  if (!result) return;
+    // 1) Kiểm tra theo index 'source_url' trước (đúng với schema hiện tại),
+    //    fallback theo key SHA-256(url) nếu cần.
+    const txRead = db.transaction(STORE_PRODUCTS_IMAGES);
+    const store: any = txRead.store;
+    const byUrl = store.index?.('source_url') ? await store.index('source_url').get(url) : null;
 
-  const { blob, etag } = result;
-  const blob_hash = await hashBlob(blob);
-  const updated_at = Date.now();
+    const key = byUrl?.key ?? (await sha256Hex(url));
+    const existing = byUrl ?? (await db.get(STORE_PRODUCTS_IMAGES, key));
 
-  // 🟢 Đã đổi sang phương án mới như sau:
-  // Chỉ cập nhật khi etag hoặc blob_hash thay đổi
-  if (existing) {
-    const sameEtag = etag && etag === existing.etag;
-    const sameBlob = blob_hash === existing.blob_hash;
+    const now = Date.now();
+    const last = Number(existing?.updated_at ?? 0);
 
-    if (sameEtag || sameBlob) {
-      // Không cần ghi lại nếu nội dung không đổi
-      console.log(`⚡ Skip unchanged image: ${url}`);
-      return;
+    // 2) TTL: còn hạn thì bỏ qua (không fetch). Nếu muốn luôn kiểm tra thay đổi,
+    //    bạn có thể bỏ khối này hoặc chuyển sang conditional request với ETag.
+    if (existing && now - last < CACHE_TTL) {
+      return existing;
     }
+
+    // 3) Fetch blob + ETag ngoài IDB (không giữ transaction mở khi await)
+    let result = await fetchBlobWithEtag(url);
+    if (!result) result = await fetchBlobWithEtag(withProxy(url));
+    if (!result) return existing ?? undefined;
+
+    const { blob, etag } = result;
+    const blob_hash = await hashBlob(blob);
+
+    // 4) Nếu đã có dữ liệu và nội dung không đổi → bỏ ghi
+    if (existing) {
+      const sameEtag = !!etag && etag === existing.etag;
+      const sameBlob = blob_hash === existing.blob_hash;
+      if (sameEtag || sameBlob) {
+        console.log(`⚡ Skip unchanged image: ${url}`);
+        return existing;
+      }
+    }
+
+    // 5) Ghi vào IDB (idb tự mở/đóng transaction → không TransactionInactiveError)
+    const record = {
+      key,
+      source_url: url,
+      blob,
+      etag,
+      blob_hash,
+      updated_at: now,
+    };
+
+    await db.put(STORE_PRODUCTS_IMAGES, record);
+    console.log(`💾 Cached product image: ${url} (${blob.size} bytes, etag=${etag || 'none'})`);
+    return record;
+  })();
+
+  inFlight.set(url, task);
+  try {
+    return await task;
+  } finally {
+    inFlight.delete(url);
   }
-
-  await db.put(STORE_PRODUCTS_IMAGES, {
-    key,
-    source_url: url,
-    blob,
-    etag,
-    blob_hash,
-    updated_at,
-  });
-
-  console.log(`💾 Cached product image: ${url} (${blob.size} bytes, etag=${etag || 'none'})`);
 };
 
 //** ✅ Lấy Blob URL ảnh sản phẩm theo productId */
