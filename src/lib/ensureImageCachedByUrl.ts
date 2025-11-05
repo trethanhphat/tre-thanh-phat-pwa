@@ -1,13 +1,14 @@
 // ✅ File: src/lib/ensureImageCachedByUrl.ts (phiên bản an toàn)
 import { initDB, STORE_NEWS_IMAGES, STORE_PRODUCTS_IMAGES, STORE_IMAGES } from '@/lib/db';
 
+// Khai báo map từ type sang store name
 const STORE_MAP = {
   news: STORE_NEWS_IMAGES,
   product: STORE_PRODUCTS_IMAGES,
   generic: STORE_IMAGES,
 } as const;
 
-const CACHE_TTL = 24 * 60 * 60 * 1000; // tuỳ chọn
+const CACHE_TTL = 24 * 60 * 60 * 1000; // Thời gian cache 24h (1 ngày) tuỳ chọn
 
 export interface CachedImage {
   url: string; // giữ lại nếu nơi khác còn dùng
@@ -15,6 +16,7 @@ export interface CachedImage {
   hash?: string;
   etag?: string;
   lastFetched?: string;
+  key: string;
   // khoá thực tế trong DB: key = sha256(url)
 }
 
@@ -36,7 +38,7 @@ export async function hashBlob(blob: Blob): Promise<string> {
 // (tuỳ chọn) meta từ edge, nếu bạn có route này thì giữ; nếu không trả null
 export async function fetchImageMeta(
   url: string
-): Promise<{ hash?: string; etag?: string } | null> {
+): Promise<{ hash?: string; etag?: string; last_modified?: string } | null> {
   try {
     const res = await fetch(`/api/image-meta?url=${encodeURIComponent(url)}`, {
       cache: 'no-store',
@@ -75,7 +77,8 @@ export async function ensureImageCachedByUrl(
     const meta = await fetchImageMeta(url); // có thể luôn null nếu không triển khai
     console.log('[ImageCache] 🔍 Meta từ /api/image-meta:', { url, meta }); // Hiển thị xem có lấy được etag từ image-meta không
     const remoteHash = meta?.hash;
-    const remoteEtag = meta?.etag;
+    const remoteEtag = meta?.etag?.replace(/^W\//, ''); // bỏ W/ nếu có
+    const remoteLastModified = meta?.last_modified;
 
     if (existing) {
       // TTL 7 ngày (giữ nguyên hành vi cũ khi meta không có)
@@ -109,12 +112,14 @@ export async function ensureImageCachedByUrl(
     redirect: 'follow',
     mode: 'cors' as RequestMode,
   });
-  const etagFromHeader = res.headers.get('ETag') ?? undefined;
+  const meta = await fetchImageMeta(url);
+  const remoteEtag = meta?.etag?.replace(/^W\//, ''); // bỏ W/ nếu có
+  const etagHeader = res.headers.get('ETag') ?? remoteEtag ?? undefined;
 
   // Bắt đầu console log header để biết xem có etag không
   console.log('[ImageCache] 🛰️ Server response headers:', {
     url,
-    etagFromHeader,
+    etagHeader,
     etag: res.headers.get('ETag'),
     contentType: res.headers.get('Content-Type'),
   });
@@ -123,7 +128,7 @@ export async function ensureImageCachedByUrl(
     // tuỳ chọn: fallback proxy nếu bạn dùng route proxy
     const proxy = `/api/image-proxy?url=${encodeURIComponent(url)}`;
     res = await fetch(proxy, { cache: 'no-store', redirect: 'follow' });
-    const etagFromHeader = res.headers.get('ETag') ?? undefined;
+    const etagFromHeader = res.headers.get('ETag') ?? remoteEtag ?? undefined;
     // Bắt đầu console log header từ proxy
     console.log('[ImageCache] 🛰️ Proxy response headers:', {
       url: proxy,
@@ -133,9 +138,10 @@ export async function ensureImageCachedByUrl(
     if (!res.ok) return; // đành bỏ qua
   }
   const blob = await res.blob();
+
   if (!blob || blob.size === 0) return;
   const hash = await hashBlob(blob);
-  const etag = res.headers.get('ETag') ?? undefined;
+  const etag = remoteEtag ?? etagHeader;
   console.log('[ImageCache] ETag từ server:', etag);
 
   // nếu trùng hash → khỏi ghi
