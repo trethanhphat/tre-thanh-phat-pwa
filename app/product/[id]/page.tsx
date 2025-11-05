@@ -12,7 +12,6 @@
  *    + Nếu không thay đổi → giữ nguyên cache cũ
  */
 
-*/
 'use client';
 
 import { useEffect, useState } from 'react';
