@@ -76,7 +76,7 @@ export async function ensureImageCachedByUrl(
   if (!options?.forceUpdate) {
     const meta = await fetchImageMeta(url); // có thể luôn null nếu không triển khai
     console.log('[ImageCache] 🔍 Meta từ /api/image-meta:', { url, meta }); // Hiển thị xem có lấy được etag từ image-meta không
-    const remoteHash = meta?.hash;
+    const remoteHash = meta?.hash ?? meta?.blob_hash;
     const remoteEtag = meta?.etag?.replace(/^W\//, ''); // bỏ W/ nếu có
     const remoteLastModified = meta?.last_modified;
 
@@ -99,6 +99,8 @@ export async function ensureImageCachedByUrl(
           existingHash: existing?.hash,
           remoteEtag,
           existingEtag: existing?.etag,
+          remoteLastModified,
+          existingLastModified: existing?.last_modified,
         });
         // Kết thúc console log để biết ảnh có thay đổi không
         return; // không đổi
