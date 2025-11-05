@@ -57,6 +57,9 @@ export async function ensureImageCachedByUrl(
 
   const db = await initDB();
   const storeName = STORE_MAP[type] ?? STORE_IMAGES;
+  // Bắt đầu Console log để biết store đang dùng
+  console.log('[ImageCache] 📦 Store đang dùng:', { type, storeName });
+  // Kết thúc Console log để biết store đang dùng
 
   // 1) KIỂM TRA TỒN TẠI THEO index 'source_url' (đúng schema)
   const txRead = db.transaction(storeName);
@@ -70,6 +73,7 @@ export async function ensureImageCachedByUrl(
   // 2) TTL/meta: quyết định có cần tải lại không
   if (!options?.forceUpdate) {
     const meta = await fetchImageMeta(url); // có thể luôn null nếu không triển khai
+    console.log('[ImageCache] 🔍 Meta từ /api/image-meta:', { url, meta }); // Hiển thị xem có lấy được etag từ image-meta không
     const remoteHash = meta?.hash;
     const remoteEtag = meta?.etag;
 
@@ -80,10 +84,20 @@ export async function ensureImageCachedByUrl(
         if (ageDays <= 7) return; // còn hạn → bỏ
       }
       // nếu có meta → so sánh hash/etag
+
       if (
         (remoteHash && existing.hash === remoteHash) ||
         (remoteEtag && existing.etag === remoteEtag)
       ) {
+        //  Bắt đầu console log để biết ảnh có thay đổi không
+        console.log('[ImageCache] ⚠️ Skip lưu vì ảnh không thay đổi:', {
+          url,
+          remoteHash,
+          existingHash: existing?.hash,
+          remoteEtag,
+          existingEtag: existing?.etag,
+        });
+        // Kết thúc console log để biết ảnh có thay đổi không
         return; // không đổi
       }
     }
@@ -95,6 +109,13 @@ export async function ensureImageCachedByUrl(
     redirect: 'follow',
     mode: 'cors' as RequestMode,
   });
+  // Bắt console log header để biết xem có etag không
+  console.log('[ImageCache] 🛰️ Server response headers:', {
+    url,
+    etag: res.headers.get('ETag'),
+    contentType: res.headers.get('Content-Type'),
+  });
+  // Kết thúc console log header xem có etag không
   if (!res.ok) {
     // tuỳ chọn: fallback proxy nếu bạn dùng route proxy
     const proxy = `/api/image-proxy?url=${encodeURIComponent(url)}`;
@@ -103,9 +124,9 @@ export async function ensureImageCachedByUrl(
   }
   const blob = await res.blob();
   if (!blob || blob.size === 0) return;
-
   const hash = await hashBlob(blob);
   const etag = res.headers.get('ETag') ?? undefined;
+  console.log('[ImageCache] ETag từ server:', etag);
 
   // nếu trùng hash → khỏi ghi
   if (!options?.forceUpdate && existing?.hash === hash) return;
@@ -123,5 +144,16 @@ export async function ensureImageCachedByUrl(
     hash,
     lastFetched: new Date().toISOString(),
   };
+  // Ghi đè bản ghi
+  // Console log để biết ghi dữ liệu gì
+  console.log('[ImageCache] 💾 Lưu ảnh vào IndexedDB:', {
+    url,
+    key,
+    storeName,
+    etag,
+    hash,
+    updated_at: new Date().toISOString(),
+  });
+  // Kết thúc console log để biết ghi dữ liệu gì
   await db.put(storeName, record);
 }
