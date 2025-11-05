@@ -106,8 +106,11 @@ export async function saveNewsImageIfNotExists(url: string) {
   });
 
   console.log(`[newsImageService] 💾 Cached news image ${url}`, {
-    key,
+    key: key,
+    source_url: url,
     blob_hash,
+    etag,
+    updated_at,
     size: blob.size,
   });
 }
