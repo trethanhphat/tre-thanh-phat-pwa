@@ -1,4 +1,18 @@
 // 📄 File: app/product/[id]/page.tsx
+/**
+ * Trang chi tiết sản phẩm /product/[id]
+ * - ✅ OFFLINE FIRST:
+ *    + Thử load dữ liệu sản phẩm từ IndexedDB trước (getProductOffline)
+ *    + Nếu có → hiển thị ngay
+ *    + Nếu chưa có → thông báo cần mở online để đồng bộ lần đầu
+ *
+ * - ✅ ONLINE UPDATE:
+ *    + Khi online, gọi /api/product?id=ID để lấy dữ liệu mới
+ *    + Nếu có khác biệt → lưu vào IndexedDB (saveProductOffline)
+ *    + Nếu không thay đổi → giữ nguyên cache cũ
+ */
+
+*/
 'use client';
 
 import { useEffect, useState } from 'react';

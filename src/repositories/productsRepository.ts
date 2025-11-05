@@ -1,4 +1,9 @@
 // ✅ File: src/repositories/productsRepository.ts
+/*🔹 Repository quản lý dữ liệu sản phẩm trong IndexedDB
+ * - Kiểm tra tồn tại bản ghi
+ * - Đồng bộ danh sách sản phẩm (an toàn với ảnh)
+ * - Lưu / lấy sản phẩm offline
+ */
 // Import hàm khởi tạo DB và tên store
 import { initDB, STORE_PRODUCTS } from '../lib/db';
 // Import hàm cache ảnh sản phẩm từ module dịch vụ ảnh

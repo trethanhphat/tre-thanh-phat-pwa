@@ -9,6 +9,15 @@
 //   • Hàm fetchAndSyncNewsFromAPI() nay trả về mảng tin hợp lệ,
 //     đồng thời prefetch ảnh top N cho offline hiển thị nhanh
 //   • Giữ nguyên tương thích loadNewsFromDB, upsertNews, pruneNews
+//
+// Hàm chính:
+//   • hasNewsInDB() - Kiểm tra nhanh có tin trong DB không để bên BachgroundPrefetch biết có cần fetch không.
+//   • countNewsInDB() - Đếm số tin trong DB dùng để biết số lượng tin hiện có.
+//   • loadNewsFromDB() - Load toàn bộ  tin từ IndexedDB (offline-first)
+//   • upsertNews() - Thêm/cập nhật tin vào IndexedDB nếu có thay đổi
+//   • pruneNews() - Xoá tin không còn tồn tại trên server
+//   • fetchAndSyncNewsFromAPI() - Fetch tin từ API và đồng bộ vào IndexedDB + cache ảnh
+//   • syncNews() - Đồng bộ tin tức đầy đủ (fallback cho service worker hoặc job nền)
 // ─────────────────────────────────────────────
 
 import axios from 'axios';

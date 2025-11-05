@@ -1,4 +1,9 @@
-// ✅ File: src/lib/ensureImageCachedByUrl.ts (phiên bản an toàn)
+// ✅ File: src/lib/ensureImageCachedByUrl.ts
+/**✅ Đảm bảo ảnh được cache trong IndexedDB theo URL
+ * - Hỗ trợ các loại ảnh: 'news' | 'product' | 'generic' (mặc định)
+ * - Kiểm tra TTL + meta (etag/blob_hash) để quyết định có tải lại hay không
+ * - Lưu trữ ảnh với khoá SHA-256 của URL
+ */
 import { initDB, STORE_NEWS_IMAGES, STORE_PRODUCTS_IMAGES, STORE_IMAGES } from '@/lib/db';
 
 // Khai báo map từ type sang store name
