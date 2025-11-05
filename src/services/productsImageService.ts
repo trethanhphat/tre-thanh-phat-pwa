@@ -22,11 +22,14 @@ async function fetchBlobWithEtag(url: string): Promise<{ blob: Blob; etag?: stri
   try {
     const res = await fetch(url, { cache: 'no-cache' });
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
-
+    const etagFromHeader = res.headers.get('ETag') ?? undefined; // Lấy ETag từ header
     const blob = await res.blob();
+    console.log('[ImageCache] 🛰️ Server response headers:', { etagFromHeader }); // Hiển thị ETag ra console log
+
     if (blob.size === 0) throw new Error('Blob empty');
 
     const etag = res.headers.get('ETag') ?? undefined;
+    console.log('[ImageCache] 🛰️ Server response headers:', { etag });
     return { blob, etag };
   } catch (err) {
     console.warn('❌ Fetch image error:', url, err);
@@ -162,6 +165,7 @@ export async function prefetchProductImages(urls: string[]) {
   if (conn?.saveData) return;
 
   for (const url of urls.slice(0, 5)) {
+    console.log('[Prefetch] 🚀 Prefetch product image:', url);
     await saveProductImageIfNotExists(url);
   }
 }

@@ -1,9 +1,12 @@
 // ✅ File: src/repositories/productsRepository.ts
+// Import hàm khởi tạo DB và tên store
 import { initDB, STORE_PRODUCTS } from '../lib/db';
+// Import hàm cache ảnh sản phẩm từ module dịch vụ ảnh
 import {
   prefetchProductImages,
   ensureProductImageCachedByUrl,
 } from '../services/productsImageService'; // ✅ Chuyển hoàn toàn sang module riêng
+// Import kiểu dữ liệu Product
 import { Product } from '@/models/Product';
 
 // ✅ Kiểm tra nếu store 'products' có ít nhất 1 bản ghi thì trả kết quả true
