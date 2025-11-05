@@ -38,7 +38,7 @@ export async function hashBlob(blob: Blob): Promise<string> {
 // (tuỳ chọn) meta từ edge, nếu bạn có route này thì giữ; nếu không trả null
 export async function fetchImageMeta(
   url: string
-): Promise<{ hash?: string; etag?: string; last_modified?: string } | null> {
+): Promise<{ blob_hash?: string; etag?: string; last_modified?: string } | null> {
   try {
     const res = await fetch(`/api/image-meta?url=${encodeURIComponent(url)}`, {
       cache: 'no-store',
