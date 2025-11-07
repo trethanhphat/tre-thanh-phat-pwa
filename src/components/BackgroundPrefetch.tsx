@@ -74,9 +74,7 @@ export default function BackgroundPrefetch() {
 
         const tasks = [
           (async () => {
-            console.log('[BackgroundPrefetch] 📰 prefetchNewsOnce() start'); // Báo hiệu bắt đầu prefetch tin tức
-            await prefetchNewsOnce();
-            console.log('[BackgroundPrefetch] ✅ prefetchNewsOnce() done'); // Báo hiệu hoàn thành prefetch tin tức
+            // await prefetchNewsOnce();
           })(),
         ];
         // ⬇️ Prefetch Products luôn (bỏ qua TTL)
