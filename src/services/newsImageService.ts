@@ -6,8 +6,8 @@ const CACHE_TTL = 4 * 60 * 60 * 1000;
 
 /** ✅ Hàm hash url */
 async function hashUrl(text: string): Promise<string> {
-  const data = new TextEncoder().encode(text);
-  const hash = await crypto.subtle.digest('SHA-256', data);
+  const url = new TextEncoder().encode(text);
+  const hash = await crypto.subtle.digest('SHA-256', url);
   return Array.from(new Uint8Array(hash))
     .map(b => b.toString(16).padStart(2, '0'))
     .join('');
@@ -15,8 +15,8 @@ async function hashUrl(text: string): Promise<string> {
 
 /** ✅ Hash nội dung blob */
 async function hashBlob(blob: Blob): Promise<string> {
-  const buf = await blob.arrayBuffer();
-  const hash = await crypto.subtle.digest('SHA-256', buf);
+  const buffer = await blob.arrayBuffer();
+  const hash = await crypto.subtle.digest('SHA-256', buffer);
   return Array.from(new Uint8Array(hash))
     .map(b => b.toString(16).padStart(2, '0'))
     .join('');
@@ -33,15 +33,20 @@ async function fetchBlobWithEtag(url: string): Promise<{ blob: Blob; etag?: stri
     console.log('[newsImageService] 🔎 try fetch:', url);
     const res = await fetch(url, { cache: 'no-cache' });
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const etagFromHeader = res.headers.get('ETag') ?? undefined;
+    console.log('[newsImageService] 🛰️ server response headers:', { etagFromHeader });
     const blob = await res.blob();
+
     if (!blob.size) throw new Error('Blob empty');
-    const etag = res.headers.get('ETag') ?? undefined;
+    const etag = etagFromHeader;
     return { blob, etag };
   } catch (err) {
     console.warn('[newsImageService] ❌ fetch error', url, err);
     return null;
   }
 }
+
+const inFlight = new Map<string, Promise<any>>(); // chống tải/ghi trùng
 
 /** ✅ Lưu/cập nhật ảnh tin tức (với kiểm tra etag + blob_hash) */
 export async function saveNewsImageIfNotExists(url: string) {
@@ -114,8 +119,35 @@ export async function saveNewsImageIfNotExists(url: string) {
     size: blob.size,
   });
 }
+/** ✅ Offline-first lấy ảnh → nếu có blob thì hiển thị ngay */
+export const getNewsImageURL = async (url: string) => {
+  if (!url) return '';
+  const db = await initDB();
+  const key = await hashUrl(url);
+  const record = await db.get(STORE_NEWS_IMAGES, key);
 
-/** ✅ Đảm bảo cache */
+  if (record?.blob) {
+    return URL.createObjectURL(record.blob);
+  }
+
+  // 🔹 Nếu chưa có blob → thử online trước
+  return withProxy(url);
+};
+
+/** ✅ Prefetch một số ảnh nổi bật */
+export async function prefetchNewsImages(urls: string[]) {
+  if (!urls?.length) return;
+
+  const conn = (navigator as any).connection;
+  if (conn?.saveData) return;
+
+  for (const url of urls.slice(0, 5)) {
+    console.log('[newsImageServices] 🚀 Prefetch news image:', url);
+    await saveNewsImageIfNotExists(url);
+  }
+}
+
+/** ✅ Đảm bảo cache trước khi hiển thị */
 export async function ensureNewsImageCachedByUrl(url: string) {
   try {
     await saveNewsImageIfNotExists(url);

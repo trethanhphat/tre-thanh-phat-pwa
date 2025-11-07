@@ -4,12 +4,20 @@ import { initDB, STORE_PRODUCTS, STORE_PRODUCTS_IMAGES } from '@/lib/db';
 /** ⏱ TTL cache tối đa (7 ngày) cho ảnh sản phẩm */
 const CACHE_TTL = 7 * 24 * 60 * 60 * 1000;
 
-/** ✅ Tạo key hash từ URL (SHA-256 hex) */
-async function sha256Hex(text: string): Promise<string> {
-  const msgUint8 = new TextEncoder().encode(text);
-  const hashBuffer = await crypto.subtle.digest('SHA-256', msgUint8);
+/** ✅ Hàm hash từ URL (SHA-256 hex) */
+async function hashUrl(text: string): Promise<string> {
+  const url = new TextEncoder().encode(text);
+  const hashBuffer = await crypto.subtle.digest('SHA-256', url);
   const hashArray = Array.from(new Uint8Array(hashBuffer));
   return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+}
+
+/** ✅ Hash nội dung blob (SHA-256) */
+async function hashBlob(blob: Blob): Promise<string> {
+  const buffer = await blob.arrayBuffer();
+  const hash = await crypto.subtle.digest('SHA-256', buffer);
+  const bytes = Array.from(new Uint8Array(hash));
+  return bytes.map(b => b.toString(16).padStart(2, '0')).join('');
 }
 
 /** ✅ API proxy fallback */
@@ -20,29 +28,20 @@ function withProxy(url: string) {
 /** ✅ Fetch ảnh → kèm lấy ETag nếu có */
 async function fetchBlobWithEtag(url: string): Promise<{ blob: Blob; etag?: string } | null> {
   try {
+    console.log('[productsImageServices] 🔎 Fetching image:', url);
     const res = await fetch(url, { cache: 'no-cache' });
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const etagFromHeader = res.headers.get('ETag') ?? undefined; // Lấy ETag từ header
     const blob = await res.blob();
-    console.log('[ImageCache] 🛰️ Server response headers:', { etagFromHeader }); // Hiển thị ETag ra console log
+    console.log('[productsImageServices] 🛰️ Server response headers:', { etagFromHeader }); // Hiển thị ETag ra console log
 
     if (blob.size === 0) throw new Error('Blob empty');
-
-    const etag = res.headers.get('ETag') ?? undefined;
-    console.log('[ImageCache] 🛰️ Server response headers:', { etag });
+    const etag = etagFromHeader;
     return { blob, etag };
   } catch (err) {
     console.warn('❌ Fetch image error:', url, err);
     return null;
   }
-}
-
-/** ✅ Hash nội dung blob (SHA-256) */
-async function hashBlob(blob: Blob): Promise<string> {
-  const buffer = await blob.arrayBuffer();
-  const digest = await crypto.subtle.digest('SHA-256', buffer);
-  const bytes = Array.from(new Uint8Array(digest));
-  return bytes.map(b => b.toString(16).padStart(2, '0')).join('');
 }
 
 /** ✅ Lưu/cập nhật ảnh sản phẩm (có kiểm tra thay đổi nội dung) */
@@ -64,7 +63,7 @@ export const saveProductImageIfNotExists = async (url: string) => {
     const store: any = txRead.store;
     const byUrl = store.index?.('source_url') ? await store.index('source_url').get(url) : null;
 
-    const key = byUrl?.key ?? (await sha256Hex(url));
+    const key = byUrl?.key ?? (await hashUrl(url));
     const existing = byUrl ?? (await db.get(STORE_PRODUCTS_IMAGES, key));
 
     const now = Date.now();
@@ -105,7 +104,11 @@ export const saveProductImageIfNotExists = async (url: string) => {
     };
 
     await db.put(STORE_PRODUCTS_IMAGES, record);
-    console.log(`💾 Cached product image: ${url} (${blob.size} bytes, etag=${etag || 'none'})`);
+    console.log(
+      `[productsImageServices] 💾 Cached product image: ${url} (${blob.size} bytes, etag=${
+        etag || 'none'
+      })`
+    );
     return record;
   })();
 
@@ -146,7 +149,7 @@ export async function getProductBlobUrlById(productId: number): Promise<string |
 export const getProductImageURL = async (url: string) => {
   if (!url) return '';
   const db = await initDB();
-  const key = await sha256Hex(url);
+  const key = await hashUrl(url);
   const record = await db.get(STORE_PRODUCTS_IMAGES, key);
 
   if (record?.blob) {
@@ -165,7 +168,7 @@ export async function prefetchProductImages(urls: string[]) {
   if (conn?.saveData) return;
 
   for (const url of urls.slice(0, 5)) {
-    console.log('[Prefetch] 🚀 Prefetch product image:', url);
+    console.log('[productsImageServices] 🚀 Prefetch product image:', url);
     await saveProductImageIfNotExists(url);
   }
 }
@@ -176,6 +179,6 @@ export async function ensureProductImageCachedByUrl(originalUrl: string, fetchUr
   try {
     await saveProductImageIfNotExists(fetchUrl || originalUrl);
   } catch (err) {
-    console.warn('⚠️ Cache error:', originalUrl, err);
+    console.warn('[productsImageServices] ⚠️ Cache error:', originalUrl, err);
   }
 }

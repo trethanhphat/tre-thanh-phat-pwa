@@ -1,8 +1,9 @@
 // ✅ File: src/services/newsPrefetch.ts
+import { initDB, STORE_IMAGES } from '@/lib/db';
 import { fetchAndSyncNewsFromAPI } from '@/repositories/newsRepository';
 import { ensureNewsImageCachedByUrl } from '@/services/newsImageService';
 
-const PREFETCH_KEY = 'ttp_prefetch_news_v1';
+const PREFETCH_KEY = 'lastPrefetchNews';
 const PREFETCH_INTERVAL = 4 * 60 * 60 * 1000; // 4 giờ
 
 function goodConnection(): boolean {
