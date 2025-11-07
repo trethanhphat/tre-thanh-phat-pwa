@@ -17,12 +17,12 @@ const CACHE_TTL = 24 * 60 * 60 * 1000; // Thời gian cache 24h (1 ngày) tuỳ 
 
 export interface CachedImage {
   key: string; // khoá chính trong DB: key = sha256(url)
-  soure_url: string; // giữ lại nếu nơi khác còn dùng
+  source_url: string; // giữ lại nếu nơi khác còn dùng
   blob?: Blob; // Lưu blob ảnh
   blob_hash?: string; // hash(blob) để nhận diện trùng lặp nội dung (tên khác)
   last_modified?: string;
   etag?: string;
-  lastFetched?: string;
+  updated_at?: string;
 }
 
 async function sha256Hex(s: string) {
@@ -56,11 +56,11 @@ export async function fetchImageMeta(
 }
 
 export async function ensureImageCachedByUrl(
-  soure_url: string,
+  source_url: string,
   type: keyof typeof STORE_MAP = 'generic',
   options?: { forceUpdate?: boolean }
 ): Promise<void> {
-  if (!soure_url) return;
+  if (!source_url) return;
 
   const db = await initDB();
   const storeName = STORE_MAP[type] ?? STORE_IMAGES;
@@ -71,17 +71,19 @@ export async function ensureImageCachedByUrl(
   // 1) KIỂM TRA TỒN TẠI THEO index 'source_url' (đúng schema)
   const txRead = db.transaction(storeName);
   const store: any = txRead.store;
-  const byUrl = store.index?.('source_url') ? await store.index('source_url').get(soure_url) : null;
+  const byUrl = store.index?.('source_url')
+    ? await store.index('source_url').get(source_url)
+    : null;
 
   // fallback tìm theo key hash nếu bản ghi cũ không có index
-  const key = byUrl?.key ?? (await sha256Hex(soure_url));
+  const key = byUrl?.key ?? (await sha256Hex(source_url));
   const existing = byUrl ?? (await db.get(storeName, key)); // đọc đơn lẻ, không mở tx dài
 
   // 2) TTL/meta: quyết định có cần tải lại không
   if (!options?.forceUpdate) {
-    const meta = await fetchImageMeta(soure_url); // có thể luôn null nếu không triển khai
+    const meta = await fetchImageMeta(source_url); // có thể luôn null nếu không triển khai
     console.log('[src/lib/ensureImageCachedByUrl] 🔍 Meta từ /api/image-meta:', {
-      soure_url,
+      source_url,
       meta,
     }); // Hiển thị xem có lấy được etag từ image-meta không
     const remoteHash = meta?.blob_hash;
@@ -102,7 +104,7 @@ export async function ensureImageCachedByUrl(
       ) {
         //  Bắt đầu console log để biết ảnh có thay đổi không
         console.log('[src/lib/ensureImageCachedByUrl] ⚠️ Skip lưu vì ảnh không thay đổi:', {
-          soure_url,
+          source_url,
           remoteHash,
           existingHash: existing?.blob_hash,
           remoteEtag,
@@ -117,18 +119,18 @@ export async function ensureImageCachedByUrl(
   }
 
   // 3) FETCH NGOÀI IDB (không giữ transaction)
-  let res = await fetch(soure_url, {
+  let res = await fetch(source_url, {
     cache: 'no-store',
     redirect: 'follow',
     mode: 'cors' as RequestMode,
   });
-  const meta = await fetchImageMeta(soure_url);
+  const meta = await fetchImageMeta(source_url);
   const remoteEtag = meta?.etag?.replace(/^W\//, ''); // bỏ W/ nếu có
   const etagHeader = res.headers.get('ETag') ?? remoteEtag ?? undefined;
 
   // Bắt đầu console log header để biết xem có etag không
   console.log('[src/lib/ensureImageCachedByUrl] 🛰️ Server response headers:', {
-    soure_url,
+    source_url,
     etagHeader,
     etag: res.headers.get('ETag'),
     contentType: res.headers.get('Content-Type'),
@@ -136,7 +138,7 @@ export async function ensureImageCachedByUrl(
   // Kết thúc console log header xem có etag không
   if (!res.ok) {
     // tuỳ chọn: fallback proxy nếu bạn dùng route proxy
-    const proxy = `/api/image-proxy?url=${encodeURIComponent(soure_url)}`;
+    const proxy = `/api/image-proxy?url=${encodeURIComponent(source_url)}`;
     res = await fetch(proxy, { cache: 'no-store', redirect: 'follow' });
     const etagFromHeader = res.headers.get('ETag') ?? remoteEtag ?? undefined;
     // Bắt đầu console log header từ proxy
@@ -160,24 +162,25 @@ export async function ensureImageCachedByUrl(
   // 4) GHI NGẮN: để idb tự mở/đóng transaction
   const record = {
     key, // <<<<<< chìa khoá thực tế trong store
-    source_url: soure_url, // để tra cứu qua index lần sau
+    source_url: source_url, // để tra cứu qua index lần sau
     blob,
     blob_hash: blob_hash, // nếu bạn đọc ở nơi khác
     etag,
     updated_at: Date.now(),
     // giữ thêm các field cũ nếu bạn muốn tương thích:
-    last_modified: meta?.last_modified ?? existing?.last_modified,
-    lastFetched: new Date().toISOString(),
+    // last_modified: meta?.last_modified ?? existing?.last_modified,
+    // lastFetched: new Date().toISOString(),
   };
   // Ghi đè bản ghi
   // Console log để biết ghi dữ liệu gì
   console.log('[src/lib/ensureImageCachedByUrl] 💾 Lưu ảnh vào IndexedDB:', {
     storeName,
     key,
-    soure_url,
+    source_url,
     blob_hash,
     etag,
-    updated_at: new Date().toISOString(),
+    update_at: record.updated_at,
+    // updated_at: new Date().toISOString(),
   });
   // Kết thúc console log để biết ghi dữ liệu gì
   await db.put(storeName, record);
