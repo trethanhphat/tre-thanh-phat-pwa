@@ -65,7 +65,7 @@ export async function ensureImageCachedByUrl(
   const db = await initDB();
   const storeName = STORE_MAP[type] ?? STORE_IMAGES;
   // Bắt đầu Console log để biết store đang dùng
-  console.log('[ImageCache] 📦 Store đang dùng:', { type, storeName });
+  console.log('[src/lib/ensureImageCachedByUrl] 📦 Store đang dùng:', { type, storeName });
   // Kết thúc Console log để biết store đang dùng
 
   // 1) KIỂM TRA TỒN TẠI THEO index 'source_url' (đúng schema)
@@ -80,7 +80,7 @@ export async function ensureImageCachedByUrl(
   // 2) TTL/meta: quyết định có cần tải lại không
   if (!options?.forceUpdate) {
     const meta = await fetchImageMeta(url); // có thể luôn null nếu không triển khai
-    console.log('[ImageCache] 🔍 Meta từ /api/image-meta:', { url, meta }); // Hiển thị xem có lấy được etag từ image-meta không
+    console.log('[src/lib/ensureImageCachedByUrl] 🔍 Meta từ /api/image-meta:', { url, meta }); // Hiển thị xem có lấy được etag từ image-meta không
     const remoteHash = meta?.blob_hash;
     const remoteEtag = meta?.etag?.replace(/^W\//, ''); // bỏ W/ nếu có
     const remoteLastModified = meta?.last_modified;
@@ -98,7 +98,7 @@ export async function ensureImageCachedByUrl(
         (remoteEtag && existing.etag === remoteEtag)
       ) {
         //  Bắt đầu console log để biết ảnh có thay đổi không
-        console.log('[ImageCache] ⚠️ Skip lưu vì ảnh không thay đổi:', {
+        console.log('[src/lib/ensureImageCachedByUrl] ⚠️ Skip lưu vì ảnh không thay đổi:', {
           url,
           remoteHash,
           existingHash: existing?.hash,
@@ -124,7 +124,7 @@ export async function ensureImageCachedByUrl(
   const etagHeader = res.headers.get('ETag') ?? remoteEtag ?? undefined;
 
   // Bắt đầu console log header để biết xem có etag không
-  console.log('[ImageCache] 🛰️ Server response headers:', {
+  console.log('[src/lib/ensureImageCachedByUrl] 🛰️ Server response headers:', {
     url,
     etagHeader,
     etag: res.headers.get('ETag'),
@@ -137,7 +137,7 @@ export async function ensureImageCachedByUrl(
     res = await fetch(proxy, { cache: 'no-store', redirect: 'follow' });
     const etagFromHeader = res.headers.get('ETag') ?? remoteEtag ?? undefined;
     // Bắt đầu console log header từ proxy
-    console.log('[ImageCache] 🛰️ Proxy response headers:', {
+    console.log('[src/lib/ensureImageCachedByUrl] 🛰️ Proxy response headers:', {
       url: proxy,
       etagFromHeader,
     });
@@ -149,7 +149,7 @@ export async function ensureImageCachedByUrl(
   if (!blob || blob.size === 0) return;
   const hash = await hashBlob(blob);
   const etag = remoteEtag ?? etagHeader;
-  console.log('[ImageCache] ETag từ server:', etag);
+  console.log('[src/lib/ensureImageCachedByUrl] ETag từ server:', etag);
 
   // nếu trùng hash → khỏi ghi
   if (!options?.forceUpdate && existing?.hash === hash) return;
@@ -169,7 +169,7 @@ export async function ensureImageCachedByUrl(
   };
   // Ghi đè bản ghi
   // Console log để biết ghi dữ liệu gì
-  console.log('[ImageCache] 💾 Lưu ảnh vào IndexedDB:', {
+  console.log('[src/lib/ensureImageCachedByUrl] 💾 Lưu ảnh vào IndexedDB:', {
     url,
     key,
     storeName,

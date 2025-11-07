@@ -41,7 +41,7 @@ export async function prefetchNewsOnce(force = false) {
 
     if (items?.length > 0) {
       const imgs = items.map(i => i.image_url).filter(Boolean) as string[];
-      console.log('[newsPrefetch] 🖼️ Prefetching images:', imgs.length);
+      console.log('[newsPrefetch] 🖼️ Start Prefetching images:', imgs.length);
       await Promise.all(imgs.slice(0, 10).map(url => ensureNewsImageCachedByUrl(url)));
     } else {
       console.warn('[newsPrefetch] ⚠️ No news fetched or synced');
