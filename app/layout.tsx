@@ -43,17 +43,17 @@
 
 import React from 'react';
 import '@/styles/globals.scss';
-import { appName, appDescription } from '@/lib/env';
-import UpdateNotifier from '@/components/UpdateNotifier';
-import BottomMenu from '@/components/BottomMenu';
-import Header from '@/components/Header';
-import Footer from '@/components/Footer';
-import type { Metadata } from 'next';
-import ServiceWorkerCheck from '@/components/ServiceWorkerCheck';
-import ServiceWorkerRegister from '@/components/ServiceWorkerRegister';
-import BackgroundSync from '@/components/BackgroundSync'; // import client component
-import BackgroundPrefetch from '@/components/BackgroundPrefetch';
-import ResponsiveTableLabels from '@/components/ResponsiveTableLabels';
+import { appName, appDescription } from '@/lib/env'; // import appName và appDescription từ biến môi trường để hiển thị trong metadata
+import UpdateNotifier from '@/components/UpdateNotifier'; // import UpdateNotifier component để thông báo khi có bản cập nhật mới
+import BottomMenu from '@/components/BottomMenu'; // import BottomMenu component
+import Header from '@/components/Header'; // import Header component
+import Footer from '@/components/Footer'; // import Footer component
+import type { Metadata } from 'next'; // import kiểu Metadata từ 'next'
+import ServiceWorkerCheck from '@/components/ServiceWorkerCheck'; // import client component ServiceWorkerCheck để theo dõi Service Worker
+import ServiceWorkerRegister from '@/components/ServiceWorkerRegister'; // import client component ServiceWorkerRegister để đăng ký Service Worker
+// import BackgroundSync from '@/components/BackgroundSync'; // Tạm tắt import client component BackgroundSync để đồng bộ dữ liệu trong nền
+import BackgroundPrefetch from '@/components/BackgroundPrefetch'; // import client component BackgroundPrefetch để tải dữ liệu lần đầu khi mở hoặc cài app
+import ResponsiveTableLabels from '@/components/ResponsiveTableLabels'; // import client component ResponsiveTableLabels để tự động thêm data-label cho bảng
 
 export const viewport = {
   themeColor: '#ffffff',
@@ -79,7 +79,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <UpdateNotifier />
         <ServiceWorkerRegister /> {/* ✅ Đăng ký Service Worker */}
         <ServiceWorkerCheck /> {/* ✅ Theo dõi Service Worker */}
-        <BackgroundSync />{' '}
+        {/* <BackgroundSync />{' '} */}{' '}
+        {/* Tạm tắt client component chạy useEffect để đồng bộ dữ liệu trong nền */}
         {/* client component chạy useEffect để đồng bộ dữ liệu trong nền -- Cần cải tiến*/}
         <BackgroundPrefetch />{' '}
         {/* client component chạy useEffect để tải dữ liệu lần đầu khi mở hoặc cài app*/}

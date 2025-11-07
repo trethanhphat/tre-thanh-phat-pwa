@@ -34,7 +34,7 @@ import { hasNewsInDB } from '@/repositories/newsRepository';
 import { hasProductsInDB } from '@/repositories/productsRepository';
 import { hasBatchesInDB, syncBatchesByPrefix } from '@/repositories/batchesRepository';
 import { prefetchNewsOnce } from '@/services/newsPrefetch';
-import { prefetchProductsOnce } from '@/services/productsPrefetch';
+// import { prefetchProductsOnce } from '@/services/productsPrefetch'; // Tạm tắt import hàm prefetchProductsOnce để giảm hiển thị console log
 import { prefetchBatchesOnce } from '@/services/batchesPrefetch'; // ⬅️ thêm
 
 export default function BackgroundPrefetch() {
@@ -73,7 +73,8 @@ export default function BackgroundPrefetch() {
             console.log('[BackgroundPrefetch] ✅ prefetchNewsOnce() done'); // Báo hiệu hoàn thành prefetch tin tức
           })(),
         ];
-
+        // ⬇️ Prefetch Products luôn (bỏ qua TTL)
+        /* Start Tạm tắt prefetchProductsOnce để giảm hiển thị console log
         if (typeof prefetchProductsOnce === 'function') {
           tasks.push(
             (async () => {
@@ -85,6 +86,7 @@ export default function BackgroundPrefetch() {
         } else {
           console.log('[BackgroundPrefetch] ⚠️ prefetchProductsOnce not defined, skipped'); // Báo hiệu nếu hàm prefetchProductsOnce không được định nghĩa
         }
+        // End tạm tắt prefetchProductsOnce*/
 
         // ⬇️ Prefetch News nếu DB còn trống (bỏ qua TTL)
         if (!newsReady || !canSkipByTTL) {
@@ -100,6 +102,7 @@ export default function BackgroundPrefetch() {
         }
 
         // ⬇️ Prefetch Products nếu DB còn trống (bỏ qua TTL)
+        /* Start Tạm tắt prefetchProductsOnce để giảm hiển thị console log
         if (!productsReady || !canSkipByTTL) {
           tasks.push(
             (async () => {
@@ -111,6 +114,7 @@ export default function BackgroundPrefetch() {
         } else {
           console.log('[BackgroundPrefetch] ℹ️ Products DB ready — skip prefetch'); // Báo hiệu nếu dữ liệu sản phẩm đã sẵn sàng trong DB thì bỏ qua prefetch
         }
+        // End tạm tắt prefetchProductsOnce */
 
         // ⬇️ Prefetch Batches (Google Sheet → IndexedDB) nếu DB còn trống (bỏ qua TTL)
         if (!batchesReady || !canSkipByTTL) {
@@ -155,14 +159,16 @@ export default function BackgroundPrefetch() {
     run();
 
     // ⬇️ khi app được cài (PWA), force prefetch cả news + products + batches
+    // Start Tạm tắt chạy khi cài đặt app để giảm hiển thị console log
     const onInstalled = () => {
       console.log('[BackgroundPrefetch] 🧪 App installed → force prefetch all'); // Báo hiệu ứng dụng đã được cài đặt, bắt đầu prefetch bắt buộc
       Promise.all([
         prefetchNewsOnce(true),
-        prefetchProductsOnce(true),
+        //prefetchProductsOnce(true),
         prefetchBatchesOnce(true),
       ]).catch(err => console.warn('[BackgroundPrefetch] force prefetch error', err)); // Báo hiệu lỗi nếu có trong quá trình prefetch bắt buộc
     };
+    // End tạm tắt chạy khi cài đặt app */
 
     window.addEventListener('appinstalled', onInstalled); // Lắng nghe sự kiện 'appinstalled' để kích hoạt prefetch bắt buộc
     return () => window.removeEventListener('appinstalled', onInstalled); // Dọn dẹp sự kiện khi component unmount
