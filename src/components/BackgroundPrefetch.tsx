@@ -48,17 +48,23 @@ export default function BackgroundPrefetch() {
       }
 
       const lastPrefetch = localStorage.getItem('lastPrefetch'); // Lấy thời gian prefetch lần cuối từ localStorage
+      console.log('[BackgroundPrefetch] ℹ️ Last prefetch at:', lastPrefetch); // Báo hiệu thời gian prefetch lần cuối
       const now = Date.now(); // Lấy thời gian hiện tại
       const oneDay = 24 * 60 * 60 * 1000; // Định nghĩa khoảng thời gian 1 ngày
 
       // ⬇️ kiểm tra DB cục bộ
       const newsReady = await hasNewsInDB(); // Kiểm tra nếu đã có tin tức trong DB
+      console.log('[BackgroundPrefetch] ℹ️ News in DB:', newsReady); // Báo hiệu trạng thái tin tức trong DB
       const productsReady = await hasProductsInDB(); // Kiểm tra nếu đã có sản phẩm trong DB
+      console.log('[BackgroundPrefetch] ℹ️ Products in DB:', productsReady); // Báo hiệu trạng thái sản phẩm trong DB
       const batchesReady = await hasBatchesInDB(); // Kiểm tra nếu đã có lô trồng trong DB
+      console.log('[BackgroundPrefetch] ℹ️ Batches in DB:', batchesReady); // Báo hiệu trạng thái lô trồng trong DB
+
+      // ⬇️ Quy tắc tiền tải
 
       // ✅ chỉ prefetch nếu chưa từng chạy hoặc đã hơn 24h
       const canSkipByTTL = lastPrefetch && now - parseInt(lastPrefetch) < oneDay;
-      if (canSkipByTTL && productsReady && batchesReady) {
+      if (canSkipByTTL && newsReady && productsReady && batchesReady) {
         console.log('[BackgroundPrefetch] ⏸️ Skip — last prefetch within 24h (DB ready)'); // Báo hiệu bỏ qua nếu đã prefetch trong 24h qua và dữ liệu đã sẵn sàng
         return;
       }
@@ -130,7 +136,11 @@ export default function BackgroundPrefetch() {
         }
 
         await Promise.all(tasks);
+
+        console.log('[BackgroundPrefetch] ℹ️ Updating lastPrefetch time'); // Báo hiệu cập nhật thời gian prefetch lần cuối
+
         localStorage.setItem('lastPrefetch', now.toString());
+
         console.log('[BackgroundPrefetch] ✅ All prefetch tasks completed'); // Báo hiệu tất cả các tác vụ prefetch đã hoàn thành
 
         // ⬇️ Phát hiện mã QR trong URL để đồng bộ lô trồng tương ứng
