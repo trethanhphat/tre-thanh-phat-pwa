@@ -4,8 +4,8 @@ import { initDB, STORE_NEWS_IMAGES } from '@/lib/db';
 /** ⏱ TTL cache tối đa (4 giờ) cho ảnh tin tức */
 const CACHE_TTL = 4 * 60 * 60 * 1000;
 
-/** ✅ Hash SHA-256 */
-async function sha256Hex(text: string): Promise<string> {
+/** ✅ Hàm hash url */
+async function hashUrl(text: string): Promise<string> {
   const data = new TextEncoder().encode(text);
   const hash = await crypto.subtle.digest('SHA-256', data);
   return Array.from(new Uint8Array(hash))
@@ -47,7 +47,7 @@ async function fetchBlobWithEtag(url: string): Promise<{ blob: Blob; etag?: stri
 export async function saveNewsImageIfNotExists(url: string) {
   if (!url) return;
   const db = await initDB();
-  const key = await sha256Hex(url);
+  const key = await hashUrl(url);
   const existing = await db.get(STORE_NEWS_IMAGES, key);
 
   // TTL check: nếu còn hạn → bỏ qua
