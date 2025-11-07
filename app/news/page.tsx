@@ -3,8 +3,54 @@
  * 📘 Module: Hiển thị danh sách News
  * 🧠 Description:
  * - Trang /news hiển thị danh sách tin tức với cơ chế Offline-First và Online Update.
- * - Sử dụng IndexedDB để lưu trữ dữ liệu tin tức và ảnh tin tức.
- * - Giao diện Responsive với thanh điều khiển (Control Bar) tìm kiếm, phân trang và chọn số lượng bài/trang.
+ *  Phần hiển thị:
+ * - Giao diện Responsive với thanh điều khiển (Control Bar) tìm kiếm, phân trang, sắp xếp và chọn số lượng bài/trang trên đầu và cuối trang.
+ * - Bảng tin tức với các cột: Ảnh, Tiêu đề, Tác giả, Chuyên mục, Ngày xuất bản.
+ * - Hiển thị trạng thái đang dùng cache offline, vừa cập nhật mới hoặc lỗi tải dữ liệu.
+ * - Hiển thị trên PC (Màn hình lớn dạng bảng - table có nút nhấn hàng tiêu đề để sắp xếp cột Tiêu đề, Tác giả và Ngày xuất bản)
+ * - Hiển thị trên di động (Màn hình nhỏ dạng thẻ - card hiển thị thêm nút nhấn sort cuối phần tiêu đề, Tác giả).
+ *
+ *  Cơ chế dữ liệu:
+ * - ✅ OFFLINE FIRST:
+ *   + Luôn thử load dữ liệu từ IndexedDB trước (loadNewsFromDB)
+ *   + Nếu có → hiển thị ngay, Hiển thị chú ý đang dùng cache (offline) (báo đang cập nhật trong nền nếu có kết nối mạng)
+ *   + Nếu chưa có → thông báo cần mở online để đồng bộ lần đầu
+ *
+ * Dữ liệu trên IndexedDB:
+ * - Lưu trữ tin tức với các trường:
+ *  + news_id: string;          // ID tin tức lấy từ id trong feed hoặc link hoặc title nếu không có id
+ * title: string;            // Tiêu đề tin tức
+ * link: string;             // URL liên kết tin tức
+ *  author: string;           // Tác giả
+ * category: string;         // Chuyên mục dạng mảng
+ * published: number;        // Thời gian xuất bản (timestamp)
+ * updated: number;          // Thời gian cập nhật (timestamp)
+ * summary: string;        // Tóm tắt tin tức
+ * content: string;         // Nội dung tin tức
+ * image_url: string;       // Lấy URL ảnh đại diện hoặc bắt ảnh đầu tiên trong nội dung tin và chuyển dạng kích thước sang url cỡ ảnh 480px trong File app/api/news/route.ts
+ * updated_at: number;      // Thời gian cập nhật lần cuối
+ *
+ * - ✅ ONLINE UPDATE:
+ *   + Khi online, gọi /api/news bằng axios để lấy danh sách mới;
+ *   + Nếu có khác biệt → syncNews và cập nhật IndexedDB
+ *   + Nếu không thay đổi → giữ nguyên cache cũ
+ * - ✅ IMAGE CACHE (phiên bản mới):
+ *  + Dùng useImageCacheTracker('news') để đồng bộ ảnh vào IndexedDB
+ *   + Mỗi ảnh được lưu bằng:
+ *      url: string;                // URL gốc của ảnh nếu lấy của google blogger thì đổi sang kích thước 480px bằng hàm đổi tham số thành s480
+ *      key: hash(url) để key ngắn gọn và tránh lỗi key quá dài
+ *  source_url: url gốc để tra cứu;
+ *  updated_at: thời gian cập nhật lần cuối;
+ *  blob: dữ liệu ảnh thực tế;
+ * etag: để kiểm tra thay đổi nội dung từ server;
+ * blob_hash: hash(blob) để nhận diện trùng lặp nội dung ảnh;
+ *
+ *   + Khi render → lấy blob URL từ getImageBlobUrl(url)
+ *  Tính năng:
+ * - Khi app mở, sẽ prefetch một số tin tức mới nhất từ API và lưu vào IndexedDB (xem src/services/newsPrefetch.ts).
+ *
+ * - Đầu tiên kiểm tra trong IndexedDB để xem có lưu trữ dữ liệu tin tức không.
+ *
  * - Khi load trang, ưu tiên lấy dữ liệu từ IndexedDB để hiển thị nhanh rồi báo là dữ liệu trên máy.
  * - Nếu mở lần đầu không có tin thì báo là cần kết nối mạng để đồng bộ.
  * - Nếu có kết nối mạng, tự động gọi API để lấy danh sách tin tức mới.
@@ -40,8 +86,7 @@
  *   - TTP Internal Coding Standard v2.1
  *
  * 🧩 Dependencies:
- *   - IndexedDB API
- *   - src/lib/db.ts
+ *   - app/api/news/route.ts
  *
  * 🧠 Notes:
  *   - TTL cache ảnh tối đa: 4 giờ.
