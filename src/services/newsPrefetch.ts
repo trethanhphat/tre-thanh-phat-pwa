@@ -1,4 +1,45 @@
-// ✅ File: src/services/newsPrefetch.ts
+/**
+ * 📄 File: src/services/newsPrefetch.ts
+ * 📘 Services: Prefetch News khi mở app lần đầu
+ * 🧠 Description:
+ * Được gọi khi app mở lần đầu thực hiện trong BackgroundPrefetch component.
+ * Mục đích: Kiểm tra lần cuối prefetch so sánh với hiện tại quá thời hạn cập nhật chưa + kiểm tra trạng thái kết nối mạng để tải trước:
+ *  - Một số tin tức mới nhất từ API;
+ *  - Lưu tin vào IndexedDB;
+ *  - Tải và lưu cache ảnh liên quan của 10 tin.
+ *
+ *
+ * 👤 Author: Nguyễn Như Đường (TPB Corp)
+ * 🏢 Organization: Thanh Phát Bamboo Corp (TPB Corp)
+ * 📅 Created: 2025-10-25
+ * 🔄 Last Updated: 2025-11-07
+ * 🧩 Maintainer: DevOps Team @ TPB Corp
+ *
+ *
+ * 🧾 Version: 1.0.2
+ * 🪶 Change Log:
+ *   - 1.0.2 (2025-11-07): Tối ưu TTL cache ảnh & xử lý offline.
+ *   - 1.0.1 (2025-10-30): Bổ sung đồng bộ khi khởi động app.
+ *   - 1.0.0 (2025-10-25): Tạo file ban đầu.
+ *
+ * ⚖️ License: © 2025 TPB Corp. All rights reserved.
+ * 📜 Confidentiality: Internal Use Only.
+ * 🔐 Compliance: ISO/IEC 27001, ISO/IEC 12207, ISO 9001
+ *
+ * 🧭 Standards:
+ *   - ISO/IEC 12207: Software Life Cycle Processes
+ *   - ISO/IEC 25010: Software Quality Requirements
+ *   - TTP Internal Coding Standard v2.1
+ *
+ * 🧩 Dependencies:
+ *   - IndexedDB API
+ *   - src/lib/db.ts
+ *
+ * 🧠 Notes:
+ *   - TTL cache ảnh tối đa: 4 giờ.
+ *   - Ảnh giới hạn kích thước 512x512px để tối ưu.
+ */
+
 import { initDB, STORE_IMAGES } from '@/lib/db';
 import { fetchAndSyncNewsFromAPI } from '@/repositories/newsRepository';
 import { ensureNewsImageCachedByUrl } from '@/services/newsImageService';
@@ -29,6 +70,7 @@ function shouldPrefetch(force = false): boolean {
  * - Prefetch ảnh top 10
  * - Ghi last-run timestamp (localStorage)
  */
+
 export async function prefetchNewsOnce(force = false) {
   if (!shouldPrefetch(force)) return;
 

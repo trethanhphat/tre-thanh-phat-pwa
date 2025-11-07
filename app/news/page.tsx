@@ -80,7 +80,7 @@ import { useEffect, useRef, useState } from 'react';
 import axios from 'axios';
 import { News } from '@/models/News';
 import ControlBar from '@/components/ControlBar';
-import NewsTable from '@app/news/NewsTable';
+import NewsTable from './NewsTable';
 import { loadNewsFromDB, syncNews } from '@/repositories/newsRepository';
 import { useImageCacheTracker } from '@/hooks/useImageCacheTracker'; // ✅ dùng hook mới hợp nhất
 
