@@ -1,4 +1,52 @@
-// ✅ File: app/news/page.tsx
+/**********************************************************************
+ * 📄 File: File: app/news/page.tsx
+ * 📘 Module: Hiển thị danh sách News
+ * 🧠 Description:
+ * - Trang /news hiển thị danh sách tin tức với cơ chế Offline-First và Online Update.
+ * - Sử dụng IndexedDB để lưu trữ dữ liệu tin tức và ảnh tin tức.
+ * - Giao diện Responsive với thanh điều khiển (Control Bar) tìm kiếm, phân trang và chọn số lượng bài/trang.
+ * - Khi load trang, ưu tiên lấy dữ liệu từ IndexedDB để hiển thị nhanh rồi báo là dữ liệu trên máy.
+ * - Nếu mở lần đầu không có tin thì báo là cần kết nối mạng để đồng bộ.
+ * - Nếu có kết nối mạng, tự động gọi API để lấy danh sách tin tức mới.
+ * - Nếu có thay đổi so với dữ liệu cũ trong IndexedDB thì cập nhật và hiển thị tin mới.
+ * - Nếu không có thay đổi thì giữ nguyên dữ liệu cũ.
+ * - Nếu có kết nối mạng, tự động gọi API để kiểm tra và cập nhật tin tức mới trong nền và báo lại lên giao diện.
+ * - Ảnh tin tức được cache trong IndexedDB với cơ chế nhận diện trùng lặp bằng hash(blob).
+ * - Sử dụng hook useImageCacheTracker để đồng bộ ảnh tin tức vào IndexedDB.
+ * - Giao diện có thanh điều khiển (Control Bar) để tìm kiếm
+ * - Dữ liệu tin tức được lưu trong IndexedDB để truy cập nhanh và offline.
+ * - Ảnh tin tức được cache trong IndexedDB với cơ chế nhận diện trùng lặp bằng hash(blob).
+ * - Có bảng tin với phân trang, tìm kiếm và sắp xếp.
+ *
+ * 👤 Author: Nguyễn Như Đường (TPB Corp)
+ * 🏢 Organization: Thanh Phát Bamboo Corp (TPB Corp)
+ * 📅 Created: 2025-10-25
+ * 🔄 Last Updated: 2025-11-07
+ * 🧩 Maintainer: DevOps Team @ TPB Corp
+ *
+ * 🧾 Version: 1.0.2
+ * 🪶 Change Log:
+ *   - 1.0.2 (2025-11-07): Tối ưu TTL cache ảnh & xử lý offline.
+ *   - 1.0.1 (2025-10-30): Bổ sung đồng bộ khi khởi động app.
+ *   - 1.0.0 (2025-10-25): Tạo file ban đầu.
+ *
+ * ⚖️ License: © 2025 TPB Corp. All rights reserved.
+ * 📜 Confidentiality: Internal Use Only.
+ * 🔐 Compliance: ISO/IEC 27001, ISO/IEC 12207, ISO 9001
+ *
+ * 🧭 Standards:
+ *   - ISO/IEC 12207: Software Life Cycle Processes
+ *   - ISO/IEC 25010: Software Quality Requirements
+ *   - TTP Internal Coding Standard v2.1
+ *
+ * 🧩 Dependencies:
+ *   - IndexedDB API
+ *   - src/lib/db.ts
+ *
+ * 🧠 Notes:
+ *   - TTL cache ảnh tối đa: 4 giờ.
+ *   - Ảnh giới hạn kích thước 512x512px để tối ưu.
+ */
 /**
  * Trang /news
  * - ✅ OFFLINE FIRST:
@@ -41,11 +89,11 @@ type SortOrder = 'asc' | 'desc';
 
 export default function NewsListPage() {
   // ---------------------- STATE ----------------------
-  const [items, setItems] = useState<News[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [usingCache, setUsingCache] = useState(false);
-  const [justUpdated, setJustUpdated] = useState(false);
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [items, setItems] = useState<News[]>([]); // Tạo mảng lưu trữ tin tức
+  const [loading, setLoading] = useState(true); // Tạo trạng thái loading
+  const [usingCache, setUsingCache] = useState(false); // Trạng thái đang dùng cache
+  const [justUpdated, setJustUpdated] = useState(false); // Trạng thái vừa cập nhật mới
+  const [errorMessage, setErrorMessage] = useState<string | null>(null); // Lưu thông báo lỗi nếu có
 
   // ---------------------- IMAGE CACHE ----------------------
   const {

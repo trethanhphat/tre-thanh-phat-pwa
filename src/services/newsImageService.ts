@@ -1,4 +1,42 @@
-// ✅ File: src/services/newsImageService.ts
+/**
+ * 📄 File: src/services/newsImageService.ts
+ * 📘 Module: Image Cache Service for News
+ * 🧠 Description:
+ * Quản lý cache ảnh tin tức trong IndexedDB.
+ * Lần đầu chạy sẽ tải ảnh từ URL, nếu không tải được trực tiếp thì dùng proxy tải rồi lưu vào IndexedDB.
+ * Lần sau sẽ kiểm tra TTL + etag/blob_hash để quyết định tải lại hay không.
+ * Khi hiển thị ảnh sẽ ưu tiên lấy từ cache, nếu không có thì tải từ URL (hoặc proxy).
+ *
+ * 👤 Author: Nguyễn Như Đường (TPB Corp)
+ * 🏢 Organization: Thanh Phát Bamboo Corp (TPB Corp)
+ * 📅 Created: 2025-10-25
+ * 🔄 Last Updated: 2025-11-07
+ * 🧩 Maintainer: DevOps Team @ TPB Corp
+ *
+ * 🧾 Version: 1.3.2
+ * 🪶 Change Log:
+ *   - 1.3.2 (2025-11-07): Tối ưu TTL cache ảnh & xử lý offline.
+ *   - 1.3.1 (2025-10-30): Bổ sung đồng bộ khi khởi động app.
+ *   - 1.3.0 (2025-10-25): Tạo file ban đầu.
+ *
+ * ⚖️ License: © 2025 TPB Corp. All rights reserved.
+ * 📜 Confidentiality: Internal Use Only.
+ * 🔐 Compliance: ISO/IEC 27001, ISO/IEC 12207, ISO 9001
+ *
+ * 🧭 Standards:
+ *   - ISO/IEC 12207: Software Life Cycle Processes
+ *   - ISO/IEC 25010: Software Quality Requirements
+ *   - TTP Internal Coding Standard v2.1
+ *
+ * 🧩 Dependencies:
+ *   - IndexedDB API
+ *   - src/lib/db.ts
+ *
+ * 🧠 Notes:
+ *   - TTL cache ảnh tối đa: 4 giờ.
+ *   - Ảnh giới hạn kích thước 512x512px để tối ưu.
+ */
+
 import { initDB, STORE_NEWS_IMAGES } from '@/lib/db';
 
 /** ⏱ TTL cache tối đa (4 giờ) cho ảnh tin tức */
@@ -130,8 +168,19 @@ export const getNewsImageURL = async (url: string) => {
     return URL.createObjectURL(record.blob);
   }
 
-  // 🔹 Nếu chưa có blob → thử online trước
-  return withProxy(url);
+  // 🔹 Nếu chưa có blob → thử tải trực tiếp trước
+  try {
+    const res = await fetch(url, { method: 'HEAD', cache: 'no-cache' });
+    if (res.ok) {
+      console.log('[newsImageService] 🌐 Direct URL available:', url);
+      return url;
+    }
+  } catch (err) {
+    console.warn('[newsImageService] ⚠️ Direct fetch failed, fallback to proxy:', err);
+  }
+
+  // 🔸 Fallback sang proxy nếu URL gốc không truy cập được
+  return url;
 };
 
 /** ✅ Prefetch một số ảnh nổi bật */

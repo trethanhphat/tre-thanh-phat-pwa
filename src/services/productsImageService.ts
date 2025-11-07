@@ -1,4 +1,7 @@
 // File: src/services/productsImageService.ts
+/*
+ */
+// Đảm bảo ảnh sản phẩm được cache trong IndexedDB với kiểm tra TTL + etag/blob_hash
 import { initDB, STORE_PRODUCTS, STORE_PRODUCTS_IMAGES } from '@/lib/db';
 
 /** ⏱ TTL cache tối đa (7 ngày) cho ảnh sản phẩm */
