@@ -51,6 +51,7 @@ import Footer from '@/components/Footer'; // import Footer component
 import type { Metadata } from 'next'; // import kiểu Metadata từ 'next'
 import ServiceWorkerCheck from '@/components/ServiceWorkerCheck'; // import client component ServiceWorkerCheck để theo dõi Service Worker
 import ServiceWorkerRegister from '@/components/ServiceWorkerRegister'; // import client component ServiceWorkerRegister để đăng ký Service Worker
+import NetworkStatusBar from '@/components/NetworkStatusBar'; // import client component NetworkStatusBar để hiển thị trạng thái mạng
 // import BackgroundSync from '@/components/BackgroundSync'; // Tạm tắt import client component BackgroundSync để đồng bộ dữ liệu trong nền
 import BackgroundPrefetch from '@/components/BackgroundPrefetch'; // import client component BackgroundPrefetch để tải dữ liệu lần đầu khi mở hoặc cài app
 import ResponsiveTableLabels from '@/components/ResponsiveTableLabels'; // import client component ResponsiveTableLabels để tự động thêm data-label cho bảng
@@ -85,6 +86,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <BackgroundPrefetch />{' '}
         {/* client component chạy useEffect để tải dữ liệu lần đầu khi mở hoặc cài app*/}
         <ResponsiveTableLabels /> {/* ✅ Tự động thêm data-label cho bảng */}
+        <NetworkStatusBar /> {/* ✅ Hiển thị thanh trạng thái mạng */}
       </body>
     </html>
   );

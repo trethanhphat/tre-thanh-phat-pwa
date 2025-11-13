@@ -1,4 +1,81 @@
-// ✅ File: src/components/BackgroundPrefetch.tsx
+/****************************************************************************************************
+ * 📄 File: File: src/components/BackgroundPrefetch.tsx
+ * 📘 Module: Tải trước dữ liệu cho ứng dụng
+ * 🧠 Description: 
+ * Thực hiện tải trước dữ liệu lưu vào local một số dữ liệu như: 
+ * - 10 tin tức mới nhất; 
+ * - Sản phẩm; 
+ * - Danh sách lô trồng theo nông hộ (5 ký tự đầu mã cây hoặc mã lô trồng)
+ * 🛠️ Features: 
+ * Tải sẵn dữ liệu để hỗ trợ trải nghiệm offline-first tốt hơn.
+ * - Chỉ chạy khi online (mạng tốt là wifi) và không quá thường xuyên (24h một lần)
+ * - Lắng nghe sự kiện 'appinstalled' để tiền tải khi PWA được cài đặt
+ *  * 
+ * - Cải thiện trải nghiệm người dùng khi offline hoặc mạng yếu
+ * - Giảm thời gian chờ tải dữ liệu khi truy cập các trang chính
+ * - Đảm bảo dữ liệu luôn được cập nhật định kỳ
+ *  * 🧩 Main Functions:
+ * - BackgroundPrefetch: React component không render gì, chỉ chạy useEffect để tiền tải
+ *  *  * ⚙️ Workflow:
+ *  • Kiểm tra trạng thái online
+ *  • Kiểm tra nếu đã prefetch trong 24h qua để tránh lặp lại
+ * • Kiểm tra nếu dữ liệu đã có trong IndexedDB để bỏ qua prefetch không cần thiết
+ * • Gọi prefetchNewsOnce(), prefetchProductsOnce(), prefetchBatchesOnce() tương ứng
+ *  • Phát hiện mã QR trong URL và gọi syncBatchesByPrefix() nếu tìm thấy
+ * Khi cài đặt PWA:
+ *  
+ * • Lắng nghe sự kiện 'appinstalled' và gọi prefetch bắt buộc cho tất cả dữ liệu
+ *  *  * ✅ Benefits:
+ * • Cải thiện trải nghiệm người dùng khi offline hoặc mạng yếu
+ * • Giảm thời gian chờ tải dữ liệu khi truy cập các trang chính
+ * • Đảm bảo dữ liệu luôn được cập nhật định kỳ
+ *  
+ *  *  * 📝 Additional Info
+ * - Ghi log chi tiết quá trình để dễ dàng theo dõi và debug
+ * :
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ *  
+/***************************************************************************************************
+ * 🏢 Organization: Thanh Phát Bamboo Corp (TPB Corp)
+ * 👤 Author: Nguyễn Như Đường (TPB Corp)
+ * 📱 Contact: +84-904-969-268
+ * 📧 Email: duong273@gmail.com
+ * 📅 Created: 2025-10-30
+ * 🔄 Last Updated: 2025-11-13
+ * 🧩 Maintainer: DevOps Team @ TPB Corp
+ * 
+ /***************************************************************************************************
+ * 🧾 Version: 1.0.2
+ * 🪶 Change Log:
+ *   - 1.0.2 (2025-11-07): Tối ưu TTL cache ảnh & xử lý offline.
+ *   - 1.0.1 (2025-10-30): Bổ sung đồng bộ khi khởi động app.
+ *   - 1.0.0 (2025-10-30): Tạo file ban đầu.
+ *
+ /***************************************************************************************************
+ * ⚖️ License: © 2025 TPB Corp. All rights reserved.
+ * 📜 Confidentiality: Internal Use Only.
+ * 🔐 Compliance: ISO/IEC 27001, ISO/IEC 12207, ISO 9001
+ *
+ /***************************************************************************************************
+ * 🧭 Standards:
+ *   - ISO/IEC 12207: Software Life Cycle Processes
+ *   - ISO/IEC 25010: Software Quality Requirements
+ *   - TTP Internal Coding Standard v2.1
+ *
+ /***************************************************************************************************
+ * 🧩 Dependencies:
+ *   - app/api/news/route.ts
+ *
+ /***************************************************************************************************
+ * 🧠 Notes:
+ *   - TTL cache ảnh tối đa: 4 giờ.
+ *   - Ảnh giới hạn kích thước 512x512px để tối ưu.
+ *  - Chỉ tiền tải khi online.
 /** ✅ Thành phần tiền tải nền (background prefetch)
  * - Khi app load, kiểm tra nếu online và đã lâu chưa prefetch
  * - Gọi các hàm prefetch để tải dữ liệu tin tức, sản phẩm, lô hàng về IndexedDB
@@ -43,9 +120,34 @@ export default function BackgroundPrefetch() {
       console.log('[BackgroundPrefetch] 🚀 run() start'); // Báo là hàm bắt đầu chạy (Đã được gọi)
 
       if (!navigator.onLine) {
-        console.log('[BackgroundPrefetch] ❌ Offline — skip prefetch'); // Báo hiệu Nếu offline thì bỏ qua
+        console.log('[BackgroundPrefetch] ❌ Offline — skip prefetch');
+        // Phát sự kiện để UI bắt và hiển thị badge/panel
+        window.dispatchEvent(
+          new CustomEvent('network:status', {
+            detail: { online: false, timestamp: Date.now() },
+          })
+        );
         return;
       }
+      // Khi online, phát hiện chỉ số hiện tại (nếu browser hỗ trợ)
+      const conn =
+        (navigator as any).connection ||
+        (navigator as any).mozConnection ||
+        (navigator as any).webkitConnection;
+      const metrics = conn
+        ? {
+            effectiveType: conn.effectiveType,
+            downlink: conn.downlink,
+            rtt: conn.rtt,
+            saveData: conn.saveData,
+            type: conn.type,
+          }
+        : {};
+      window.dispatchEvent(
+        new CustomEvent('network:status', {
+          detail: { online: true, ...metrics, timestamp: Date.now() },
+        })
+      );
 
       const lastPrefetch = localStorage.getItem('lastPrefetch'); // Lấy thời gian prefetch lần cuối từ localStorage
       console.log('[BackgroundPrefetch] ℹ️ Last prefetch at:', lastPrefetch); // Báo hiệu thời gian prefetch lần cuối
