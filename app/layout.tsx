@@ -76,6 +76,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <Header />
         <main style={{ padding: '1rem' }}>{children}</main>
         <Footer />
+        <NetworkStatusBar /> {/* ✅ Hiển thị thanh trạng thái mạng */}
         <BottomMenu />
         <UpdateNotifier />
         <ServiceWorkerRegister /> {/* ✅ Đăng ký Service Worker */}
@@ -86,7 +87,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <BackgroundPrefetch />{' '}
         {/* client component chạy useEffect để tải dữ liệu lần đầu khi mở hoặc cài app*/}
         <ResponsiveTableLabels /> {/* ✅ Tự động thêm data-label cho bảng */}
-        <NetworkStatusBar /> {/* ✅ Hiển thị thanh trạng thái mạng */}
       </body>
     </html>
   );
