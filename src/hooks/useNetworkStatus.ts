@@ -76,17 +76,17 @@
   * - API Docs: https://tpbc.top/api-docs/hooks/useNetworkStatus
   * - Changelog: https://tpbc.top/changelogs/useNetworkStatus
   **************************************************************************************************/
+// src/hooks/useNetworkStatus.ts
 import { useEffect, useState } from 'react';
 
 export type NetworkMetrics = {
   online: boolean;
-  effectiveType?: string; // 'slow-2g'|'2g'|'3g'|'4g'
+  effectiveType?: string; // 'slow-2g'|'2g'|'3g'|'4g' (chất lượng, không phải loại mạng)
   downlink?: number; // Mbps
   rtt?: number; // ms
   saveData?: boolean;
-  type?: string; // 'wifi'|'cellular'... (không phải browser nào cũng support)
-  timestamp: number; // để bạn log theo thời gian
-  // cờ giả lập (QA)
+  type?: string; // <-- loại mạng nếu trình duyệt có: 'wifi' | 'cellular' | ...
+  timestamp: number;
   simulated?: boolean;
 };
 
@@ -95,8 +95,9 @@ export function readConnection(): Partial<NetworkMetrics> {
     (navigator as any).connection ||
     (navigator as any).mozConnection ||
     (navigator as any).webkitConnection;
+
   if (!conn) return {};
-  const { effectiveType, downlink, rtt, saveData, type } = conn;
+  const { effectiveType, downlink, rtt, saveData, type } = conn; // <-- lấy thêm type
   return { effectiveType, downlink, rtt, saveData, type };
 }
 
@@ -111,21 +112,39 @@ export default function useNetworkStatus() {
     const handleOnline = () => {
       setState(s => ({ ...s, online: true, timestamp: Date.now(), simulated: false }));
       window.dispatchEvent(
-        new CustomEvent('network:status', { detail: { ...state, online: true } })
+        new CustomEvent('network:status', {
+          detail: { ...readConnection(), online: true, timestamp: Date.now() },
+        })
       );
     };
+
     const handleOffline = () => {
-      setState(s => ({ ...s, online: false, timestamp: Date.now(), simulated: false }));
+      // Khi offline, loại bỏ các chỉ số để UI không hiển thị số liệu cũ
+      setState(s => ({
+        ...s,
+        online: false,
+        effectiveType: undefined,
+        downlink: undefined,
+        rtt: undefined,
+        saveData: undefined,
+        type: undefined,
+        timestamp: Date.now(),
+        simulated: false,
+      }));
       window.dispatchEvent(
-        new CustomEvent('network:status', { detail: { ...state, online: false } })
+        new CustomEvent('network:status', {
+          detail: { online: false, timestamp: Date.now() },
+        })
       );
     };
+
     const conn =
       (navigator as any).connection ||
       (navigator as any).mozConnection ||
       (navigator as any).webkitConnection;
+
     const handleChange = () => {
-      const metrics = readConnection();
+      const metrics = readConnection(); // <-- includes type if available
       setState(s => ({ ...s, ...metrics, timestamp: Date.now(), simulated: false }));
       window.dispatchEvent(
         new CustomEvent('network:status', {
@@ -140,7 +159,7 @@ export default function useNetworkStatus() {
       conn.addEventListener('change', handleChange);
     }
 
-    // phát sự kiện lần đầu
+    // phát sự kiện lần đầu & đồng bộ state
     handleChange();
 
     return () => {
@@ -152,14 +171,8 @@ export default function useNetworkStatus() {
     };
   }, []);
 
-  // API giả lập cho QA
   const simulate = (override: Partial<NetworkMetrics>) => {
-    const next: NetworkMetrics = {
-      ...state,
-      ...override,
-      simulated: true,
-      timestamp: Date.now(),
-    };
+    const next: NetworkMetrics = { ...state, ...override, simulated: true, timestamp: Date.now() };
     setState(next);
     window.dispatchEvent(new CustomEvent('network:status', { detail: next }));
   };

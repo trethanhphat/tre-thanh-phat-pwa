@@ -62,9 +62,25 @@
  * * ***************************************************************************************************
  *
  */
+// src/components/NetworkStatusBar.tsx
 'use client';
 import React from 'react';
 import useNetworkStatus from '@/hooks/useNetworkStatus';
+
+const qualityLabel = (eff?: string) => {
+  switch (eff) {
+    case 'slow-2g':
+      return 'Rất yếu';
+    case '2g':
+      return 'Yếu';
+    case '3g':
+      return 'Trung bình';
+    case '4g':
+      return 'Tốt';
+    default:
+      return undefined;
+  }
+};
 
 const badgeColor = (online: boolean, eff?: string) => {
   if (!online) return 'bg-red-600';
@@ -83,34 +99,45 @@ const badgeColor = (online: boolean, eff?: string) => {
 
 export default function NetworkStatusBar() {
   const { network, simulate } = useNetworkStatus();
-  const { online, effectiveType, downlink, rtt, saveData, simulated } = network;
+  const { online, effectiveType, downlink, rtt, saveData, simulated, type } = network;
+
+  // Offline: chỉ báo trạng thái, KHÔNG hiển thị chỉ số
+  if (!online) {
+    return (
+      <div className="fixed bottom-4 right-4 z-50 text-white shadow-lg rounded-md overflow-hidden">
+        <div className={`px-3 py-2 text-sm ${badgeColor(false)}`}>Offline</div>
+      </div>
+    );
+  }
+
+  const qLabel = qualityLabel(effectiveType);
 
   return (
     <div className="fixed bottom-4 right-4 z-50 text-white shadow-lg rounded-md overflow-hidden">
-      <div className={`px-3 py-2 text-sm ${badgeColor(online, effectiveType)}`}>
-        {online ? 'Online' : 'Offline'}
-        {effectiveType ? ` • ${effectiveType}` : ''}
+      <div className={`px-3 py-2 text-sm ${badgeColor(true, effectiveType)}`}>
+        Online
+        {/* type chỉ hiển thị khi browser có cung cấp */}
+        {type ? ` • ${type === 'wifi' ? 'Wi‑Fi' : type === 'cellular' ? 'Cellular' : type}` : ''}
+        {qLabel ? ` • ${qLabel}` : effectiveType ? ` • ${effectiveType}` : ''}
         {typeof downlink === 'number' ? ` • ${downlink.toFixed(2)} Mbps` : ''}
         {typeof rtt === 'number' ? ` • ${Math.round(rtt)} ms` : ''}
-        {saveData ? ' • SaveData' : ''}
-        {simulated ? ' • Simulated' : ''}
+        {saveData ? ' • Tiết kiệm dữ liệu' : ''}
+        {simulated ? ' • Giả lập' : ''}
       </div>
 
-      {/* Panel chi tiết cho QA */}
+      {/* Panel chi tiết (chỉ khi online) */}
       <div className="bg-white text-gray-900 p-3 text-xs border border-gray-200">
         <div className="font-semibold mb-2">Chi tiết mạng</div>
         <ul className="space-y-1">
-          <li>
-            Trạng thái: <strong>{online ? 'Online' : 'Offline'}</strong>
-          </li>
-          <li>effectiveType: {effectiveType ?? '-'}</li>
+          <li>Loại mạng (type): {type ?? '-'}</li> {/* <-- dùng type */}
+          <li>Chất lượng (effectiveType): {effectiveType ?? '-'}</li>
           <li>downlink (Mbps): {downlink ?? '-'}</li>
           <li>rtt (ms): {rtt ?? '-'}</li>
           <li>saveData: {String(saveData ?? false)}</li>
           <li>time: {new Date(network.timestamp).toLocaleString()}</li>
         </ul>
 
-        {/* Nút giả lập nhanh */}
+        {/* Nút giả lập cho QA */}
         <div className="mt-3 grid grid-cols-2 gap-2">
           <button
             className="px-2 py-1 bg-red-500 text-white rounded"
@@ -120,21 +147,39 @@ export default function NetworkStatusBar() {
           </button>
           <button
             className="px-2 py-1 bg-green-600 text-white rounded"
-            onClick={() => simulate({ online: true, effectiveType: '4g', downlink: 25, rtt: 50 })}
+            onClick={() =>
+              simulate({ online: true, effectiveType: '4g', downlink: 25, rtt: 50, type: 'wifi' })
+            }
           >
-            Giả lập: 4G tốt
+            Giả lập: Wi‑Fi tốt
           </button>
           <button
             className="px-2 py-1 bg-yellow-600 text-white rounded"
-            onClick={() => simulate({ online: true, effectiveType: '3g', downlink: 2.2, rtt: 180 })}
+            onClick={() =>
+              simulate({
+                online: true,
+                effectiveType: '3g',
+                downlink: 2.2,
+                rtt: 180,
+                type: 'cellular',
+              })
+            }
           >
-            Giả lập: 3G
+            Giả lập: Cellular TB
           </button>
           <button
             className="px-2 py-1 bg-orange-600 text-white rounded"
-            onClick={() => simulate({ online: true, effectiveType: '2g', downlink: 0.2, rtt: 800 })}
+            onClick={() =>
+              simulate({
+                online: true,
+                effectiveType: '2g',
+                downlink: 0.2,
+                rtt: 800,
+                type: 'cellular',
+              })
+            }
           >
-            Giả lập: 2G yếu
+            Giả lập: Cellular yếu
           </button>
         </div>
       </div>
