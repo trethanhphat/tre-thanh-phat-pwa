@@ -1,62 +1,64 @@
-/*****************
-* File: src/app/network-debug/page.tsx
-* Module: Trang Debug Mạng
-* Description: 
-* Trang React hiển thị các sự kiện trạng thái mạng để hỗ trợ debug.
-* - Hiển thị bảng các sự kiện mạng (online/offline, loại kết nối, tốc độ, v.v.)
-* - Lấy dữ liệu từ sự kiện tùy chỉnh 'network:status' do hook useNetworkStatus phát ra
-* - Giúp kiểm thử và theo dõi trạng thái mạng trong quá trình phát triển và QA
-* Features:
-* - Bảng hiển thị các sự kiện mạng với thông tin chi tiết
-* - Cập nhật thời gian thực khi có sự kiện mạng mới
-* Dependencies:
-* - useNetworkStatus hook từ '@/hooks/useNetworkStatus' (phát sự kiện mạng)
-* Usage:
-* import NetworkDebugPage from 'src/app/network-debug/page';
-* <NetworkDebugPage />
-* ****************************************************************************************************
-* Organization: Thanh Phát Bamboo Corp (TPB Corp)
-* Author: Nguyễn Như Đường (TPB Corp)
-* Contact: +84-904-969-268
-* Email:
-* Created: 2025-11-13
-* Last Updated: 2025-11-13
-* Maintainer: DevOps Team @ TPB Corp
-* Version: 1.0.0
-* Change Log:
-* - 1.0.0 (2025-11-13): Tạo file ban đầu.
-* ****************************************************************************************************
-* License: © 2025 TPB Corp. All rights reserved.
-* Confidentiality: Internal Use Only.
-* compliant with TPB Corp's proprietary software policies.
-* Standard Disclaimer:
-* This software is provided "as is," without warranty of any kind, express or implied, including but not limited to the warranties of merchantability,
-* fitness for a particular purpose, and noninfringement. In no event shall the authors or copyright holders be liable for any claim, damages,
-* or other liability, whether in an action of contract, tort, or otherwise, arising from, out of, or in connection with the software or the use or other dealings in the software.
-* ****************************************************************************************************
-* References:
-* - Network Information API: https://developer.mozilla.org/en-US/docs/Web/API/Network_Information_API
-* - React Documentation: https://reactjs.org/docs/getting-started.html
-* - TPB Corp Internal Wiki: https://tpbc.top/wiki/useNetworkStatus
-* - API Docs: https://tpbc.top/api-docs/hooks/useNetworkStatus
-* - Changelog: https://tpbc.top/changelogs/useNetworkStatus
-* Dependencies:
-* - useNetworkStatus hook from '@/hooks/useNetworkStatus'
-* Documentation:
-* - Internal Wiki: https://tpbc.top/wiki/useNetworkStatus
-* - API Docs: https://tpbc.top/api-docs/hooks/useNetworkStatus
-* ************************************************************************************************
-* Special Notes:
-* - This component is intended for internal use within TPB Corp applications only.
-* - Unauthorized distribution or modification is prohibited.
-* Standard Disclaimer:
-* This software is provided "as is," without warranty of any kind, express or implied, including but not limited to the warranties of merchantability,
-* fitness for a particular purpose, and noninfringement. In no event shall the authors or copyright holders be liable for any claim, damages,
-* or other liability, whether in an action of contract, tort, or otherwise, arising from, out of, or in connection with the software or the use or other dealings in the software.  ********************************************************************************    
-* **********************************************************************************
-*  
-*****************/
-
+/*
+ ****************************************************************************************************
+ * File: src/app/network-debug/page.tsx
+ * Module: Trang hiển thị Debug Mạng
+ * Description:
+ * Trang React hiển thị các sự kiện trạng thái mạng để hỗ trợ debug.
+ * - Hiển thị bảng các sự kiện mạng (online/offline, loại kết nối, tốc độ, v.v.)
+ * - Lấy dữ liệu từ sự kiện tùy chỉnh 'network:status' do hook useNetworkStatus phát ra
+ * - Giúp kiểm thử và theo dõi trạng thái mạng trong quá trình phát triển và QA
+ * Features:
+ * - Bảng hiển thị các sự kiện mạng với thông tin chi tiết
+ * - Cập nhật thời gian thực khi có sự kiện mạng mới
+ * Dependencies:
+ * - useNetworkStatus hook từ '@/hooks/useNetworkStatus' (phát sự kiện mạng)
+ * Usage:
+ * import NetworkDebugPage from 'src/app/network-debug/page';
+ * <NetworkDebugPage />
+ ****************************************************************************************************
+ * Organization: Thanh Phát Bamboo Corp (TPB Corp)
+ * Author: Nguyễn Như Đường (TPB Corp)
+ * Contact: +84-904-969-268
+ * Email:
+ * Created: 2025-11-13
+ * Last Updated: 2025-11-13
+ * Maintainer: DevOps Team @ TPB Corp
+ * Version: 1.0.0
+ * Change Log:
+ * - 1.0.0 (2025-11-13): Tạo file ban đầu.
+ ****************************************************************************************************
+ * License: © 2025 TPB Corp. All rights reserved.
+ * Confidentiality: Internal Use Only.
+ * compliant with TPB Corp's proprietary software policies.
+ * Standard Disclaimer:
+ * This software is provided "as is," without warranty of any kind, express or implied, including but not limited to the warranties of merchantability,
+ * fitness for a particular purpose, and noninfringement. In no event shall the authors or copyright holders be liable for any claim, damages,
+ * or other liability, whether in an action of contract, tort, or otherwise, arising from, out of, or in connection with the software or the use or other dealings in the software.
+ ****************************************************************************************************
+ * References:
+ * - Network Information API: https://developer.mozilla.org/en-US/docs/Web/API/Network_Information_API
+ * - React Documentation: https://reactjs.org/docs/getting-started.html
+ * - TPB Corp Internal Wiki: https://tpbc.top/wiki/useNetworkStatus
+ * - API Docs: https://tpbc.top/api-docs/hooks/useNetworkStatus
+ * - Changelog: https://tpbc.top/changelogs/useNetworkStatus
+ * Dependencies:
+ * - useNetworkStatus hook from '@/hooks/useNetworkStatus'
+ * Documentation:
+ * - Internal Wiki: https://tpbc.top/wiki/useNetworkStatus
+ * - API Docs: https://tpbc.top/api-docs/hooks/useNetworkStatus
+ ****************************************************************************************************
+ * Special Notes:
+ * - This component is intended for internal use within TPB Corp applications only.
+ * - Unauthorized distribution or modification is prohibited.
+ * Standard Disclaimer:
+ * This software is provided "as is," without warranty of any kind, express or implied, including but not limited to the warranties of merchantability,
+ * fitness for a particular purpose, and noninfringement. In no event shall the authors or copyright holders be liable for any claim, damages,
+ * or other liability, whether in an action of contract, tort, or otherwise, arising from, out of, or in connection with the software or the use or other dealings in the software.  ********************************************************************************
+ ****************************************************************************************************
+ * License: © 2025 TPB Corp. All rights reserved.
+ * Confidentiality: Internal Use Only.
+ * compliant with TPB Corp's proprietary software policies.
+ ****************************************************************************************************
  */
 'use client';
 import React, { useEffect, useState } from 'react';
