@@ -99,8 +99,8 @@ const badgeColor = (online: boolean, eff?: string) => {
 };
 
 export default function NetworkStatusBar() {
-  const { network, simulate } = useNetworkStatus();
-  const { online, effectiveType, downlink, rtt, saveData, simulated, type } = network;
+  const { network } = useNetworkStatus();
+  const { online, effectiveType, downlink, rtt, saveData, type } = network;
 
   // Offline: chỉ báo trạng thái, KHÔNG hiển thị chỉ số
   if (!online) {
@@ -123,7 +123,6 @@ export default function NetworkStatusBar() {
         {typeof downlink === 'number' ? ` • ${downlink.toFixed(2)} Mbps` : ''}
         {typeof rtt === 'number' ? ` • ${Math.round(rtt)} ms` : ''}
         {saveData ? ' • Tiết kiệm dữ liệu' : ''}
-        {simulated ? ' • Giả lập' : ''}
       </div>
     </div>
   );
