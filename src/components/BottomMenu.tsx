@@ -21,7 +21,7 @@ export default function BottomMenu() {
   return (
     <>
       {/* Padding để không bị Menu che nội dung */}
-      <div style={{ paddingBottom: `${menuHeight}px` }}></div>
+      <div style={{ paddingBottom: `${menuHeight + 10}px` }}></div>
 
       {/* Menu nổi dưới cùng */}
       <nav style={{ height: `${menuHeight}px` }} className="nav-bar">
