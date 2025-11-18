@@ -25,10 +25,47 @@
  ****************************************************************************************************
  */
 //
+/*
+ ****************************************************************************************************
+ * File: /src/hooks/useServiceWorkerUpdate.ts
+ * Description:
+ *   Hook React để quản lý cập nhật Service Worker cho ứng dụng PWA.
+ *   Cung cấp thông tin về bản cập nhật mới, trạng thái cập nhật và loại kết nối mạng hiện tại.
+ ****************************************************************************************************
+ */
+
+'use client';
 
 import { useEffect, useState } from 'react';
 
 type UpdateStatus = 'idle' | 'checking' | 'hasUpdate' | 'updating' | 'done' | 'error';
+
+type AnyConnection = {
+  type?: string;          // 'wifi' | 'cellular' | ...
+  effectiveType?: string; // '4g' | '3g' | '2g' | 'slow-2g'
+  downlink?: number;
+  rtt?: number;
+  saveData?: boolean;
+  addEventListener?: (ev: string, cb: (...args: any[]) => void) => void;
+  removeEventListener?: (ev: string, cb: (...args: any[]) => void) => void;
+};
+
+function getNavigatorConnection(): AnyConnection | undefined {
+  if (typeof navigator === 'undefined') return undefined;
+  const nav: any = navigator;
+  return nav.connection || nav.mozConnection || nav.webkitConnection;
+}
+
+/** Trả về chuỗi kết nối ưu tiên: type -> effectiveType -> null */
+function resolveConnectionType(conn?: AnyConnection): string | null {
+  if (!conn) return null;
+  if (typeof conn.type === 'string' && conn.type.trim() !== '') return conn.type;
+  if (typeof conn.effectiveType === 'string' && conn.effectiveType.trim() !== '') {
+    // Có thể chuyển '4g' => 'cellular-4g' nếu bạn muốn phân biệt rõ
+    return conn.effectiveType;
+  }
+  return null;
+}
 
 export function useServiceWorkerUpdate() {
   const [waitingWorker, setWaitingWorker] = useState<ServiceWorker | null>(null);
@@ -39,21 +76,24 @@ export function useServiceWorkerUpdate() {
   useEffect(() => {
     if (typeof window === 'undefined' || !('serviceWorker' in navigator)) return;
 
-    // 🔹 Theo dõi loại kết nối (Wi-Fi / 4G / 3G)
-    const connection =
-      (navigator as any).connection ||
-      (navigator as any).mozConnection ||
-      (navigator as any).webkitConnection;
-    if (connection?.type) {
-      setConnectionType(connection.type) || setConnectionType(undefined);
-      console.log('[src/hooks/useServiceWorkerUpdate.ts] Loại kết nối hiện tại:', connection.type);
-    }
+    // 🔹 Đọc loại kết nối ban đầu (sau mount)
+    const connection = getNavigatorConnection();
+    const initialType = resolveConnectionType(connection);
+    setConnectionType(initialType);
+    console.log('[/src/hooks/useServiceWorkerUpdate.ts] Kết nối hiện tại:', initialType ?? 'unknown');
+
+    // 🔹 Lắng nghe thay đổi mạng (Network Information API)
+    const onConnChange = () => {
+      const t = resolveConnectionType(connection);
+      setConnectionType((prev) => (prev === t ? prev : t));
+      console.log('[/src/hooks/useServiceWorkerUpdate.ts] Kết nối thay đổi:', t ?? 'unknown');
+    };
+    connection?.addEventListener?.('change', onConnChange);
 
     // 🔹 Lấy registration hiện có
-    navigator.serviceWorker.getRegistration().then(reg => {
+    navigator.serviceWorker.getRegistration().then((reg) => {
       if (!reg) return;
 
-      // Khi có update mới
       reg.onupdatefound = () => {
         const newWorker = reg.installing;
         if (!newWorker) return;
@@ -63,17 +103,16 @@ export function useServiceWorkerUpdate() {
             setWaitingWorker(newWorker);
             setHasUpdate(true);
             setStatus('hasUpdate');
-            console.log('[src/hooks/useServiceWorkerUpdate.ts] ⚡ Có bản cập nhật mới sẵn sàng.');
+            console.log('[/src/hooks/useServiceWorkerUpdate.ts] ⚡ Có bản cập nhật mới sẵn sàng.');
           }
         };
       };
     });
 
-    // Khi SW mới được kích hoạt
+    // 🔹 Khi SW mới được kích hoạt
     const onControllerChange = () => {
-      console.log('[src/hooks/useServiceWorkerUpdate.ts] ✅ Bản cập nhật đã được kích hoạt.');
+      console.log('[/src/hooks/useServiceWorkerUpdate.ts] ✅ Bản cập nhật đã được kích hoạt.');
       setStatus('done');
-      // Tránh reload loop — chỉ reload 1 lần
       if (!sessionStorage.getItem('pwa_reloaded')) {
         sessionStorage.setItem('pwa_reloaded', 'true');
         setTimeout(() => window.location.reload(), 1500);
@@ -81,8 +120,10 @@ export function useServiceWorkerUpdate() {
     };
 
     navigator.serviceWorker.addEventListener('controllerchange', onControllerChange);
+
     return () => {
       navigator.serviceWorker.removeEventListener('controllerchange', onControllerChange);
+      connection?.removeEventListener?.('change', onConnChange);
     };
   }, []);
 
@@ -93,20 +134,24 @@ export function useServiceWorkerUpdate() {
       return;
     }
 
-    if (connectionType && connectionType !== 'wifi') {
+    // Cảnh báo nếu không phải Wi‑Fi
+    // Tùy chiến lược, bạn có thể xét cả 'cellular' | '4g' | '3g' đều là mạng di động.
+    const isCellularLike =
+      connectionType &&
+      /^(cellular|[234]g|slow-2g)$/i.test(connectionType); // 'wifi' thì bỏ qua cảnh báo
+
+    if (isCellularLike) {
       const confirmUpdate = confirm(
         '⚠️ Bạn đang dùng mạng di động. Tải bản cập nhật có thể tốn dữ liệu.\nBạn có muốn tiếp tục không?'
       );
       if (!confirmUpdate) {
-        alert('⏳ Bản cập nhật sẽ tự động cài khi bạn có Wi-Fi.');
+        alert('⏳ Bản cập nhật sẽ tự động cài khi bạn có Wi‑Fi.');
         return;
       }
     }
 
     if (waitingWorker) {
-      console.log(
-        '[src/hooks/useServiceWorkerUpdate.ts] 🚀 Gửi tín hiệu SKIP_WAITING để kích hoạt SW mới.'
-      );
+      console.log('[/src/hooks/useServiceWorkerUpdate.ts] 🚀 Gửi SKIP_WAITING để kích hoạt SW mới.');
       setStatus('updating');
       waitingWorker.postMessage({ type: 'SKIP_WAITING' });
     } else {
@@ -117,7 +162,6 @@ export function useServiceWorkerUpdate() {
   return {
     hasUpdate,
     update,
-    status, // 'hasUpdate' | 'updating' | 'done'
-    connectionType,
+    status,         // 'idle' | 'checking' | 'hasUpdate' | 'updating' | 'done' | 'error'
+    connectionType, // 'wifi' | 'cellular' | '4g'...'slow-2g' | null
   };
-}
