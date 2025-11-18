@@ -60,10 +60,12 @@ function getNavigatorConnection(): AnyConnection | undefined {
 function resolveConnectionType(conn?: AnyConnection): string | null {
   if (!conn) return null;
   if (typeof conn.type === 'string' && conn.type.trim() !== '') return conn.type;
+  /*
   if (typeof conn.effectiveType === 'string' && conn.effectiveType.trim() !== '') {
     // Có thể chuyển '4g' => 'cellular-4g' nếu bạn muốn phân biệt rõ
     return conn.effectiveType;
   }
+    */
   return null;
 }
 
