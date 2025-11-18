@@ -67,7 +67,6 @@
 'use client';
 import React from 'react';
 import useNetworkStatus from '@/hooks/useNetworkStatus';
-import { resolveConnectionType } from '@/hooks/useServiceWorkerUpdate';
 
 const qualityLabel = (eff?: string) => {
   switch (eff) {
@@ -124,9 +123,6 @@ export default function NetworkStatusBar() {
         {typeof downlink === 'number' ? ` • ${downlink.toFixed(2)} Mbps` : ''}
         {typeof rtt === 'number' ? ` • ${Math.round(rtt)} ms` : ''}
         {saveData ? ' • Tiết kiệm dữ liệu' : ''}
-      </div>
-      <div>
-        {`Loại kết nối (resolveConnectionType): ${resolveConnectionType() || 'Không xác định'}`}
       </div>
     </div>
   );

@@ -35,67 +35,20 @@
  */
 
 'use client';
-
 import { useEffect, useState } from 'react';
+import useNetworkStatus from '@/hooks/useNetworkStatus';
 
 type UpdateStatus = 'idle' | 'checking' | 'hasUpdate' | 'updating' | 'done' | 'error';
 
-type AnyConnection = {
-  type?: string; // 'wifi' | 'cellular' | ...
-  effectiveType?: string; // '4g' | '3g' | '2g' | 'slow-2g'
-  downlink?: number;
-  rtt?: number;
-  saveData?: boolean;
-  addEventListener?: (ev: string, cb: (...args: any[]) => void) => void;
-  removeEventListener?: (ev: string, cb: (...args: any[]) => void) => void;
-};
-
-function getNavigatorConnection(): AnyConnection | undefined {
-  if (typeof navigator === 'undefined') return undefined;
-  const nav: any = navigator;
-  return nav.connection || nav.mozConnection || nav.webkitConnection;
-}
-
-/** Trả về chuỗi kết nối ưu tiên: type -> effectiveType -> null */
-export function resolveConnectionType(conn?: AnyConnection): string | null {
-  if (!conn) return null;
-  if (typeof conn.type === 'string' && conn.type.trim() !== '') return conn.type;
-  /*
-  if (typeof conn.effectiveType === 'string' && conn.effectiveType.trim() !== '') {
-    // Có thể chuyển '4g' => 'cellular-4g' nếu bạn muốn phân biệt rõ
-    return conn.effectiveType;
-  }
-    */
-  return null;
-}
-
 export function useServiceWorkerUpdate() {
+  const { network } = useNetworkStatus(); // <-- dùng dữ liệu mạng từ hook đã có
   const [waitingWorker, setWaitingWorker] = useState<ServiceWorker | null>(null);
   const [status, setStatus] = useState<UpdateStatus>('idle');
-  const [connectionType, setConnectionType] = useState<string | null>(null);
   const [hasUpdate, setHasUpdate] = useState(false);
 
   useEffect(() => {
     if (typeof window === 'undefined' || !('serviceWorker' in navigator)) return;
 
-    // 🔹 Đọc loại kết nối ban đầu (sau mount)
-    const connection = getNavigatorConnection();
-    const initialType = resolveConnectionType(connection);
-    setConnectionType(initialType);
-    console.log(
-      '[/src/hooks/useServiceWorkerUpdate.ts] Kết nối hiện tại:',
-      initialType ?? 'unknown'
-    );
-
-    // 🔹 Lắng nghe thay đổi mạng (Network Information API)
-    const onConnChange = () => {
-      const t = resolveConnectionType(connection);
-      setConnectionType(prev => (prev === t ? prev : t));
-      console.log('[/src/hooks/useServiceWorkerUpdate.ts] Kết nối thay đổi:', t ?? 'unknown');
-    };
-    connection?.addEventListener?.('change', onConnChange);
-
-    // 🔹 Lấy registration hiện có
     navigator.serviceWorker.getRegistration().then(reg => {
       if (!reg) return;
 
@@ -114,7 +67,6 @@ export function useServiceWorkerUpdate() {
       };
     });
 
-    // 🔹 Khi SW mới được kích hoạt
     const onControllerChange = () => {
       console.log('[/src/hooks/useServiceWorkerUpdate.ts] ✅ Bản cập nhật đã được kích hoạt.');
       setStatus('done');
@@ -125,29 +77,27 @@ export function useServiceWorkerUpdate() {
     };
 
     navigator.serviceWorker.addEventListener('controllerchange', onControllerChange);
-
     return () => {
       navigator.serviceWorker.removeEventListener('controllerchange', onControllerChange);
-      connection?.removeEventListener?.('change', onConnChange);
     };
   }, []);
 
-  // ✅ Khi người dùng nhấn "Cập nhật"
   const update = () => {
     if (!navigator.onLine) {
       alert('❌ Không có kết nối mạng. Vui lòng thử lại khi có Internet.');
       return;
     }
 
-    // Cảnh báo nếu không phải Wi‑Fi
-    // Tùy chiến lược, bạn có thể xét cả 'cellular' | '4g' | '3g' đều là mạng di động.
-    const isCellularLike = connectionType && /^(cellular|[234]g|slow-2g)$/i.test(connectionType); // 'wifi' thì bỏ qua cảnh báo
+    // Cellular-like: 'cellular' hoặc effectiveType là 2g/3g/4g/slow-2g
+    const kind = network.type?.toLowerCase();
+    const eff = network.effectiveType?.toLowerCase();
+    const isCellularLike = (kind && kind !== 'wifi') || (eff && /^(slow-2g|2g|3g|4g)$/.test(eff));
 
     if (isCellularLike) {
-      const confirmUpdate = confirm(
+      const ok = confirm(
         '⚠️ Bạn đang dùng mạng di động. Tải bản cập nhật có thể tốn dữ liệu.\nBạn có muốn tiếp tục không?'
       );
-      if (!confirmUpdate) {
+      if (!ok) {
         alert('⏳ Bản cập nhật sẽ tự động cài khi bạn có Wi‑Fi.');
         return;
       }
@@ -167,7 +117,7 @@ export function useServiceWorkerUpdate() {
   return {
     hasUpdate,
     update,
-    status, // 'idle' | 'checking' | 'hasUpdate' | 'updating' | 'done' | 'error'
-    connectionType, // 'wifi' | 'cellular' | '4g'...'slow-2g' | null
+    status,
+    connectionType: network.type ?? network.effectiveType ?? null,
   };
 }
