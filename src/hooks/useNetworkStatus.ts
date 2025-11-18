@@ -98,7 +98,7 @@ export function readConnection(): Partial<NetworkMetrics> {
 
   if (!conn) return {};
   const { effectiveType, downlink, rtt, saveData, type } = conn;
-  console.log('Đọc kết nối mạng:', {
+  console.log('[src/hooks/useNetworkStatus.ts] Đọc kết nối mạng:', {
     effectiveType: effectiveType,
     downlink: downlink,
     rtt: rtt,
@@ -114,7 +114,11 @@ export default function useNetworkStatus() {
     ...readConnection(),
     timestamp: Date.now(),
   }));
-  console.log('Khởi tạo useNetworkStatus với trạng thái:', state, setState);
+  console.log(
+    '[src/hooks/useNetworkStatus.ts] Khởi tạo useNetworkStatus với trạng thái:',
+    state,
+    setState
+  );
   useEffect(() => {
     const handleOnline = () => {
       setState(s => ({ ...s, online: true, timestamp: Date.now() }));
@@ -124,9 +128,9 @@ export default function useNetworkStatus() {
           detail: { ...readConnection(), online: true, timestamp: Date.now() },
         })
       );
-      console.log('Phát sự kiện mạng online');
+      console.log('[src/hooks/useNetworkStatus.ts] Phát sự kiện mạng online');
     };
-    console.log('Đăng ký sự kiện mạng');
+    console.log('[src/hooks/useNetworkStatus.ts] Đăng ký sự kiện mạng');
 
     const handleOffline = () => {
       // Khi offline, loại bỏ các chỉ số để UI không hiển thị số liệu cũ
