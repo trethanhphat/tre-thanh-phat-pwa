@@ -1,7 +1,7 @@
 /*
  ****************************************************************************************************
  * File: src/app/network-debug/page.tsx
- * Module: Trang hiển thị Debug Mạng
+ * Module: Trang hiển thị thông tin Debug Mạng
  * Description:
  * Trang React hiển thị các sự kiện trạng thái mạng để hỗ trợ debug.
  * - Hiển thị bảng các sự kiện mạng (online/offline, loại kết nối, tốc độ, v.v.)

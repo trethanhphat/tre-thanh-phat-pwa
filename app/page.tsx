@@ -2,7 +2,7 @@
 
 'use client';
 
-import styles from '@/components/Home.module.scss';
+//import styles from '@/components/Home.module.scss';
 import { appName, appDescription, appUrl, phone, email, copyright } from '@/lib/env';
 
 export default function Home() {

@@ -1,4 +1,5 @@
-/****************************************************************************************************
+/*
+ ****************************************************************************************************
  * 📄 File: src/components/NetworkStatusBar.tsx
  * 📘 Module: Hiển thị trạng thái mạng
  * 🧠 Description:
@@ -16,28 +17,28 @@
  * 📝 Usage
  * import NetworkStatusBar from '@/components/NetworkStatusBar';
  * <NetworkStatusBar />
- * ****************************************************************************************************
+ ****************************************************************************************************
  * - Copyright (c) 2025 TPB Corp. All rights reserved.
- * ***************************************************************************************************
+ ****************************************************************************************************
  * License: Proprietary and Confidential
  *
- * 8***************************************************************************************************
+ ****************************************************************************************************
  * 🏢 Organization: Thanh Phát Bamboo Corp (TPB Corp)
  * 👤 Author: Nguyễn Như Đường (TPB Corp)
- * 📱 Contact: +84-904-969-268
- * 📧 Email: duong273@gmail.com
+ * 📱 Contact:
+ * 📧 Email:
  * 📅 Created: 2025-11-13
  * 🔄 Last Updated: 2025-11-13
  * 🧩 Maintainer: DevOps Team @ TPB Corp
- * ***************************************************************************************************
+ ****************************************************************************************************
  * 🧾 Version: 1.0.0
  * 🪶 Change Log:
  *  - 1.0.0 (2025-11-13): Tạo file ban đầu.
- * * ***************************************************************************************************
+ ****************************************************************************************************
  * ⚖️ License: © 2025 TPB Corp. All rights reserved.
  * 📜 Confidentiality: Internal Use Only.
  *  compliant with TPB Corp's proprietary software policies.
- * * ***************************************************************************************************
+ ****************************************************************************************************
  * Special Notes:
  * - This component is intended for internal use within TPB Corp applications only.
  * - Unauthorized distribution or modification is prohibited.
@@ -123,65 +124,6 @@ export default function NetworkStatusBar() {
         {typeof rtt === 'number' ? ` • ${Math.round(rtt)} ms` : ''}
         {saveData ? ' • Tiết kiệm dữ liệu' : ''}
         {simulated ? ' • Giả lập' : ''}
-      </div>
-
-      {/* Panel chi tiết (chỉ khi online) */}
-      <div className="bg-white text-gray-900 p-3 text-xs border border-gray-200">
-        <div className="font-semibold mb-2">Chi tiết mạng</div>
-        <ul className="space-y-1">
-          <li>Loại mạng (type): {type ?? '-'}</li> {/* <-- dùng type */}
-          <li>Chất lượng (effectiveType): {effectiveType ?? '-'}</li>
-          <li>downlink (Mbps): {downlink ?? '-'}</li>
-          <li>rtt (ms): {rtt ?? '-'}</li>
-          <li>saveData: {String(saveData ?? false)}</li>
-          <li>time: {new Date(network.timestamp).toLocaleString()}</li>
-        </ul>
-
-        {/* Nút giả lập cho QA */}
-        <div className="mt-3 grid grid-cols-2 gap-2">
-          <button
-            className="px-2 py-1 bg-red-500 text-white rounded"
-            onClick={() => simulate({ online: false })}
-          >
-            Giả lập: Offline
-          </button>
-          <button
-            className="px-2 py-1 bg-green-600 text-white rounded"
-            onClick={() =>
-              simulate({ online: true, effectiveType: '4g', downlink: 25, rtt: 50, type: 'wifi' })
-            }
-          >
-            Giả lập: Wi‑Fi tốt
-          </button>
-          <button
-            className="px-2 py-1 bg-yellow-600 text-white rounded"
-            onClick={() =>
-              simulate({
-                online: true,
-                effectiveType: '3g',
-                downlink: 2.2,
-                rtt: 180,
-                type: 'cellular',
-              })
-            }
-          >
-            Giả lập: Cellular TB
-          </button>
-          <button
-            className="px-2 py-1 bg-orange-600 text-white rounded"
-            onClick={() =>
-              simulate({
-                online: true,
-                effectiveType: '2g',
-                downlink: 0.2,
-                rtt: 800,
-                type: 'cellular',
-              })
-            }
-          >
-            Giả lập: Cellular yếu
-          </button>
-        </div>
       </div>
     </div>
   );

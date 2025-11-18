@@ -1,3 +1,65 @@
+/*
+ ****************************************************************************************************
+ * File: app/layout.tsx
+ * Module: Root Layout của Ứng dụng với PWA và Thành phần UI Chung
+ * Description:
+ *  Root Layout của ứng dụng với các thành phần UI chung và cấu hình PWA
+ *
+ * Features:
+ * - Header, Footer, BottomMenu
+ * - Service Worker registration and monitoring
+ * - BackgroundSync and BackgroundPrefetch for offline and background data handling
+ * - ResponsiveTableLabels for better mobile table display
+ *
+ * Metadata:
+ * - Title, description, icons, manifest
+ * - Viewport configuration
+ *
+ * Dependencies:
+ * - Various client components for PWA features and UI elements
+ *
+ * Usage:
+ * - This layout is applied to all pages in the app directory
+ *
+ ****************************************************************************************************
+ * Organization: Thanh Phát Bamboo Corp (TPB Corp)
+ * Author: Nguyễn Như Đường (TPB Corp)
+ * Contact:
+ * Email:
+ * Created: 2025-11-13
+ * Last Updated: 2025-11-13
+ * Maintainer: DevOps Team @ TPB Corp
+ *
+ ****************************************************************************************************
+ * Version: 1.0.0
+ * Change Log:
+ * - 1.0.0 (2025-11-13): Tạo file ban đầu.
+ *
+ ****************************************************************************************************
+ * License: © 2025 TPB Corp. All rights reserved.
+ * Confidentiality: Internal Use Only.
+ * compliant with TPB Corp's proprietary software policies.
+ * Standard Disclaimer:
+ * This software is provided "as is," without warranty of any kind, express or implied, including but not limited to the warranties of merchantability,
+ * fitness for a particular purpose, and noninfringement. In no event shall the authors or copyright holders be liable for any claim, damages,
+ * or other liability, whether in an action of contract, tort, or otherwise, arising from, out of, or in connection with the software or the use or other dealings in the software
+ *
+ ****************************************************************************************************
+ * References:
+ * - Next.js Documentation: https://nextjs.org/docs
+ * - PWA Guide: https://web.dev/progressive-web-apps/
+ * - TPB Corp Internal Wiki: https://tpbc.top/wiki/pwa-implementation
+ *
+ ****************************************************************************************************
+ * Special Notes:
+ * - This layout is intended for internal use within TPB Corp applications only.
+ * - Unauthorized distribution or modification is prohibited.
+ * Standard Disclaimer:
+ * This software is provided "as is," without warranty of any kind, express or implied, including but not limited to the warranties of merchantability,
+ * fitness for a particular purpose, and noninfringement. In no event shall the authors or copyright holders be liable for any claim, damages,
+ * or other liability, whether in an action of contract, tort, or otherwise, arising from, out of, or in connection with the software or the use or other dealings in the software.
+ ****************************************************************************************************
+ */
 // ✅ File: app/layout.tsx
 /**
  * Root Layout của ứng dụng sẽ được áp dụng cho toàn bộ các trang con
@@ -57,7 +119,10 @@ import BackgroundPrefetch from '@/components/BackgroundPrefetch'; // import clie
 import ResponsiveTableLabels from '@/components/ResponsiveTableLabels'; // import client component ResponsiveTableLabels để tự động thêm data-label cho bảng
 
 export const viewport = {
-  themeColor: '#ffffff',
+  themeColor: [
+    { media: '(prefers-color-scheme: light)', color: '#054219' },
+    { media: '(prefers-color-scheme: dark)', color: '#0a8030' },
+  ],
 };
 
 export const metadata: Metadata = {

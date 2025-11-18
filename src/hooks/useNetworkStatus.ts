@@ -81,8 +81,8 @@ import { useEffect, useState } from 'react';
 
 export type NetworkMetrics = {
   online: boolean;
-  effectiveType?: string; // 'slow-2g'|'2g'|'3g'|'4g' (chất lượng, không phải loại mạng)
-  downlink?: number; // Mbps
+  effectiveType?: string; // chất lượng mạng
+  downlink?: number; // Tốc độ mạng tính bằng Mbps
   rtt?: number; // ms
   saveData?: boolean;
   type?: string; // <-- loại mạng nếu trình duyệt có: 'wifi' | 'cellular' | ...
@@ -97,7 +97,14 @@ export function readConnection(): Partial<NetworkMetrics> {
     (navigator as any).webkitConnection;
 
   if (!conn) return {};
-  const { effectiveType, downlink, rtt, saveData, type } = conn; // <-- lấy thêm type
+  const { effectiveType, downlink, rtt, saveData, type } = conn;
+  console.log('Đọc kết nối mạng:', {
+    effectiveType: effectiveType,
+    downlink: downlink,
+    rtt: rtt,
+    saveData: saveData,
+    type: type,
+  });
   return { effectiveType, downlink, rtt, saveData, type };
 }
 
@@ -107,16 +114,19 @@ export default function useNetworkStatus() {
     ...readConnection(),
     timestamp: Date.now(),
   }));
-
+  console.log('Khởi tạo useNetworkStatus với trạng thái:', state, setState);
   useEffect(() => {
     const handleOnline = () => {
-      setState(s => ({ ...s, online: true, timestamp: Date.now(), simulated: false }));
+      setState(s => ({ ...s, online: true, timestamp: Date.now() }));
+      console.log('Mạng đã online');
       window.dispatchEvent(
         new CustomEvent('network:status', {
           detail: { ...readConnection(), online: true, timestamp: Date.now() },
         })
       );
+      console.log('Phát sự kiện mạng online');
     };
+    console.log('Đăng ký sự kiện mạng');
 
     const handleOffline = () => {
       // Khi offline, loại bỏ các chỉ số để UI không hiển thị số liệu cũ
@@ -129,7 +139,6 @@ export default function useNetworkStatus() {
         saveData: undefined,
         type: undefined,
         timestamp: Date.now(),
-        simulated: false,
       }));
       window.dispatchEvent(
         new CustomEvent('network:status', {
@@ -144,8 +153,8 @@ export default function useNetworkStatus() {
       (navigator as any).webkitConnection;
 
     const handleChange = () => {
-      const metrics = readConnection(); // <-- includes type if available
-      setState(s => ({ ...s, ...metrics, timestamp: Date.now(), simulated: false }));
+      const metrics = readConnection();
+      setState(s => ({ ...s, ...metrics, timestamp: Date.now() }));
       window.dispatchEvent(
         new CustomEvent('network:status', {
           detail: { ...metrics, online: navigator.onLine, timestamp: Date.now() },
@@ -171,11 +180,5 @@ export default function useNetworkStatus() {
     };
   }, []);
 
-  const simulate = (override: Partial<NetworkMetrics>) => {
-    const next: NetworkMetrics = { ...state, ...override, simulated: true, timestamp: Date.now() };
-    setState(next);
-    window.dispatchEvent(new CustomEvent('network:status', { detail: next }));
-  };
-
-  return { network: state, simulate };
+  return { network: state };
 }
