@@ -41,7 +41,7 @@ import { useEffect, useState } from 'react';
 type UpdateStatus = 'idle' | 'checking' | 'hasUpdate' | 'updating' | 'done' | 'error';
 
 type AnyConnection = {
-  type?: string;          // 'wifi' | 'cellular' | ...
+  type?: string; // 'wifi' | 'cellular' | ...
   effectiveType?: string; // '4g' | '3g' | '2g' | 'slow-2g'
   downlink?: number;
   rtt?: number;
@@ -80,18 +80,21 @@ export function useServiceWorkerUpdate() {
     const connection = getNavigatorConnection();
     const initialType = resolveConnectionType(connection);
     setConnectionType(initialType);
-    console.log('[/src/hooks/useServiceWorkerUpdate.ts] Kết nối hiện tại:', initialType ?? 'unknown');
+    console.log(
+      '[/src/hooks/useServiceWorkerUpdate.ts] Kết nối hiện tại:',
+      initialType ?? 'unknown'
+    );
 
     // 🔹 Lắng nghe thay đổi mạng (Network Information API)
     const onConnChange = () => {
       const t = resolveConnectionType(connection);
-      setConnectionType((prev) => (prev === t ? prev : t));
+      setConnectionType(prev => (prev === t ? prev : t));
       console.log('[/src/hooks/useServiceWorkerUpdate.ts] Kết nối thay đổi:', t ?? 'unknown');
     };
     connection?.addEventListener?.('change', onConnChange);
 
     // 🔹 Lấy registration hiện có
-    navigator.serviceWorker.getRegistration().then((reg) => {
+    navigator.serviceWorker.getRegistration().then(reg => {
       if (!reg) return;
 
       reg.onupdatefound = () => {
@@ -136,9 +139,7 @@ export function useServiceWorkerUpdate() {
 
     // Cảnh báo nếu không phải Wi‑Fi
     // Tùy chiến lược, bạn có thể xét cả 'cellular' | '4g' | '3g' đều là mạng di động.
-    const isCellularLike =
-      connectionType &&
-      /^(cellular|[234]g|slow-2g)$/i.test(connectionType); // 'wifi' thì bỏ qua cảnh báo
+    const isCellularLike = connectionType && /^(cellular|[234]g|slow-2g)$/i.test(connectionType); // 'wifi' thì bỏ qua cảnh báo
 
     if (isCellularLike) {
       const confirmUpdate = confirm(
@@ -151,7 +152,9 @@ export function useServiceWorkerUpdate() {
     }
 
     if (waitingWorker) {
-      console.log('[/src/hooks/useServiceWorkerUpdate.ts] 🚀 Gửi SKIP_WAITING để kích hoạt SW mới.');
+      console.log(
+        '[/src/hooks/useServiceWorkerUpdate.ts] 🚀 Gửi SKIP_WAITING để kích hoạt SW mới.'
+      );
       setStatus('updating');
       waitingWorker.postMessage({ type: 'SKIP_WAITING' });
     } else {
@@ -162,6 +165,7 @@ export function useServiceWorkerUpdate() {
   return {
     hasUpdate,
     update,
-    status,         // 'idle' | 'checking' | 'hasUpdate' | 'updating' | 'done' | 'error'
+    status, // 'idle' | 'checking' | 'hasUpdate' | 'updating' | 'done' | 'error'
     connectionType, // 'wifi' | 'cellular' | '4g'...'slow-2g' | null
   };
+}
