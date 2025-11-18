@@ -20,6 +20,7 @@ export function useServiceWorkerUpdate() {
       (navigator as any).webkitConnection;
     if (connection?.effectiveType) {
       setConnectionType(connection.effectiveType);
+      console.log('[PWA] Loại kết nối hiện tại:', connection.effectiveType);
     }
 
     // 🔹 Lấy registration hiện có
