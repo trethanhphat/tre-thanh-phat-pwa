@@ -57,7 +57,7 @@ function getNavigatorConnection(): AnyConnection | undefined {
 }
 
 /** Trả về chuỗi kết nối ưu tiên: type -> effectiveType -> null */
-function resolveConnectionType(conn?: AnyConnection): string | null {
+export function resolveConnectionType(conn?: AnyConnection): string | null {
   if (!conn) return null;
   if (typeof conn.type === 'string' && conn.type.trim() !== '') return conn.type;
   /*
