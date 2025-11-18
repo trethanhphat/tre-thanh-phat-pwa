@@ -1,7 +1,5 @@
 // File: /src/components/ManualSyncButton.tsx
-
 'use client';
-
 import { useServiceWorkerUpdate } from '@/hooks/useServiceWorkerUpdate';
 import { useState } from 'react';
 
@@ -10,11 +8,11 @@ export default function ManualSyncButton() {
   const [syncing, setSyncing] = useState(false);
 
   const handleClick = async () => {
-    console.log('[SYNC] Kết nối mạng:', connectionType);
+    console.log('[/src/components/ManualSyncButton.tsx] Kết nối mạng:', connectionType);
 
     // 1. Ưu tiên cập nhật phiên bản mới
     if (hasUpdate) {
-      console.log('[SYNC] Có bản cập nhật mới');
+      console.log('[/src/components/ManualSyncButton.tsx] Có bản cập nhật mới');
       update();
       return;
     }
@@ -22,15 +20,15 @@ export default function ManualSyncButton() {
     // 2. Không có bản cập nhật → thử đồng bộ dữ liệu
     if (connectionType === 'wifi') {
       setSyncing(true);
-      console.log('[SYNC] Đang đồng bộ dữ liệu...');
+      console.log('[/src/components/ManualSyncButton.tsx] Đang đồng bộ dữ liệu...');
 
       try {
         // 🔄 Giả lập gửi dữ liệu ảnh, text... lên server
         await new Promise(res => setTimeout(res, 1000));
-        console.log('[SYNC] ✅ Đồng bộ thành công');
+        console.log('[/src/components/ManualSyncButton.tsx] ✅ Đồng bộ thành công');
         alert('Đồng bộ thành công');
       } catch (e) {
-        console.error('[SYNC] ❌ Lỗi khi đồng bộ:', e);
+        console.error('[/src/components/ManualSyncButton.tsx] ❌ Lỗi khi đồng bộ:', e);
         alert('Lỗi khi đồng bộ');
       } finally {
         setSyncing(false);

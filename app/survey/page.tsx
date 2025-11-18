@@ -1,6 +1,4 @@
 'use client';
-
-import { useServiceWorkerUpdate } from '@/hooks/useServiceWorkerUpdate'; // Module Update
 import type { AppProps } from 'next/app'; // Module Update
 
 import Image from 'next/image';
