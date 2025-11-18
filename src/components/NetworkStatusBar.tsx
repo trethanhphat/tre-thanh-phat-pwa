@@ -67,7 +67,7 @@
 'use client';
 import React from 'react';
 import useNetworkStatus from '@/hooks/useNetworkStatus';
-import resolveConnectionType from @/hooks/useServiceWorkerUpdate';
+import { resolveConnectionType } from '@/hooks/useServiceWorkerUpdate';
 
 const qualityLabel = (eff?: string) => {
   switch (eff) {
