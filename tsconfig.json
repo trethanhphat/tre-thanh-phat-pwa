@@ -3,24 +3,14 @@
   "compilerOptions": {
     "baseUrl": ".",
     "paths": {
-      "@/*": [
-        "src/*"
-      ],
-      "@app/*": ["app/*"],    // ✅ thêm alias cho app/*
-      "@fonts/*": [
-        "src/fonts/*"
-      ],
-      "@styles/*": [
-        "src/styles/*"
-      ]
+      "@/*": ["src/*"],
+      "@app/*": ["app/*"], // ✅ thêm alias cho app/*
+      "@fonts/*": ["src/fonts/*"],
+      "@styles/*": ["src/styles/*"]
     },
     "target": "ES2017",
-    "lib": [
-      "dom",
-      "dom.iterable",
-      "esnext"
-    ],
-    "allowJs": true,
+    "lib": ["dom", "dom.iterable", "esnext"],
+    "allowJs": false,
     "skipLibCheck": true,
     "strict": false, // Tạm thời ít hiển thị lỗi để cơ bản sau chuyển sang true sau
     "forceConsistentCasingInFileNames": true,
@@ -32,10 +22,7 @@
     "resolveJsonModule": true,
     "isolatedModules": true,
     "jsx": "preserve",
-    "typeRoots": [
-      "./node_modules/@types",
-      "./types"
-    ],
+    "typeRoots": ["./node_modules/@types", "./types"],
     "plugins": [
       {
         "name": "next"
@@ -43,14 +30,6 @@
     ],
     "strictNullChecks": true
   },
-  "include": [
-    "next-env.d.ts",
-    "**/*.ts",
-    "**/*.tsx",
-    ".next/types/**/*.ts",
-    "**/*.scss"
-  ],
-  "exclude": [
-    "node_modules"
-  ]
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts", "**/*.scss"],
+  "exclude": ["node_modules"]
 }
