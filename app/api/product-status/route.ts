@@ -1,4 +1,4 @@
-// File: src/pages/api/product-status.ts
+// File: app/api/product-status/route.ts
 
 import type { NextApiRequest, NextApiResponse } from 'next';
 import axios from 'axios';
